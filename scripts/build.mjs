@@ -26,13 +26,17 @@ const [{ outputFiles }] = await Promise.all([
     target: ['es2022'],
     minify: true,
     write: false,
-    define: { __APP_BASE_PATH__: JSON.stringify(basePath) },
+    define: { __APP_BASE_PATH__: JSON.stringify(basePath), __STATIC_BUILD__: 'true' },
     logLevel: 'info',
   }),
 ])
 
 const bundle = outputFiles[0]
 if (!bundle) throw new Error('The browser bundle was not generated.')
+const bundleText = new TextDecoder().decode(bundle.contents)
+if (bundleText.includes('Expected a Remix SPA response')) {
+  throw new Error('The static Pages build must mount the client app directly, not use the Remix server SPA response router.')
+}
 await writeFile(path.join(output, 'assets/app.js'), bundle.contents)
 
 const styles = await readFile(path.join(root, 'public/styles.css'), 'utf8')
@@ -61,7 +65,7 @@ const html = `<!doctype html>
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="assets/app.js"></script>
   </head>
-  <body><p class="boot">Tuning in to Frequency…</p><noscript>Enable JavaScript to open your listening room.</noscript></body>
+  <body><div id="app"></div><noscript>Enable JavaScript to open your listening room.</noscript></body>
 </html>`
 
 await writeFile(path.join(output, 'index.html'), html)
