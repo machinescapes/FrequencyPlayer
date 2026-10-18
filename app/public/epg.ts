@@ -157,6 +157,11 @@ export function createScheduleClient(options: {
     try {
       const response = await request(source === 'freeview' ? options.url : 'https://www.nts.live/api/v2/live', {
         cache: 'no-store', signal: AbortSignal.any([options.signal, AbortSignal.timeout(20000)]) })
+      if (source === 'freeview' && response.status === 204) {
+        failed = true
+        loading = false
+        return
+      }
       if (!response.ok) throw Error('Schedule unavailable')
       const json = await response.json()
       const data = source === 'nts' ? parseNts(json) : validateSchedule(json)
