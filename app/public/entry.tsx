@@ -1,11 +1,9 @@
-import { createRouter } from 'remix/router'
-import { render, run } from 'remix/spa'
-import { on, ref, type Handle } from 'remix/component'
-import { routes } from '../routes.ts'
+import { createRoot, on, ref, type Handle } from 'remix/component'
 import { validateCatalogue, loadSaved, save, safeUrl, parseFeed } from './catalogue.js'
 import { setupNavigation } from './navigation.js'
 
 declare const __APP_BASE_PATH__: string
+declare const __STATIC_BUILD__: boolean
 const APP_BASE_PATH = typeof __APP_BASE_PATH__ === 'undefined' ? '/' : __APP_BASE_PATH__
 
 type CatalogueItem = {
@@ -94,7 +92,18 @@ function App(handle: Handle) {
     </div>
   }
 }
-const router=createRouter({middleware:[render()]})
-router.map(routes,{actions:{home:({render})=>render(<App/>)}})
-const app=run(router,{fallback:<p class="boot">Opening your listening room…</p>})
-await app.ready()
+if(__STATIC_BUILD__){
+  const container=document.getElementById('app')
+  if(!container)throw new Error('Missing app root')
+  const root=createRoot(container)
+  root.render(<App />)
+  window.addEventListener('pagehide',()=>root.dispose(),{once:true})
+}else{
+  const {createRouter}=await import('remix/router')
+  const {render,run}=await import('remix/spa')
+  const {routes}=await import('../routes.ts')
+  const router=createRouter({middleware:[render()]})
+  router.map(routes,{actions:{home:({render})=>render(<App/>)}})
+  const app=run(router,{fallback:<p class="boot">Opening your listening room…</p>})
+  await app.ready()
+}

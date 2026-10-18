@@ -4,16 +4,17 @@ A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. The
 
 ## Run
 
-Node **24.3+** required.
+Node **24.3+** is needed only to install dependencies and build the static site. The deployed app runs entirely in the browser from GitHub Pages; it has no application server or runtime backend.
 
 ```sh
 npm ci
 npm run dev
 # http://localhost:44100
 npm test
+npm run build
 ```
 
-`npm start` starts production mode, using Remix's on-demand asset pipeline; no separate build step. `PORT=3000 npm start` changes the port. Use HTTPS in deployment; localhost is allowed for service-worker development. The development server watches server/module changes; refresh the browser after editing UI or CSS. There is intentionally no fake build or typecheck command: no TypeScript development dependency has been added without approval.
+`npm run dev` starts the local development server. `npm run build` type-checks, lints, tests, and compiles a minimized static site into `dist/`. GitHub Pages serves those files directly. Its workflow deploys the `dist/` folder after changes land on `main`; no Node process runs in production. Use HTTPS for the PWA; localhost is allowed for service-worker development.
 
 ## What works
 
