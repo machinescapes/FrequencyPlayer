@@ -9,6 +9,15 @@
     padding-bottom: calc(var(--player) + 8px);
   }
 
+  /*
+   * The radio app dropped its sidebar and the shared sheet now zeroes
+   * `main`'s left margin. The TV page keeps one, so restore the offset here
+   * and let the breakpoints take it back down to zero on phones.
+   */
+  .app.tv-body main {
+    margin-left: var(--sidebar);
+  }
+
   .tv-badge {
     align-self: center;
     margin-left: 2px;
@@ -534,6 +543,11 @@
   }
 
   @media (max-width: 540px) {
+    /* The sidebar becomes a sticky top bar, so content spans the full width. */
+    .app.tv-body main {
+      margin-left: 0;
+    }
+
     .channel-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
