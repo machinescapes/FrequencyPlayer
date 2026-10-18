@@ -1,9 +1,18 @@
 import http from 'node:http'
+import { readFile } from 'node:fs/promises'
 import { createRequestListener } from 'remix/node-fetch-server'
 import { createRouter } from 'remix/router'
 import { staticFiles } from 'remix/middleware/static'
 import { assets, scriptEntry } from './app/assets.ts'
 const router = createRouter({middleware:[staticFiles('./public',{index:false})]})
+router.get('/epg/freeview.json', async () => {
+  try {
+    return new Response(await readFile('./public/epg/freeview.json'), {headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    return new Response(null, {status:204,headers:{'Cache-Control':'no-store'}})
+  }
+})
 router.get('/assets/*', async ({request}) => (await assets.fetch(request)) ?? new Response('Asset not found', {status:404}))
 router.get('/', () => new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#101211"><meta name="color-scheme" content="dark"><meta name="mobile-web-app-capable" content="yes"><title>Frequency · Radio</title><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon.svg"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="stylesheet" href="/styles.css"><script type="importmap">${JSON.stringify(scriptEntry.importMap).replaceAll('<','\\u003c')}</script>${scriptEntry.preloads.map(h=>`<link rel="modulepreload" href="${h}">`).join('')}<script type="module" src="${scriptEntry.href}"></script></head><body><div id="app"></div><noscript>Enable JavaScript to use the radio player.</noscript></body></html>`,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'}}))
 router.get('/offline-assets.json',()=>Response.json([...new Set([scriptEntry.href,...scriptEntry.preloads,...Object.values(scriptEntry.importMap.imports ?? {})])]))
