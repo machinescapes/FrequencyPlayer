@@ -21,7 +21,9 @@
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_one/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_one",
       "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_one",
-      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR1.uk"
     },
     {
       "id": "bbc2",
@@ -43,7 +45,9 @@
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_two/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_two",
       "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_two",
-      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR2.uk"
     },
     {
       "id": "bbc3",
@@ -65,7 +69,9 @@
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_three/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_three",
       "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_three",
-      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR3.uk"
     },
     {
       "id": "bbc4",
@@ -87,7 +93,9 @@
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_fourfm/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_fourfm",
       "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_fourfm",
-      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR4FM.uk"
     },
     {
       "id": "bbc5",
@@ -109,7 +117,9 @@
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_five_live/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_five_live",
       "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_five_live",
-      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR5L.uk"
     },
     {
       "id": "bbc6",
@@ -131,7 +141,9 @@
       "streamType": "hls",
       "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_6music/blocks-colour-black_600x600.png",
       "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_6music",
-      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_6music"
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_6music",
+      "scheduleSource": "freeview",
+      "scheduleId": "BBCR6M.uk"
     },
     {
       "id": "radiox",
@@ -153,7 +165,9 @@
       "streamType": "mp3",
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/232/logo/600x600.jpg",
       "scheduleUrl": "https://www.radiox.co.uk/radio/schedule/",
-      "showsUrl": "https://www.globalplayer.com/catchup/radiox/uk/"
+      "showsUrl": "https://www.globalplayer.com/catchup/radiox/uk/",
+      "scheduleSource": "freeview",
+      "scheduleId": "RadioX.uk"
     },
     {
       "id": "capital",
@@ -175,7 +189,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/230/logo/600x600.jpg",
       "scheduleUrl": "https://www.capitalfm.com/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/capital/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "CapitalRadio.uk"
     },
     {
       "id": "capitalxtra",
@@ -197,7 +213,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/204/logo/600x600.jpg",
       "scheduleUrl": "https://www.capitalxtra.com/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/capitalxtra/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "CapitalXtra.uk"
     },
     {
       "id": "heart",
@@ -219,7 +237,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/229/logo/600x600.jpg",
       "scheduleUrl": "https://www.heart.co.uk/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/heart/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "HeartRadio.uk"
     },
     {
       "id": "classicfm",
@@ -240,7 +260,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/43/logo/600x600.jpg",
       "scheduleUrl": "https://www.classicfm.com/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/classicfm/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "ClassicFM.uk"
     },
     {
       "id": "smooth",
@@ -262,7 +284,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/202/logo/600x600.jpg",
       "scheduleUrl": "https://www.smoothradio.com/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/smooth/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "SmoothRadio.uk"
     },
     {
       "id": "lbc",
@@ -284,7 +308,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/206/logo/600x600.jpg",
       "scheduleUrl": "https://www.lbc.co.uk/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/lbc/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "LBCRadio.uk"
     },
     {
       "id": "lbcnews",
@@ -304,7 +330,9 @@
       "streamType": "mp3",
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/1007/logo/600x600.jpg",
       "scheduleUrl": "https://www.lbc.co.uk/radio/schedule/lbc-news/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "LBCNews.uk"
     },
     {
       "id": "gold",
@@ -326,7 +354,9 @@
       "logoUrl": "https://owdo.thisisglobal.com/2.0/id/90/logo/600x600.jpg",
       "scheduleUrl": "https://www.goldradio.com/radio/schedule/",
       "showsUrl": "https://www.globalplayer.com/catchup/gold/uk/",
-      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "freeview",
+      "scheduleId": "GoldRadio.uk"
     },
     {
       "id": "greatesthits",
@@ -425,7 +455,9 @@
       "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/36.png?ver=1788534585",
       "scheduleUrl": "https://www.hellorayo.co.uk/planet-rock/schedule",
       "showsUrl": "https://www.hellorayo.co.uk/planet-rock/shows",
-      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information.",
+      "scheduleSource": "freeview",
+      "scheduleId": "PlanetRock.uk"
     },
     {
       "id": "jazzfm",
@@ -467,7 +499,9 @@
       "logoUrl": "https://www.nts.live/css/images/nts-socials-img.png",
       "scheduleUrl": "https://www.nts.live/schedule",
       "showsUrl": "https://www.nts.live/explore",
-      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "nts",
+      "scheduleId": "nts1"
     },
     {
       "id": "nts2",
@@ -489,7 +523,9 @@
       "logoUrl": "https://www.nts.live/css/images/nts-socials-img.png",
       "scheduleUrl": "https://www.nts.live/schedule",
       "showsUrl": "https://www.nts.live/explore",
-      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "scheduleSource": "nts",
+      "scheduleId": "nts2"
     },
     {
       "id": "6shows",

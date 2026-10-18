@@ -80,21 +80,23 @@ Schedule: https://www.nts.live/schedule. Show discovery: https://www.nts.live/ex
 
 BBC, Global and Bauer artwork is referenced from their broadcaster-hosted metadata feeds; every selected live-station image returned HTTP 200. Global's feed supplied HTTP artwork links: their HTTPS equivalents were checked successfully before inclusion. Logos are displayed unmodified with preserved proportions and fall back to text marks if unavailable. BBC and Global logos are also reused on their corresponding show/discovery cards; these are station identities, not programme artwork.
 
-[RadioDNS Project Logo](https://radiodns.org/campaigns/project-logo/technical-details/) explains service information and station-logo discovery. Metadata publication does not transfer ownership of artwork or imply broadcaster endorsement. Refer to the broadcaster's feed terms, including the [BBC metadata terms](https://radiospi.api.bbci.co.uk/terms.txt); those terms require reviewing the BBC metadata at least monthly. Maintain these source references and review configured artwork/metadata accordingly. Frequency fetches images directly, without bundling downloaded logos or exposing broadcaster credentials. No automatic metadata synchronization is implemented.
+[RadioDNS Project Logo](https://radiodns.org/campaigns/project-logo/technical-details/) explains service information and station-logo discovery. Metadata publication does not transfer ownership of artwork or imply broadcaster endorsement. Refer to the broadcaster's feed terms, including the [BBC metadata terms](https://radiospi.api.bbci.co.uk/terms.txt); those terms require reviewing the BBC metadata at least monthly. Maintain these source references and review configured artwork/metadata accordingly. Frequency fetches images directly, without bundling downloaded logos or exposing broadcaster credentials. Station logos are not automatically synchronized; schedule synchronization is described below.
 
 The config accepts `logoUrl` as HTTPS or an app-relative image path, `color`, `provider`, `countryCode`, `scheduleUrl`, `showsUrl`, and `streamType` (`mp3`, `aac`, `hls`). Relative images resolve under the application's base path. Custom sources are not restricted to the UK. Catalogue version 1, original IDs and legacy `streamUrl` entries remain compatible.
 
-## Schedules: options for a later guide
+## Programme schedules and current shows
 
-This release adds official schedule links. Service information (SI) is primarily station metadata; it must not be mistaken for programme information (PI) or a guaranteed schedule API. BBC and Global SI responses lacked browser CORS headers in checks. Tried legacy BBC JSON schedule routes and Global's guessed `PI.xml` returned 404; these are not integrated.
+The Guide uses [Freeview-EPG](https://github.com/dp247/Freeview-EPG), which publishes XMLTV listings for UK television and radio. Its raw feed is approximately 21 MB and includes a seven-day window, so the Pages workflow extracts only mapped radio stations into a compact same-origin JSON file. The extracted file is about 276 KB in the checked feed snapshot. Coverage currently includes BBC Radio 1–6, nine Global services, and Planet Rock. It does not include Bauer's other selected services or NTS schedule history.
 
-| Option | Requirements and trade-offs |
-| --- | --- |
-| Browser-accessible publisher feeds | A documented API/RSS/SPI programme feed with browser CORS. Fresh data and no infrastructure, but coverage varies by publisher. |
-| Scheduled static JSON generation — recommended first | An approved publisher feed fetched by a scheduled build/job, normalized into same-origin JSON. Fits GitHub Pages without a runtime backend. Requires agreed update frequency, source usage conditions, timezone handling and stale-data labels. |
-| Small backend adapter | Server-side publisher adapters with caching and refresh control. Can normalize several sources but adds hosting and operational maintenance. It does not grant access to restricted data. |
+`public/catalogue.json` carries explicit `scheduleSource` / `scheduleId` pairs. The sync script rejects malformed XML, invalid or reversed timestamps, and partial responses that omit upcoming listings for any mapped station. XMLTV offsets are converted to UTC milliseconds; the browser renders them in the listener's timezone, including UK daylight-saving transitions. The workflow rebuilds the extract before deployment and every six hours. On upstream failure it reuses the last published Pages extract when available, preserving its original fetch time so clients can mark it stale.
 
-A future guide should retain programme timestamps with offsets, render in the listener's timezone, label the source and freshness, and handle UK daylight-saving changes. No schedule scraper, background job or backend is part of this release.
+Each browser stores validated schedule records and source revision/freshness metadata in IndexedDB. It displays cached listings while refreshing in the background, writes changed revisions transactionally, and retains the in-memory response for the session if local storage is unavailable. Unsupported stations continue to link to broadcaster schedule pages.
+
+NTS uses its public [live endpoint](https://www.nts.live/api/v2/live) for current and next shows, with descriptions and programme artwork when returned. It does not provide this app's full historical Guide. No live song or artist metadata is inferred from programme titles or descriptions.
+
+RadioDNS SPI remains a separate open XML standard for station service information and programme information. The BBC and Global service-information endpoints were checked but did not advertise browser CORS in this investigation; RadioDNS SI must not be treated as a programme feed unless a publisher provides the corresponding PI data and access terms.
+
+**Usage condition to review:** the Freeview-EPG project describes its data as intended for personal use and lists GPL-3.0 for the repository. The repository software licence does not itself establish redistribution rights for the upstream listings or programme artwork. This app publishes a filtered extract through GitHub Pages, so confirm the upstream data terms permit that use before treating the deployment as a public release. The feed and its coverage can change independently of this app.
 
 ## Playback and verification details
 
