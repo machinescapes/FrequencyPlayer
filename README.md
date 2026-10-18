@@ -1,6 +1,6 @@
 # Frequency
 
-A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. The only direct dependency is `remix`, pinned to `3.0.0-rc.5` (a release candidate). No React, Vite, UI framework, external fonts or additional libraries.
+A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. Uses `remix@3.0.0` and lazily loaded `hls.js` for browsers without native HLS. No React, Vite, UI framework or external fonts.
 
 ## Run
 
@@ -20,7 +20,8 @@ npm run build
 
 - Responsive tablet / TV collection grid, fixed player, two colour themes, favourites, collection search.
 - Native audio playback with pause/resume, volume and Media Session controls where available.
-- Radio X direct MP3; BBC Sounds opens in an in-app player dialog. Global Player pages open in the same tab because they block iframe embedding; browser Back returns to Frequency.
+- 23 UK live stations: BBC Radio 1–6, nine Global stations, six Bauer stations and NTS 1–2. BBC, Global and NTS play directly; Bauer opens its official Rayo player.
+- Official players, schedules and show destinations open in a new tab after releasing current audio. Broadcaster filters, official station logos, brand colours and text fallback artwork.
 - Show destinations for Craig Charles, Chris Moyles and X-Posure, plus broadcaster collections.
 - Add/remove device-local items, JSON import/export, RSS episode browsing when CORS is allowed.
 - Directional keyboard focus; Enter/Space activation; `/` focuses search. Text fields retain normal arrow-key editing. Native dialogs support Escape.
@@ -41,6 +42,12 @@ Edit **`public/catalogue.json`**, or choose **Manage collection** in the app for
     "kind": "live",
     "url": "https://example.com/player",
     "streamUrl": "https://example.com/live.mp3",
+    "streamType": "mp3",
+    "logoUrl": "images/my-station.png",
+    "provider": "Independent",
+    "countryCode": "GB",
+    "scheduleUrl": "https://example.com/schedule",
+    "showsUrl": "https://example.com/shows",
     "brand": "MY RADIO",
     "mark": "M",
     "color": "#c5e762",
@@ -49,7 +56,11 @@ Edit **`public/catalogue.json`**, or choose **Manage collection** in the app for
 }
 ```
 
-`kind`: `live`, `show`, `audio`, or `feed`. `id`, `title`, `kind`, `url` are required. All URLs must use HTTPS. Without `streamUrl`, live/show cards open `url`; `feed` cards load RSS enclosures. `streamUrl` enables in-app playback for live/audio items. Direct HLS needs native browser support; no third-party HLS library is installed. Device JSON import replaces only device additions, leaving the built-in file intact. Export contains device additions. localStorage data stays in that browser profile.
+`kind`: `live`, `show`, `audio`, or `feed`. `id`, `title`, `kind`, `url` are required. Page, stream, schedule and show URLs must use HTTPS. `logoUrl` accepts HTTPS or an app-relative image path (no leading slash or `..`); images preserve their aspect ratio and fall back to `mark` if unavailable. `color` uses six-digit hex. Optional `provider` enables broadcaster filtering; `countryCode` accepts two uppercase letters and does not restrict playback geographically. Custom sources can come from any country.
+
+Without `streamUrl`, live/show cards open `url` in an official tab; `feed` cards load RSS enclosures. `streamUrl` enables direct playback. Optional `streamType` is `mp3`, `aac`, or `hls`; `.m3u8` URLs are detected automatically if omitted. Native HLS is preferred; other supported browsers lazily load HLS.js. Connections time out after 15 seconds, with Retry and official-player actions. Broadcaster URLs and regional rights can change. Logging into BBC in its own tab does not expose BBC cookies to Frequency or authenticate a raw stream.
+
+Manage collection provides separate official/direct addresses, logo, colour, broadcaster, schedule and show inputs. For an audio episode, a single URL still becomes its direct audio address. Device JSON import replaces only device additions, leaving the built-in file intact. Export contains device additions. Existing version-1 catalogues and localStorage entries remain supported; storage stays in that browser profile.
 
 ## Offline and updates
 
@@ -57,12 +68,14 @@ The worker precaches the document and local assets, then keeps network-first cop
 
 ## iPad / TV
 
-On iPad Safari, open the HTTPS deployment and use Share → Add to Home Screen. Test the actual Xbox controller/iPadOS combination: gamepad availability, hardware volume, autoplay and background audio are browser/OS controlled. In-app volume sliders may be ignored by iOS; use hardware volume. No real iPad, Xbox or TV hardware verification has been performed. Native HLS and authenticated broadcaster playback must also be checked on the intended UK network.
+On iPad Safari, open the HTTPS deployment and use Share → Add to Home Screen. Test the actual Xbox controller/iPadOS combination: gamepad availability, hardware volume, autoplay and background audio are browser/OS controlled. In-app volume sliders may be ignored by iOS; use hardware volume. No real iPad, Xbox or TV hardware verification has been performed. Native HLS and authenticated broadcaster playback must also be checked on the intended UK network. Desktop Chrome and automated WebKit playback checks do not establish actual Safari app/PWA behaviour or UK availability.
 
-Themes use CSS custom properties, cascade layers, logical properties, `color-mix`, responsive grids, visible focus and reduced-motion support. Change the token layer in `public/styles.css`; the avatar button switches moss/lilac and remembers the choice. Station marks and record artwork are CSS/text treatments, not downloaded official logos.
+Themes use CSS custom properties, cascade layers, logical properties, `color-mix`, responsive grids, visible focus and reduced-motion support. Change the token layer in `public/styles.css`; the avatar button switches moss/lilac and remembers the choice. Station cards and player artwork use broadcaster-hosted official logos and colourful brand surfaces, with CSS/text fallback marks. The hero record remains CSS artwork. See source notes for artwork provenance and metadata usage requirements.
 
 ## Validation
 
-`npm test` covers catalogue validity, unsafe URLs, duplicate IDs and style/tag normalisation. Browser smoke tests using an already-installed external Playwright/Chrome verified collection loading, favourites, add content, search, arrow focus, offline reload, and mobile overflow with no runtime errors. These browser tools are not project dependencies. Safari and real controller testing remain manual.
+`npm test` covers catalogue/import compatibility, unsafe URLs, duplicate IDs, styling, playback lifecycle, timeout/retry, HLS selection and autoplay handling. Browser smoke tests using an already-installed external Playwright/Chrome verified collection loading, favourites, add content, search, arrow focus, offline reload, and mobile overflow with no runtime errors. Additional production browser checks verified all 17 direct streams in Chrome and native-HLS WebKit, plus broadcaster filtering, config additions, artwork fallback, official tabs, audio cleanup and mobile overflow under a Pages subpath. Chrome offline reload and simulated gamepad navigation passed; WebKit offline emulation failed internally and remains unverified. These browser tools are not project dependencies. Actual Safari, UK-network, iPad and real controller testing remain manual.
 
 See [content source research](docs/sources.md) for verified endpoints and BBC/Global limitations.
+
+Updated station views: [desktop](docs/screenshots/stations-desktop.png) · [mobile](docs/screenshots/stations-mobile.png).

@@ -2,9 +2,119 @@
   "version": 1,
   "items": [
     {
+      "id": "bbc1",
+      "title": "BBC Radio 1",
+      "subtitle": "Live music and conversation from the BBC.",
+      "brand": "BBC",
+      "mark": "1",
+      "color": "#e9e9e3",
+      "kind": "live",
+      "tags": [
+        "Pop",
+        "New music"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_one",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_01505109/live/ww/bbc_radio_one/bbc_radio_one.isml/bbc_radio_one-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_one/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_one",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_one",
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "bbc2",
+      "title": "BBC Radio 2",
+      "subtitle": "Live music and conversation from the BBC.",
+      "brand": "BBC",
+      "mark": "2",
+      "color": "#f6a43a",
+      "kind": "live",
+      "tags": [
+        "Pop",
+        "Classics"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_two",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_74208725/live/ww/bbc_radio_two/bbc_radio_two.isml/bbc_radio_two-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_two/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_two",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_two",
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "bbc3",
+      "title": "BBC Radio 3",
+      "subtitle": "Live music and conversation from the BBC.",
+      "brand": "BBC",
+      "mark": "3",
+      "color": "#e45163",
+      "kind": "live",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "tags": [
+        "Classical",
+        "Arts"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_three",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_23461179/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_three/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_three",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_three",
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "bbc4",
+      "title": "BBC Radio 4",
+      "subtitle": "Live music and conversation from the BBC.",
+      "brand": "BBC",
+      "mark": "4",
+      "color": "#68c7b8",
+      "kind": "live",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "tags": [
+        "Speech",
+        "News"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_fourfm",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_fourfm/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_fourfm",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_fourfm",
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "bbc5",
+      "title": "BBC Radio 5 Live",
+      "subtitle": "Live music and conversation from the BBC.",
+      "brand": "BBC",
+      "mark": "5",
+      "color": "#72bce8",
+      "kind": "live",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "tags": [
+        "News",
+        "Sport"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_five_live",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_89021708/live/ww/bbc_radio_five_live/bbc_radio_five_live.isml/bbc_radio_five_live-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_radio_five_live/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_five_live",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_radio_five_live",
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
       "id": "bbc6",
       "title": "BBC Radio 6 Music",
-      "subtitle": "Alternative spirit. Unmissable music.",
+      "subtitle": "Live music and conversation from the BBC.",
       "brand": "BBC",
       "mark": "6",
       "color": "#c5e762",
@@ -14,13 +124,20 @@
         "Eclectic"
       ],
       "url": "https://www.bbc.co.uk/sounds/play/live:bbc_6music",
-      "note": "Launches the official BBC player. No stable supported direct stream endpoint verified."
+      "note": "2026-10-18: anonymous HTTPS worldwide 96 kbps HLS playlist and segment checks passed. Community-discovered endpoint; not a documented BBC streaming API. UK network not verified; sport may be restricted. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "provider": "BBC",
+      "countryCode": "GB",
+      "streamUrl": "https://as-hls-ww-live.akamaized.net/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+      "streamType": "hls",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_6music/blocks-colour-black_600x600.png",
+      "scheduleUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_6music",
+      "showsUrl": "https://www.bbc.co.uk/sounds/schedules/bbc_6music"
     },
     {
       "id": "radiox",
       "title": "Radio X",
-      "subtitle": "Get into the music.",
-      "brand": "RADIO",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
       "mark": "X",
       "color": "#28ca93",
       "kind": "live",
@@ -29,36 +146,350 @@
         "Rock"
       ],
       "url": "https://www.globalplayer.com/live/radiox/uk/",
-      "streamUrl": "https://media-ice.musicradio.com/RadioXLondonMP3",
-      "note": "GET verified 2026-10-17: HTTP 200, audio/mpeg, 128 kbps. Subject to broadcaster changes."
+      "streamUrl": "https://media-ssl.musicradio.com/RadioXUKMP3",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified.",
+      "provider": "Global",
+      "countryCode": "GB",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/232/logo/600x600.jpg",
+      "scheduleUrl": "https://www.radiox.co.uk/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/radiox/uk/"
     },
     {
-      "id": "bbc2",
-      "title": "BBC Radio 2",
-      "subtitle": "The music you love.",
-      "brand": "BBC",
-      "mark": "2",
-      "color": "#ef9b62",
+      "id": "capital",
+      "title": "Capital",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "C",
+      "color": "#69bbed",
       "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
       "tags": [
         "Pop",
-        "Classics"
+        "Hits"
       ],
-      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_two"
+      "url": "https://www.globalplayer.com/live/capital/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/CapitalUKMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/230/logo/600x600.jpg",
+      "scheduleUrl": "https://www.capitalfm.com/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/capital/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
     },
     {
-      "id": "bbc1",
-      "title": "BBC Radio 1",
-      "subtitle": "Where it begins.",
-      "brand": "BBC",
-      "mark": "1",
-      "color": "#deded8",
+      "id": "capitalxtra",
+      "title": "Capital XTRA",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "CX",
+      "color": "#f2c742",
       "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
       "tags": [
-        "New music",
-        "Dance"
+        "Hip-hop",
+        "R&B"
       ],
-      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_one"
+      "url": "https://www.globalplayer.com/live/capitalxtra/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/CapitalXTRANationalMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/204/logo/600x600.jpg",
+      "scheduleUrl": "https://www.capitalxtra.com/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/capitalxtra/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "heart",
+      "title": "Heart",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "♥",
+      "color": "#f4839a",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "Pop",
+        "Feel good"
+      ],
+      "url": "https://www.globalplayer.com/live/heart/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/HeartUKMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/229/logo/600x600.jpg",
+      "scheduleUrl": "https://www.heart.co.uk/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/heart/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "classicfm",
+      "title": "Classic FM",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "CF",
+      "color": "#eab8b2",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "Classical"
+      ],
+      "url": "https://www.globalplayer.com/live/classicfm/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/ClassicFMMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/43/logo/600x600.jpg",
+      "scheduleUrl": "https://www.classicfm.com/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/classicfm/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "smooth",
+      "title": "Smooth",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "S",
+      "color": "#bda6df",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "Easy listening",
+        "Classics"
+      ],
+      "url": "https://www.globalplayer.com/live/smooth/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/SmoothUKMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/202/logo/600x600.jpg",
+      "scheduleUrl": "https://www.smoothradio.com/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/smooth/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "lbc",
+      "title": "LBC",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "LBC",
+      "color": "#8aaade",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "News",
+        "Talk"
+      ],
+      "url": "https://www.globalplayer.com/live/lbc/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/LBCUKMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/206/logo/600x600.jpg",
+      "scheduleUrl": "https://www.lbc.co.uk/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/lbc/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "lbcnews",
+      "title": "LBC News",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "NEWS",
+      "color": "#9ac9dc",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "News"
+      ],
+      "url": "https://www.globalplayer.com/live/lbcnews/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/LBCNewsUKMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/1007/logo/600x600.jpg",
+      "scheduleUrl": "https://www.lbc.co.uk/radio/schedule/lbc-news/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "gold",
+      "title": "Gold Radio",
+      "subtitle": "UK live stream on Global Player.",
+      "brand": "GLOBAL",
+      "mark": "G",
+      "color": "#e9c668",
+      "kind": "live",
+      "provider": "Global",
+      "countryCode": "GB",
+      "tags": [
+        "Oldies",
+        "Classics"
+      ],
+      "url": "https://www.globalplayer.com/live/gold/uk/",
+      "streamUrl": "https://media-ssl.musicradio.com/GoldMP3",
+      "streamType": "mp3",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/90/logo/600x600.jpg",
+      "scheduleUrl": "https://www.goldradio.com/radio/schedule/",
+      "showsUrl": "https://www.globalplayer.com/catchup/gold/uk/",
+      "note": "UK national stream published in Global RadioDNS service information. 2026-10-18: GET audio response checked; UK network not verified. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "greatesthits",
+      "title": "Greatest Hits Radio",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "GH",
+      "color": "#ec719d",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Classics",
+        "Pop"
+      ],
+      "url": "https://www.hellorayo.co.uk/greatest-hits",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/381.png?ver=1792162274",
+      "scheduleUrl": "https://www.hellorayo.co.uk/greatest-hits/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/greatest-hits/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "absolute",
+      "title": "Absolute Radio",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "A",
+      "color": "#bd9cdb",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Rock",
+        "Alternative"
+      ],
+      "url": "https://www.hellorayo.co.uk/absolute-radio",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/1.png?ver=1792162209",
+      "scheduleUrl": "https://www.hellorayo.co.uk/absolute-radio/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/absolute-radio/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "kiss",
+      "title": "KISS",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "K",
+      "color": "#86cfe7",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Dance",
+        "R&B"
+      ],
+      "url": "https://www.hellorayo.co.uk/kiss",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/26.png?ver=1792162807",
+      "scheduleUrl": "https://www.hellorayo.co.uk/kiss/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/kiss/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "magic",
+      "title": "Magic Radio",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "M",
+      "color": "#8daee7",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Pop",
+        "Easy listening"
+      ],
+      "url": "https://www.hellorayo.co.uk/magic",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/30.png?ver=1792162861",
+      "scheduleUrl": "https://www.hellorayo.co.uk/magic/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/magic/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "planetrock",
+      "title": "Planet Rock",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "PR",
+      "color": "#eeac71",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Rock"
+      ],
+      "url": "https://www.hellorayo.co.uk/planet-rock",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/36.png?ver=1788534585",
+      "scheduleUrl": "https://www.hellorayo.co.uk/planet-rock/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/planet-rock/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "jazzfm",
+      "title": "Jazz FM",
+      "subtitle": "Listen through the official Rayo player.",
+      "brand": "RAYO",
+      "mark": "J",
+      "color": "#f4c052",
+      "kind": "live",
+      "provider": "Bauer",
+      "countryCode": "GB",
+      "tags": [
+        "Jazz",
+        "Soul"
+      ],
+      "url": "https://www.hellorayo.co.uk/jazz-fm",
+      "logoUrl": "https://listenapi.planetradio.co.uk/cdn/logos/1-1/600x600/375.png?ver=1787928782",
+      "scheduleUrl": "https://www.hellorayo.co.uk/jazz-fm/schedule",
+      "showsUrl": "https://www.hellorayo.co.uk/jazz-fm/shows",
+      "note": "Official player only: no independently playable stream verified. Older sharp-stream endpoints failed 2026-10-18. Logo from Bauer RadioDNS service information."
+    },
+    {
+      "id": "nts1",
+      "title": "NTS 1",
+      "subtitle": "Underground music from around the world.",
+      "brand": "NTS",
+      "mark": "NTS 1",
+      "color": "#f3a66c",
+      "kind": "live",
+      "provider": "NTS",
+      "countryCode": "GB",
+      "tags": [
+        "Independent",
+        "Eclectic"
+      ],
+      "url": "https://www.nts.live/",
+      "streamUrl": "https://stream-relay-geo.ntslive.net/stream",
+      "streamType": "mp3",
+      "logoUrl": "https://www.nts.live/css/images/nts-socials-img.png",
+      "scheduleUrl": "https://www.nts.live/schedule",
+      "showsUrl": "https://www.nts.live/explore",
+      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
+    },
+    {
+      "id": "nts2",
+      "title": "NTS 2",
+      "subtitle": "Underground music from around the world.",
+      "brand": "NTS",
+      "mark": "NTS 2",
+      "color": "#8ebeea",
+      "kind": "live",
+      "provider": "NTS",
+      "countryCode": "GB",
+      "tags": [
+        "Independent",
+        "Eclectic"
+      ],
+      "url": "https://www.nts.live/",
+      "streamUrl": "https://stream-relay-geo.ntslive.net/stream2",
+      "streamType": "mp3",
+      "logoUrl": "https://www.nts.live/css/images/nts-socials-img.png",
+      "scheduleUrl": "https://www.nts.live/schedule",
+      "showsUrl": "https://www.nts.live/explore",
+      "note": "2026-10-18: anonymous HTTPS GET returned audio/mpeg. UK network not verified. Artwork from official NTS website social metadata. Desktop Chrome and automated WebKit playback passed (short muted sample); actual Safari/iPad and UK-network availability remain unverified."
     },
     {
       "id": "6shows",
@@ -72,7 +503,9 @@
         "BBC 6 Music",
         "Catch-up"
       ],
-      "url": "https://www.bbc.co.uk/sounds/schedules/bbc_6music"
+      "url": "https://www.bbc.co.uk/sounds/schedules/bbc_6music",
+      "provider": "BBC",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_6music/blocks-colour-black_600x600.png"
     },
     {
       "id": "xshows",
@@ -86,21 +519,25 @@
         "Radio X",
         "Catch-up"
       ],
-      "url": "https://www.globalplayer.com/catchup/radiox/uk/"
+      "url": "https://www.globalplayer.com/catchup/radiox/uk/",
+      "provider": "Global",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/232/logo/600x600.jpg"
     },
     {
       "id": "bbcpodcasts",
       "title": "A little more to listen to",
       "subtitle": "Explore the BBC podcast collection",
       "brand": "BBC SOUNDS",
-      "mark": "\u2197",
+      "mark": "↗",
       "color": "#cfa3e9",
       "kind": "show",
       "tags": [
         "Podcasts",
         "Discovery"
       ],
-      "url": "https://www.bbc.co.uk/sounds/podcasts"
+      "url": "https://www.bbc.co.uk/sounds/podcasts",
+      "provider": "BBC",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_6music/blocks-colour-black_600x600.png"
     },
     {
       "id": "craig-charles",
@@ -114,7 +551,9 @@
         "BBC 6 Music",
         "Episodes"
       ],
-      "url": "https://www.bbc.co.uk/programmes/m000h9wt"
+      "url": "https://www.bbc.co.uk/programmes/m000h9wt",
+      "provider": "BBC",
+      "logoUrl": "https://sounds.files.bbci.co.uk/3.12.0/services/bbc_6music/blocks-colour-black_600x600.png"
     },
     {
       "id": "chris-moyles",
@@ -128,7 +567,9 @@
         "Radio X",
         "Catch-up"
       ],
-      "url": "https://www.globalplayer.com/catchup/radiox/uk/b8G7abG/"
+      "url": "https://www.globalplayer.com/catchup/radiox/uk/b8G7abG/",
+      "provider": "Global",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/232/logo/600x600.jpg"
     },
     {
       "id": "xposure",
@@ -142,7 +583,9 @@
         "Radio X",
         "New music"
       ],
-      "url": "https://www.radiox.co.uk/radio/shows-presenters/xposure/"
+      "url": "https://www.radiox.co.uk/radio/shows-presenters/xposure/",
+      "provider": "Global",
+      "logoUrl": "https://owdo.thisisglobal.com/2.0/id/232/logo/600x600.jpg"
     }
   ]
 }
