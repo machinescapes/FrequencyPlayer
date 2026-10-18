@@ -20,7 +20,10 @@ await writeFile(path.join(output, 'sw.js'), serviceWorker.replaceAll('__BUILD_VE
 
 const [{ outputFiles }] = await Promise.all([
   build({
-    entryPoints: {app:path.join(root, 'app/public/entry.tsx')},
+    entryPoints: {
+      app: path.join(root, 'app/public/entry.tsx'),
+      tv: path.join(root, 'app/public/tv-entry.tsx'),
+    },
     outdir: path.join(output, 'assets'),
     splitting: true,
     chunkNames: '[name]-[hash]',
@@ -42,17 +45,20 @@ if (bundleText.includes('Expected a Remix SPA response')) {
 }
 for(const file of outputFiles)await writeFile(file.path,file.contents)
 
-const styles = await readFile(path.join(root, 'public/styles.css'), 'utf8')
-const cssOutput = await build({
-  stdin: { contents: styles, loader: 'css', resolveDir: root },
-  bundle: true,
-  minify: true,
-  write: false,
-  logLevel: 'info',
-})
-await writeFile(path.join(output, 'styles.css'), cssOutput.outputFiles[0].contents)
+for (const sheet of ['styles.css', 'tv.css']) {
+  const css = await readFile(path.join(root, 'public', sheet), 'utf8')
+  const cssOutput = await build({
+    stdin: { contents: css, loader: 'css', resolveDir: root },
+    bundle: true,
+    minify: true,
+    write: false,
+    logLevel: 'info',
+  })
+  await writeFile(path.join(output, sheet), cssOutput.outputFiles[0].contents)
+}
 
-const html = `<!doctype html>
+function page({ title, script, description }) {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -61,17 +67,23 @@ const html = `<!doctype html>
     <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <base href="${basePath}">
-    <title>Frequency · Your listening room</title>
+    <title>${title}</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="assets/app.js"></script>
+    <link rel="stylesheet" href="tv.css">
+    <script type="module" src="assets/${script}.js"></script>
   </head>
-  <body><div id="app"></div><noscript>Enable JavaScript to open your listening room.</noscript></body>
+  <body><div id="app"></div><noscript>${description}</noscript></body>
 </html>`
+}
+
+const html = page({ title: 'Frequency · Your listening room', script: 'app', description: 'Enable JavaScript to open your listening room.' })
+const tvHtml = page({ title: 'Frequency TV · Public channels', script: 'tv', description: 'Enable JavaScript to open the channel guide.' })
 
 await writeFile(path.join(output, 'index.html'), html)
+await writeFile(path.join(output, 'tv.html'), tvHtml)
 await writeFile(path.join(output, '404.html'), html)
 await writeFile(path.join(output, '.nojekyll'), '')
 await writeFile(path.join(output, 'build-info.json'), JSON.stringify({ basePath, builtAt: new Date().toISOString() }, null, 2))

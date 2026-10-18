@@ -1,5 +1,5 @@
 const CACHE='frequency-shell-v__BUILD_VERSION__'
-const CORE=['./','./styles.css','./assets/app.js','./catalogue.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png']
+const CORE=['./','./tv.html','./styles.css','./tv.css','./assets/app.js','./assets/tv.js','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png']
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE)
   await cache.addAll(CORE)
