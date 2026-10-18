@@ -53,7 +53,7 @@ Edit **`public/catalogue.json`**, or choose **Manage collection** in the app for
 
 ## Offline and updates
 
-The worker caches the document, local assets and complete Remix ESM graph discovered from entry/preload URLs. It never caches third-party streams or feeds. Its cache namespace is app-specific. New workers wait for existing tabs to close before activating. Bump `CACHE` in `public/sw.js` when shipping a new asset set. For local development, unregister the worker in browser developer tools if testing asset-cache changes. Catalogue and assets use network-first with cached fallback.
+The worker precaches the document and local assets, then keeps network-first copies with cached fallbacks. It never caches third-party streams or feeds. Each build changes the worker cache version. The app checks for a new worker at startup, when the tab returns to the foreground, and every five minutes while open. Updates found during startup activate and reload automatically. An update that arrives while the app is open shows a dialog; **Update now** activates the waiting worker and reloads, while **Later** leaves the current session in place. Offline update checks fail quietly and the installed shell remains available.
 
 ## iPad / TV
 

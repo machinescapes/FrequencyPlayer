@@ -16,5 +16,12 @@
 .external-toolbar .text-link{white-space:nowrap}
 .external-dialog iframe{width:100%;height:100%;border:0;background:#fff}
 .external-dialog>p{padding:5px 14px;font-size:10px}
+.update-dialog{width:min(440px,calc(100% - 32px));padding:28px;border-radius:12px}
+.update-dialog .eyebrow{margin-bottom:10px}
+.update-dialog h2{font-size:22px;margin-bottom:10px}
+.update-dialog>p:not(.eyebrow){line-height:1.7}
+.update-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}
+.update-actions button{min-width:96px;padding:10px 16px}
+.update-actions button:first-child{border:1px solid var(--border);border-radius:7px}
 @media(max-width:540px){.external-dialog{width:100vw;height:100dvh;max-height:100dvh;border-radius:0;border:0}.external-dialog .external-toolbar{padding-inline:12px}.external-toolbar .text-link{font-size:10px}}
 }
