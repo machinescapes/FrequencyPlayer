@@ -35,7 +35,7 @@ function App(handle: Handle) {
   let playbackState:PlaybackState={status:'idle',message:''}
   let favouritesDialog:HTMLDialogElement, programmeDialog:HTMLDialogElement
   let schedules:Schedule[]=[], scheduleLoading=true, scheduleFailed=false, clock=Date.now(), guideDate=dateInput(), programme:Programme|null=null
-  let timeline:HTMLDivElement|undefined, positionTimeline=false, metadataKey=''
+  let timeline:HTMLDivElement|undefined, metadataKey=''
   const firstUse=loadSaved('frequency.favourites',null)===null && !loadSaved('frequency.favouritesSetup',false)
   let initialized=false
   const time=(value:number)=>new Date(value).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
@@ -59,14 +59,16 @@ function App(handle: Handle) {
     const artwork=current?.artwork??selected.logoUrl
     navigator.mediaSession.metadata=new MediaMetadata({title:current?.title??selected.title,artist:selected.title,artwork:artwork?[{src:new URL(artwork,document.baseURI).href}]:[]})
   }
-  function changeView(next:string){view=next;if(next==='Guide')positionTimeline=true;update()}
-  function jumpNow(){guideDate=dateInput();positionTimeline=true;update()}
+  function changeView(next:string){view=next;const refreshed=update();if(next==='Guide')void refreshed.then(positionGuideDate)}
+  function selectGuideDate(value:string){if(!value)return;guideDate=value;void update().then(positionGuideDate)}
+  function jumpNow(){guideDate=dateInput();void update().then(positionGuideDate)}
   function positionAtNow(){
     if(!timeline)return
     const stationColumn=Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--station-column'))||220
     const inset=Math.min(300,Math.max(60,(timeline.clientWidth-stationColumn)*0.7))
     timeline.scrollLeft=Math.max(0,(Date.now()-localDay(guideDate).start)*180/3600000-inset)
   }
+  function positionGuideDate(){requestAnimationFrame(()=>{if(!timeline)return;if(guideDate===dateInput())positionAtNow();else timeline.scrollLeft=0})}
   function showProgramme(value:Programme){programme=value;void update().then(()=>programmeDialog.showModal())}
   function playProgramme(){const activeProgramme=programme;if(!activeProgramme)return;const station=allItems().find(i=>i.id===activeProgramme.stationId);if(station)void play(station)}
   function scheduleText(id:string){return info(id).current?.title??(scheduleLoading?'Loading schedule…':'Schedule unavailable')}
@@ -183,8 +185,8 @@ function App(handle: Handle) {
       {view==='Channels'?<div>
         <section class="favourites-section"><div class="section-heading"><h2>Favourites <span class="section-count">{favouritesList.length}</span></h2><button class="quiet-action" mix={on('click',()=>favouritesDialog.showModal())}>Edit favourites</button></div>{favouritesList.length?<div class="favourites-grid">{favouritesList.map(card)}</div>:<button class="favourites-empty" mix={on('click',()=>favouritesDialog.showModal())}>♡ <span>Add favourites <small>Choose stations for quick access.</small></span><span>＋</span></button>}</section>
         <section><div class="section-heading"><h2>Stations</h2><span class="section-count">{live.filter(i=>!favourites.includes(i.id)).length}</span></div>{filters()}<div class="card-grid">{live.filter(i=>!favourites.includes(i.id)).map(card)}</div>{!live.length?<p class="empty-message">No stations match your search.</p>:null}</section>
-      </div>:<section class="guide"><div class="guide-controls"><label>Date <input aria-label="Guide date" type="date" value={guideDate} mix={on('change',e=>{if(e.currentTarget.value){guideDate=e.currentTarget.value;positionTimeline=true;update()}})}/></label><button class="primary" mix={on('click',jumpNow)}>Now</button><span>{timezone}</span></div>{filters()}
-        <div class="timeline" aria-label="Station schedule timeline" tabIndex={0} mix={[ref(node=>{timeline=node;if(positionTimeline){positionTimeline=false;requestAnimationFrame(()=>{if(timeline){if(guideDate===dateInput())positionAtNow();else timeline.scrollLeft=0}})}}),on('keydown',event=>{if(event.target===event.currentTarget&&['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();event.stopPropagation();event.currentTarget.scrollLeft+=event.key==='ArrowRight'?180:-180}})]}>
+      </div>:<section class="guide"><div class="guide-controls"><label>Date <input aria-label="Guide date" type="date" value={guideDate} mix={on('change',e=>selectGuideDate(e.currentTarget.value))}/></label><button class="primary" mix={on('click',jumpNow)}>Now</button><span class="date-summary">{new Date(day.start).toLocaleDateString([], {weekday:'long',month:'short',day:'numeric',year:'numeric'})} · {timezone}</span></div>{filters()}
+        <div class="timeline" aria-label="Station schedule timeline" tabIndex={0} mix={[ref(node=>{timeline=node}),on('keydown',event=>{if(event.target===event.currentTarget&&['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();event.stopPropagation();event.currentTarget.scrollLeft+=event.key==='ArrowRight'?180:-180}})]}>
           <div class="timeline-content" style={{width:`calc(var(--station-column) + ${width}px)`}}><div class="timeline-header"><div class="station-heading">Stations</div><div class="time-ruler" style={{width:`${width}px`}}>{hours.map(hour=><span key={hour} style={{left:`${(hour-day.start)*scale}px`}}>{time(hour)}</span>)}</div></div>
           {rows.map(item=>{const listings=programmes().filter(p=>p.stationId===item.id&&p.end>day.start&&p.start<day.end);const stationInfo=info(item.id);return <div class={selected?.id===item.id?'timeline-row active':'timeline-row'} key={item.id}><button class="station-cell" aria-label={(item.streamUrl?'Play ':'Open ')+item.title} mix={on('click',()=>play(item))}><span class="station-thumb" style={{background:item.color}}>{artwork(item)}</span><span>{item.title}<small>{selected?.id===item.id?stationInfo.current?.title??(playing?'Playing':'Selected'):favourites.includes(item.id)?'♥ Favourite':item.streamUrl?'▶ Play':'↗ Official'}</small></span></button><div class="programme-track" style={{width:`${width}px`}}>{listings.map(p=><button key={`${p.stationId}:${p.start}`} class={p.start<=clock&&p.end>clock?'programme current':'programme'} style={{left:`${(Math.max(p.start,day.start)-day.start)*scale}px`,width:`${(Math.min(p.end,day.end)-Math.max(p.start,day.start))*scale}px`}} aria-label={`${p.title}, ${time(p.start)} to ${time(p.end)}`} mix={on('click',()=>showProgramme(p))}><small>{time(p.start)} – {time(p.end)}</small><strong>{p.title}</strong></button>)}{!listings.length?<div class="schedule-empty">{scheduleLoading?'Loading schedule…':'No listings for this date'}{item.scheduleUrl?destination(item,item.scheduleUrl,'Official schedule'):null}</div>:null}</div></div>})}
           {clock>=day.start&&clock<day.end?<div class="now-line" style={{left:`calc(var(--station-column) + ${(clock-day.start)*scale}px)`}} aria-hidden="true"/>:null}</div></div>{!rows.length?<p class="empty-message">No stations match your search.</p>:null}
