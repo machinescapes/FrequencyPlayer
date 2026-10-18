@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
 
 permissions:
   contents: read
@@ -24,6 +26,10 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - name: Refresh radio schedules
+        run: node scripts/sync-epg.mjs
+        env:
+          EPG_FALLBACK_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/epg/freeview.json
       - run: npm run build
         env:
           PUBLIC_BASE_PATH: /FrequencyPlayer/

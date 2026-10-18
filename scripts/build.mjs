@@ -79,7 +79,7 @@ function page({ title, script, description }) {
 </html>`
 }
 
-const html = page({ title: 'Frequency · Your listening room', script: 'app', description: 'Enable JavaScript to open your listening room.' })
+const html = page({ title: 'Frequency · Radio', script: 'app', description: 'Enable JavaScript to use the radio player.' })
 const tvHtml = page({ title: 'Frequency TV · Public channels', script: 'tv', description: 'Enable JavaScript to open the channel guide.' })
 
 await writeFile(path.join(output, 'index.html'), html)
