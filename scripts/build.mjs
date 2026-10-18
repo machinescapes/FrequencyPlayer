@@ -20,24 +20,27 @@ await writeFile(path.join(output, 'sw.js'), serviceWorker.replaceAll('__BUILD_VE
 
 const [{ outputFiles }] = await Promise.all([
   build({
-    entryPoints: [path.join(root, 'app/public/entry.tsx')],
+    entryPoints: {app:path.join(root, 'app/public/entry.tsx')},
+    outdir: path.join(output, 'assets'),
+    splitting: true,
+    chunkNames: '[name]-[hash]',
     bundle: true,
     format: 'esm',
     target: ['es2022'],
     minify: true,
     write: false,
-    define: { __APP_BASE_PATH__: JSON.stringify(basePath), __STATIC_BUILD__: 'true' },
+    define: { __APP_BASE_PATH__: JSON.stringify(basePath) },
     logLevel: 'info',
   }),
 ])
 
-const bundle = outputFiles[0]
+const bundle = outputFiles.find(file=>file.path.endsWith('/app.js'))
 if (!bundle) throw new Error('The browser bundle was not generated.')
 const bundleText = new TextDecoder().decode(bundle.contents)
 if (bundleText.includes('Expected a Remix SPA response')) {
   throw new Error('The static Pages build must mount the client app directly, not use the Remix server SPA response router.')
 }
-await writeFile(path.join(output, 'assets/app.js'), bundle.contents)
+for(const file of outputFiles)await writeFile(file.path,file.contents)
 
 const styles = await readFile(path.join(root, 'public/styles.css'), 'utf8')
 const cssOutput = await build({
