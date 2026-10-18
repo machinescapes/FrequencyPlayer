@@ -14,6 +14,9 @@ function normalizeBasePath(value) {
 await rm(output, { recursive: true, force: true })
 await mkdir(path.join(output, 'assets'), { recursive: true })
 await cp(path.join(root, 'public'), output, { recursive: true })
+const buildVersion = Date.now().toString(36)
+const serviceWorker = await readFile(path.join(output, 'sw.js'), 'utf8')
+await writeFile(path.join(output, 'sw.js'), serviceWorker.replaceAll('__BUILD_VERSION__', buildVersion))
 
 const [{ outputFiles }] = await Promise.all([
   build({
