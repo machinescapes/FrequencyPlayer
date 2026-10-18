@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2024","module":"NodeNext","moduleResolution":"NodeNext","jsx":"react-jsx","jsxImportSource":"remix/component","allowImportingTsExtensions":true,"noEmit":true,"strict":true,"lib":["ES2024","DOM","DOM.Iterable"]},"include":["app","server.ts"]}

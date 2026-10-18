@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "bbc6",
+      "title": "BBC Radio 6 Music",
+      "subtitle": "Alternative spirit. Unmissable music.",
+      "brand": "BBC",
+      "mark": "6",
+      "color": "#c5e762",
+      "kind": "live",
+      "tags": [
+        "Alternative",
+        "Eclectic"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_6music",
+      "note": "Launches the official BBC player. No stable supported direct stream endpoint verified."
+    },
+    {
+      "id": "radiox",
+      "title": "Radio X",
+      "subtitle": "Get into the music.",
+      "brand": "RADIO",
+      "mark": "X",
+      "color": "#28ca93",
+      "kind": "live",
+      "tags": [
+        "Indie",
+        "Rock"
+      ],
+      "url": "https://www.globalplayer.com/live/radiox/uk/",
+      "streamUrl": "https://media-ice.musicradio.com/RadioXLondonMP3",
+      "note": "GET verified 2026-10-17: HTTP 200, audio/mpeg, 128 kbps. Subject to broadcaster changes."
+    },
+    {
+      "id": "bbc2",
+      "title": "BBC Radio 2",
+      "subtitle": "The music you love.",
+      "brand": "BBC",
+      "mark": "2",
+      "color": "#ef9b62",
+      "kind": "live",
+      "tags": [
+        "Pop",
+        "Classics"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_two"
+    },
+    {
+      "id": "bbc1",
+      "title": "BBC Radio 1",
+      "subtitle": "Where it begins.",
+      "brand": "BBC",
+      "mark": "1",
+      "color": "#deded8",
+      "kind": "live",
+      "tags": [
+        "New music",
+        "Dance"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/play/live:bbc_radio_one"
+    },
+    {
+      "id": "6shows",
+      "title": "The 6 Music collection",
+      "subtitle": "Discover shows, sessions and new sounds",
+      "brand": "BBC SOUNDS",
+      "mark": "6",
+      "color": "#c5e762",
+      "kind": "show",
+      "tags": [
+        "BBC 6 Music",
+        "Catch-up"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/schedules/bbc_6music"
+    },
+    {
+      "id": "xshows",
+      "title": "Radio X, on your time",
+      "subtitle": "Choose a show. Find your next favourite.",
+      "brand": "GLOBAL PLAYER",
+      "mark": "X",
+      "color": "#28ca93",
+      "kind": "show",
+      "tags": [
+        "Radio X",
+        "Catch-up"
+      ],
+      "url": "https://www.globalplayer.com/catchup/radiox/uk/"
+    },
+    {
+      "id": "bbcpodcasts",
+      "title": "A little more to listen to",
+      "subtitle": "Explore the BBC podcast collection",
+      "brand": "BBC SOUNDS",
+      "mark": "\u2197",
+      "color": "#cfa3e9",
+      "kind": "show",
+      "tags": [
+        "Podcasts",
+        "Discovery"
+      ],
+      "url": "https://www.bbc.co.uk/sounds/podcasts"
+    },
+    {
+      "id": "craig-charles",
+      "title": "Craig Charles",
+      "subtitle": "Explore episodes on BBC Sounds",
+      "brand": "BBC RADIO 6 MUSIC",
+      "mark": "CC",
+      "color": "#ef9b62",
+      "kind": "show",
+      "tags": [
+        "BBC 6 Music",
+        "Episodes"
+      ],
+      "url": "https://www.bbc.co.uk/programmes/m000h9wt"
+    },
+    {
+      "id": "chris-moyles",
+      "title": "The Chris Moyles Show",
+      "subtitle": "Pick a date in Global Player",
+      "brand": "RADIO X",
+      "mark": "CM",
+      "color": "#28ca93",
+      "kind": "show",
+      "tags": [
+        "Radio X",
+        "Catch-up"
+      ],
+      "url": "https://www.globalplayer.com/catchup/radiox/uk/b8G7abG/"
+    },
+    {
+      "id": "xposure",
+      "title": "X-Posure with John Kennedy",
+      "subtitle": "Discover new music and catch up",
+      "brand": "RADIO X",
+      "mark": "X / P",
+      "color": "#93b8ed",
+      "kind": "show",
+      "tags": [
+        "Radio X",
+        "New music"
+      ],
+      "url": "https://www.radiox.co.uk/radio/shows-presenters/xposure/"
+    }
+  ]
+}

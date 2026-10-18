@@ -1,0 +1,1 @@
+{"name":"frequency","private":true,"type":"module","scripts":{"dev":"NODE_ENV=development node --watch --import remix/node-tsx server.ts","start":"NODE_ENV=production node --import remix/node-tsx server.ts","test":"node --test test/*.test.js"},"engines":{"node":">=24.3.0"},"dependencies":{"remix":"3.0.0-rc.5"}}
