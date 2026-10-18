@@ -19,7 +19,7 @@ npm test
 
 - Responsive tablet / TV collection grid, fixed player, two colour themes, favourites, collection search.
 - Native audio playback with pause/resume, volume and Media Session controls where available.
-- Radio X direct MP3; BBC stations and catch-up launch official players. These launch links open in another tab; their audio is controlled there.
+- Radio X direct MP3; BBC Sounds opens in an in-app player dialog. Global Player pages open in the same tab because they block iframe embedding; browser Back returns to Frequency.
 - Show destinations for Craig Charles, Chris Moyles and X-Posure, plus broadcaster collections.
 - Add/remove device-local items, JSON import/export, RSS episode browsing when CORS is allowed.
 - Directional keyboard focus; Enter/Space activation; `/` focuses search. Text fields retain normal arrow-key editing. Native dialogs support Escape.
