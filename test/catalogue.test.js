@@ -12,6 +12,13 @@ test('old imports remain valid and new optional fields round-trip',()=>{
   const validated=validateCatalogue(JSON.parse(JSON.stringify({version:1,items:[item]})))[0]
   for(const key of Object.keys(item))assert.equal(validated[key],item[key])
 })
+test('schedule feed mappings are optional but must be complete and recognized',()=>{
+  const item={id:'x',title:'Station',kind:'live',url:'https://example.com'}
+  assert.equal(validateCatalogue({version:1,items:[item]})[0].scheduleSource,undefined)
+  assert.deepEqual(validateCatalogue({version:1,items:[{...item,scheduleSource:'freeview',scheduleId:'BBC1.uk'}]})[0].scheduleId,'BBC1.uk')
+  assert.throws(()=>validateCatalogue({version:1,items:[{...item,scheduleSource:'freeview'}]}))
+  assert.throws(()=>validateCatalogue({version:1,items:[{...item,scheduleSource:'unsupported',scheduleId:'x'}]}))
+})
 test('rejects unsafe optional fields and logo paths escaping the app base',()=>{
   const item={id:'x',title:'Station',kind:'live',url:'https://example.com'}
   for(const value of ['../logo.png','/logo.svg','//evil.com/logo.png','data:image/svg+xml,evil','javascript:alert(1)','images/../logo.png','https-not-a-url','images/%2e%2e/logo.png'])assert.equal(safeLogoUrl(value),null)

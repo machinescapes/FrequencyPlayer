@@ -61,14 +61,14 @@ const html = `<!doctype html>
     <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <base href="${basePath}">
-    <title>Frequency · Your listening room</title>
+    <title>Frequency · Radio</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="assets/app.js"></script>
   </head>
-  <body><div id="app"></div><noscript>Enable JavaScript to open your listening room.</noscript></body>
+  <body><div id="app"></div><noscript>Enable JavaScript to use the radio player.</noscript></body>
 </html>`
 
 await writeFile(path.join(output, 'index.html'), html)
