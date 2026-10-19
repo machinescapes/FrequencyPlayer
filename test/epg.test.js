@@ -76,3 +76,15 @@ test('schedule downloads remain available in memory when IndexedDB is unavailabl
   assert.equal(latest.schedules.find(schedule => schedule.source === 'freeview').programmes[0].title, 'In memory')
   controller.abort()
 })
+
+test('an unpublished optional schedule is reported as unavailable without parsing a body', async () => {
+  let latest
+  const client = createScheduleClient({
+    url: '/epg/freeview.json', signal: new AbortController().signal,
+    database: async () => { throw Error('IndexedDB unavailable') },
+    fetcher: async url => String(url).includes('nts.live') ? new Response('{}') : new Response(null, {status:204}),
+    onChange: (schedules, loading, failed) => { latest = { schedules, loading, failed } },
+  })
+  await client.start()
+  assert.deepEqual(latest, { schedules: [], loading: false, failed: true })
+})

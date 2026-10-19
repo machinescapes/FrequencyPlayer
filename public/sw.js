@@ -1,10 +1,15 @@
 const CACHE='frequency-shell-v__BUILD_VERSION__'
-const CORE=['./','./styles.css','./assets/app.js','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png']
+const CORE=['./','./styles.css','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./offline-assets.json']
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE)
-  // One missing file (EPG is generated at deploy time, not committed) must not
-  // abort the whole install and leave the app without a working shell.
-  await Promise.allSettled(CORE.map(path=>cache.add(path)))
+  // Fetch the asset manifest but don't let a missing or invalid response block
+  // the install — EPG is generated at deploy time and won't exist in dev.
+  let extraAssets=[]
+  try{
+    const response=await fetch('./offline-assets.json',{cache:'no-store'})
+    if(response.ok){const data=await response.json();if(Array.isArray(data)&&data.every(a=>typeof a==='string'))extraAssets=data}
+  }catch{}
+  await Promise.allSettled([...new Set([...CORE,...extraAssets])].map(path=>cache.add(path)))
 })()))
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('frequency-shell-')&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()))
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()})

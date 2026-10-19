@@ -5,6 +5,14 @@ import { createRouter } from 'remix/router'
 import { staticFiles } from 'remix/middleware/static'
 import { assets, scriptEntry } from './app/assets.ts'
 const router = createRouter({middleware:[staticFiles('./public',{index:false})]})
+router.get('/epg/freeview.json', async () => {
+  try {
+    return new Response(await readFile('./public/epg/freeview.json'), {headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}})
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    return new Response(null, {status:204,headers:{'Cache-Control':'no-store'}})
+  }
+})
 router.get('/assets/*', async ({request}) => (await assets.fetch(request)) ?? new Response('Asset not found', {status:404}))
 type Entry = { scripts: { importMap: { imports?: Record<string,string> }; preloads: string[]; href: string }; title: string; noscript: string }
 function page(entry: Entry) {
