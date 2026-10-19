@@ -22,7 +22,6 @@ const [{ outputFiles }] = await Promise.all([
   build({
     entryPoints: {
       app: path.join(root, 'app/public/entry.tsx'),
-      tv: path.join(root, 'app/public/tv-entry.tsx'),
     },
     outdir: path.join(output, 'assets'),
     splitting: true,
@@ -45,7 +44,7 @@ if (bundleText.includes('Expected a Remix SPA response')) {
 }
 for(const file of outputFiles)await writeFile(file.path,file.contents)
 
-for (const sheet of ['styles.css', 'tv.css']) {
+for (const sheet of ['styles.css']) {
   const css = await readFile(path.join(root, 'public', sheet), 'utf8')
   const cssOutput = await build({
     stdin: { contents: css, loader: 'css', resolveDir: root },
@@ -72,15 +71,15 @@ function page({ title, script, description }) {
     <link rel="icon" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="tv.css">
     <script type="module" src="assets/${script}.js"></script>
   </head>
   <body><div id="app"></div><noscript>${description}</noscript></body>
 </html>`
 }
 
-const html = page({ title: 'Frequency · Radio', script: 'app', description: 'Enable JavaScript to use the radio player.' })
-const tvHtml = page({ title: 'Frequency TV · Public channels', script: 'tv', description: 'Enable JavaScript to open the channel guide.' })
+const html = page({ title: 'Frequency · Watch and listen', script: 'app', description: 'Enable JavaScript to use the player.' })
+// Old /tv links become the Watch scope of the one app.
+const tvHtml = `<!doctype html><html lang="en"><head><meta charset="utf-8"><base href="${basePath}"><title>Frequency · Watch</title><meta http-equiv="refresh" content="0; url=index.html?scope=watch&view=channels"><link rel="canonical" href="index.html?scope=watch"></head><body><p><a href="index.html?scope=watch">Open Frequency</a></p></body></html>`
 
 await writeFile(path.join(output, 'index.html'), html)
 await writeFile(path.join(output, 'tv.html'), tvHtml)

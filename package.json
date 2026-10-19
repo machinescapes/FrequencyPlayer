@@ -9,7 +9,8 @@
         "lint": "eslint app server.ts scripts test eslint.config.js",
         "check": "npm run typecheck && npm run lint && npm test",
         "build": "npm run check && node scripts/build.mjs",
-        "sync:iptv": "node scripts/sync-iptv.mjs"
+        "sync:iptv": "node scripts/sync-iptv.mjs",
+        "sync:epg": "node scripts/sync-epg.mjs"
     },
     "engines": {
         "node": ">=24.3.0"

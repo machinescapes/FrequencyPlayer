@@ -217,10 +217,31 @@ export function broadcasterFor(id, network) {
 }
 
 /**
+ * iptv-org and the Freeview EPG disagree on some ids for the same channel.
+ * Without these, Channel 4, Channel 5 and BBC One Scotland would sort below
+ * TV Warehouse because their listings look absent.
+ */
+export const EPG_ALIASES = {
+  'Channel4.uk': 'Channel4London.uk',
+  'Channel5.uk': '5.uk',
+  'BBCOne.uk': 'BBCOneScotHD.uk',
+  'SkyNewsWeather.uk': 'SkyNews.uk',
+}
+
+/** The EPG channel id for an iptv channel id, accounting for known aliases. */
+export function epgIdFor(id, epgChannels) {
+  const base = id.split('@')[0]
+  if (epgChannels.has(base)) return base
+  const alias = EPG_ALIASES[base]
+  if (alias && epgChannels.has(alias)) return alias
+  return null
+}
+
+/**
  * Turn raw entries into catalogue items: dedupe by id, drop blocklisted and
  * unplayable rows, and keep the best stream per channel.
  */
-export function toItems(entries, { blocked = new Set(), limit = 20000, networks = new Map() } = {}) {
+export function toItems(entries, { blocked = new Set(), limit = 20000, networks = new Map(), countries = null, epgChannels = null } = {}) {
   const byId = new Map()
   for (const entry of entries) {
     if (!isPlayable(entry)) continue
@@ -232,6 +253,10 @@ export function toItems(entries, { blocked = new Set(), limit = 20000, networks 
     const title = entry.cleanTitle || entry.title
     const base = id.split('@')[0]
     const metadata = networks.get(base)
+    const countryCode = metadata?.country ? ISO_OVERRIDES[metadata.country] ?? metadata.country : countryFromId(id)
+    // Keep the snapshot small: filtering here rather than at read time also
+    // keeps the guide join (below) over a few hundred rows instead of 8k.
+    if (countries && !countries.has(countryCode)) continue
     byId.set(id, {
       id,
       title,
@@ -240,11 +265,13 @@ export function toItems(entries, { blocked = new Set(), limit = 20000, networks 
       tags,
       broadcaster: broadcasterFor(id, metadata?.network) ?? metadata?.network ?? null,
       essential: Boolean(essentialBrand(id)),
-      countryCode: metadata?.country ? ISO_OVERRIDES[metadata.country] ?? metadata.country : countryFromId(id),
+      countryCode,
       logoUrl: entry.logoUrl || null,
       streamUrl: entry.streamUrl,
       quality: entry.quality,
       labels: entry.labels,
+      // The EPG id can differ from the iptv id; resolve it once at sync time.
+      epgId: epgChannels ? epgIdFor(id, epgChannels) : null,
     })
   }
   // One card per essential brand: keep the best-ranked stream for that brand.
@@ -279,10 +306,10 @@ function hash(value) {
 }
 
 /** Build the committed snapshot document from fetched playlist bodies. */
-export function buildSnapshot(sources, { blocked, limit, networks, generatedAt = new Date().toISOString() } = {}) {
+export function buildSnapshot(sources, { blocked, limit, networks, countries = null, epgChannels = null, generatedAt = new Date().toISOString() } = {}) {
   const entries = []
   for (const source of sources) entries.push(...parseM3u(source.text, { group: source.group }))
-  const items = toItems(entries, { blocked, limit, networks })
+  const items = toItems(entries, { blocked, limit, networks, countries, epgChannels })
   return {
     version: 1,
     generatedAt,
@@ -296,6 +323,7 @@ export function buildSnapshot(sources, { blocked, limit, networks, generatedAt =
       essentials: items.filter(item => item.essential).length,
       broadcasters: new Set(items.map(item => item.broadcaster).filter(Boolean)).size,
       countries: new Set(items.map(item => item.countryCode).filter(Boolean)).size,
+      withGuide: items.filter(item => item.epgId).length,
     },
     items,
   }

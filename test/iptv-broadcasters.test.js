@@ -58,14 +58,21 @@ https://example.com/random.m3u8
 test('the committed snapshot is coherent',async()=>{
   const data=JSON.parse(await readFile(new URL('../public/iptv.json',import.meta.url)))
   const items=validateTvCatalogue(data)
-  assert.ok(items.length>5000)
-  assert.ok(items.filter(item=>item.essential).length>20)
-  assert.ok(items.filter(item=>item.broadcaster).length>2000)
-  assert.ok(items.some(item=>item.countryCode==='GB'))
+  // The catalogue is deliberately UK-only; adding countries needs a sync rerun.
+  assert.ok(items.length>50)
+  assert.ok(items.every(item=>item.countryCode==='GB'))
+  assert.ok(items.filter(item=>item.essential).length>10)
+  assert.ok(items.filter(item=>item.broadcaster).length>50)
   assert.equal(new Set(items.map(item=>item.id)).size,items.length)
   // Essentials must be unique per brand as well.
   const brands=items.filter(item=>item.essential).map(item=>`${item.broadcaster}:${item.title}`)
   assert.equal(new Set(brands).size,brands.length)
+  // Guide coverage is recorded at sync time so the app can list channels with
+  // listings first without parsing XMLTV in the browser.
+  const withGuide=items.filter(item=>item.epgId)
+  assert.ok(withGuide.length>10,'most major UK channels should resolve to a Freeview id')
+  assert.ok(withGuide.every(item=>typeof item.epgId==='string'&&item.epgId.length>0))
+  assert.equal(data.counts.withGuide,withGuide.length)
 })
 
 test('facets and filters cover broadcaster and essentials',()=>{

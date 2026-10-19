@@ -1,8 +1,10 @@
 const CACHE='frequency-shell-v__BUILD_VERSION__'
-const CORE=['./','./tv.html','./styles.css','./tv.css','./assets/app.js','./assets/tv.js','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png']
+const CORE=['./','./styles.css','./assets/app.js','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png']
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE)
-  await cache.addAll(CORE)
+  // One missing file (EPG is generated at deploy time, not committed) must not
+  // abort the whole install and leave the app without a working shell.
+  await Promise.allSettled(CORE.map(path=>cache.add(path)))
 })()))
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('frequency-shell-')&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()))
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()})
