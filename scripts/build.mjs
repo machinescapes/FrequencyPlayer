@@ -20,7 +20,9 @@ await writeFile(path.join(output, 'sw.js'), serviceWorker.replaceAll('__BUILD_VE
 
 const [{ outputFiles }] = await Promise.all([
   build({
-    entryPoints: {app:path.join(root, 'app/public/entry.tsx')},
+    entryPoints: {
+      app: path.join(root, 'app/public/entry.tsx'),
+    },
     outdir: path.join(output, 'assets'),
     splitting: true,
     chunkNames: '[name]-[hash]',
@@ -42,17 +44,20 @@ if (bundleText.includes('Expected a Remix SPA response')) {
 }
 for(const file of outputFiles)await writeFile(file.path,file.contents)
 
-const styles = await readFile(path.join(root, 'public/styles.css'), 'utf8')
-const cssOutput = await build({
-  stdin: { contents: styles, loader: 'css', resolveDir: root },
-  bundle: true,
-  minify: true,
-  write: false,
-  logLevel: 'info',
-})
-await writeFile(path.join(output, 'styles.css'), cssOutput.outputFiles[0].contents)
+for (const sheet of ['styles.css']) {
+  const css = await readFile(path.join(root, 'public', sheet), 'utf8')
+  const cssOutput = await build({
+    stdin: { contents: css, loader: 'css', resolveDir: root },
+    bundle: true,
+    minify: true,
+    write: false,
+    logLevel: 'info',
+  })
+  await writeFile(path.join(output, sheet), cssOutput.outputFiles[0].contents)
+}
 
-const html = `<!doctype html>
+function page({ title, script, description }) {
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -61,17 +66,23 @@ const html = `<!doctype html>
     <meta name="color-scheme" content="dark">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <base href="${basePath}">
-    <title>Frequency · Radio</title>
+    <title>${title}</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icon.svg">
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="assets/app.js"></script>
+    <script type="module" src="assets/${script}.js"></script>
   </head>
-  <body><div id="app"></div><noscript>Enable JavaScript to use the radio player.</noscript></body>
+  <body><div id="app"></div><noscript>${description}</noscript></body>
 </html>`
+}
+
+const html = page({ title: 'Frequency · Watch and listen', script: 'app', description: 'Enable JavaScript to use the player.' })
+// Old /tv links become the Watch scope of the one app.
+const tvHtml = `<!doctype html><html lang="en"><head><meta charset="utf-8"><base href="${basePath}"><title>Frequency · Watch</title><meta http-equiv="refresh" content="0; url=index.html?scope=watch&view=channels"><link rel="canonical" href="index.html?scope=watch"></head><body><p><a href="index.html?scope=watch">Open Frequency</a></p></body></html>`
 
 await writeFile(path.join(output, 'index.html'), html)
+await writeFile(path.join(output, 'tv.html'), tvHtml)
 await writeFile(path.join(output, '404.html'), html)
 await writeFile(path.join(output, '.nojekyll'), '')
 await writeFile(path.join(output, 'offline-assets.json'), JSON.stringify(['assets/app.js']))

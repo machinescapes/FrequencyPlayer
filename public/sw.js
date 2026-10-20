@@ -1,12 +1,15 @@
 const CACHE='frequency-shell-v__BUILD_VERSION__'
-const CORE=['./','./styles.css','./catalogue.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./offline-assets.json']
+const CORE=['./','./styles.css','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./offline-assets.json']
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE)
-  const response=await fetch('./offline-assets.json',{cache:'no-store'})
-  if(!response.ok)throw new Error(`Offline asset manifest returned ${response.status}`)
-  const assets=await response.json()
-  if(!Array.isArray(assets)||assets.some(asset=>typeof asset!=='string'))throw new Error('Offline asset manifest is invalid')
-  await cache.addAll([...new Set([...CORE,...assets])])
+  // Fetch the asset manifest but don't let a missing or invalid response block
+  // the install — EPG is generated at deploy time and won't exist in dev.
+  let extraAssets=[]
+  try{
+    const response=await fetch('./offline-assets.json',{cache:'no-store'})
+    if(response.ok){const data=await response.json();if(Array.isArray(data)&&data.every(a=>typeof a==='string'))extraAssets=data}
+  }catch{}
+  await Promise.allSettled([...new Set([...CORE,...extraAssets])].map(path=>cache.add(path)))
 })()))
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('frequency-shell-')&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()))
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()})

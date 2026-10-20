@@ -7,16 +7,21 @@ type Source = {streamUrl?:string, streamType?:'mp3'|'aac'|'hls'}
 // elements and delayed HLS imports cannot affect a newer selection.
 export function createPlayback({
   onChange,
-  createAudio=()=>new Audio(),
+  createMedia,
+  createAudio,
   loadHls=()=>import('hls.js').then(module=>module.default),
   timeoutMs=15_000,
 }: {
   onChange:(state:PlaybackState)=>void
-  createAudio?:()=>HTMLAudioElement
+  /** The media element to play through; pass a <video> for video streams. */
+  createMedia?:()=>HTMLMediaElement
+  /** @deprecated Use createMedia. */
+  createAudio?:()=>HTMLMediaElement
   loadHls?:()=>Promise<typeof Hls>
   timeoutMs?:number
 }) {
-  let audio:HTMLAudioElement|undefined, hls:Hls|undefined, listeners:AbortController|undefined
+  const makeMedia=createMedia??createAudio??(()=>new Audio())
+  let audio:HTMLMediaElement|undefined, hls:Hls|undefined, listeners:AbortController|undefined
   let generation=0, attempt=0, wantPlaying=false, ready=false, volume=1, timer:ReturnType<typeof setTimeout>|undefined
   let state:PlaybackState={status:'idle',message:''}
   const emit=(status:PlaybackState['status'],message='')=>{state={status,message};onChange(state)}
@@ -34,7 +39,7 @@ export function createPlayback({
     clearTimer()
     timer=setTimeout(()=>fail('This stream did not connect. Retry or open the official player.'),timeoutMs)
   }
-  async function start(current:HTMLAudioElement,token:number){
+  async function start(current:HTMLMediaElement,token:number){
     if(!wantPlaying)return
     const currentAttempt=++attempt
     try{await current.play()}catch(error){
@@ -47,7 +52,7 @@ export function createPlayback({
   async function play(source:Source){
     release()
     if(!source.streamUrl){emit('idle');return}
-    const token=generation, current=createAudio()
+    const token=generation, current=makeMedia()
     audio=current;wantPlaying=true;current.preload='none';current.volume=volume
     listeners=new AbortController()
     const listen=(event:string,callback:()=>void)=>current.addEventListener(event,()=>{if(token===generation)callback()},{signal:listeners!.signal})
