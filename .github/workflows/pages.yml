@@ -29,10 +29,8 @@ jobs:
       - name: Refresh radio schedules
         run: node scripts/sync-epg.mjs
         env:
-          EPG_FALLBACK_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/epg/freeview.json
+          EPG_FALLBACK_URL: https://frequency.wtf/epg/freeview.json
       - run: npm run build
-        env:
-          PUBLIC_BASE_PATH: /FrequencyPlayer/
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
