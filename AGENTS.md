@@ -14,7 +14,7 @@ This is the canonical instruction file for every coding agent working in this re
    - For any `in_progress` feature, check its `plan_status`. If it isn't `"approved"`, don't continue implementation. Create a plan and get user approval first (see Plan Gate below).
 5. Review recent commits with `git log --oneline -5`.
 6. Always work on a feature branch.
-7. Run `./init.sh`, which runs `npm ci` and then `npm run check`.
+7. Run `./init.sh`, which runs `pnpm install` and then `pnpm run check`.
 
 If baseline verification is already failing, fix that first. Don't stack new feature work on a broken state.
 
@@ -23,24 +23,24 @@ If baseline verification is already failing, fix that first. Don't stack new fea
 **Frequency** is a dark, touch/keyboard/gamepad-friendly PWA for UK live radio ("Listen") and IPTV channels ("Watch").
 - **Stack:** Remix 3 component/SPA APIs (`remix@3.0.0`, with JSX via `jsxImportSource: remix/component`). It does **not** use React, Vite, a UI framework or external fonts, so don't add them. `hls.js` is lazy-loaded only when the browser lacks native HLS.
 - **Hosting:** production is a fully static site on GitHub Pages (custom domain `frequency.wtf`, served at the root). There is no runtime backend. Node 24.3+ is needed only for dev, tests and the build.
-- **Repo:** `machinescapes/FrequencyPlayer`. Use `npm` here, not `pnpm`, because CI runs `npm ci`.
+- **Repo:** `machinescapes/FrequencyPlayer`. Use **`pnpm` only**: the version is pinned in `package.json` (`packageManager`) and CI installs with `pnpm install --frozen-lockfile`. Never run `npm install` or commit a `package-lock.json`.
 
 Remix 3 is not Remix 1/2. Don't assume `loader`/`action` exports, `@remix-run/*` packages or `<Outlet />`. Check against https://api.remix.run/api/remix/overview/ and this project's code.
 
 ## Commands
 
 ```sh
-npm ci
-npm run dev                # dev server at http://localhost:44100 (PORT overrides it)
-npm test                   # node --test test/*.test.js
+pnpm install
+pnpm run dev                # dev server at http://localhost:44100 (PORT overrides it)
+pnpm test                   # node --test test/*.test.js
 node --test test/epg.test.js                         # one test file
 node --test --test-name-pattern="timeout" test/playback.test.js   # one test by name
-npm run typecheck          # tsc --noEmit (covers app/ and server.ts only)
-npm run lint               # eslint app server.ts scripts test
-npm run check              # typecheck + lint + test (this is what CI's Quality workflow runs)
-npm run build              # check, then scripts/build.mjs → dist/
+pnpm run typecheck          # tsc --noEmit (covers app/ and server.ts only)
+pnpm run lint               # eslint app server.ts scripts test
+pnpm run check              # typecheck + lint + test (this is what CI's Quality workflow runs)
+pnpm run build              # check, then scripts/build.mjs → dist/
 node scripts/sync-epg.mjs  # fetch the Freeview XMLTV guide into public/epg/freeview.json (gitignored)
-npm run sync:iptv          # rebuild public/iptv.json from iptv-org
+pnpm run sync:iptv          # rebuild public/iptv.json from iptv-org
 ```
 
 Tests import `.ts` sources directly and rely on Node's built-in type stripping, with no transpile step. IndexedDB code is tested with `fake-indexeddb`, and playback is tested with hand-written Audio/Hls stubs.
@@ -75,8 +75,8 @@ On install it precaches the core files plus whatever `offline-assets.json` lists
 
 ## CI
 
-- `quality.yml` runs `npm run check` on PRs and on pushes to non-main branches.
-- `pages.yml` runs on pushes to `main`, every 6 hours, or manually. It runs sync-epg, then `npm run build`, then deploys `dist/`.
+- `quality.yml` runs `pnpm run check` on PRs and on pushes to non-main branches.
+- `pages.yml` runs on pushes to `main`, every 6 hours, or manually. It runs sync-epg, then `pnpm run build`, then deploys `dist/`.
 - `iptv-sync.yml` runs weekly (Monday 04:17 UTC) and commits a refreshed `public/iptv.json` to `main` when it changes. Its stream health probe runs from a GitHub-hosted (US) runner, so UK geo-blocked streams are recorded as `offline`.
 
 ## Skills
@@ -102,8 +102,8 @@ To get an approved plan:
 A feature is done only when **all** of these are true:
 
 - The target behaviour is implemented and reachable from the UI (or, for pipeline work, it shows up in the generated data).
-- `npm run check` is clean (typecheck, lint and tests).
-- **The change was checked in a real browser.** Start `npm run dev`, open http://localhost:44100, and go through the feature's golden path and at least one edge case in the affected scope (`?scope=watch|listen|all`, `&view=channels|guide`). Take a screenshot as evidence. A passing typecheck doesn't replace this. Use whatever browser automation your agent has (Playwright, a preview tool, or similar). If it has none, ask the user to check and record what they saw.
+- `pnpm run check` is clean (typecheck, lint and tests).
+- **The change was checked in a real browser.** Start `pnpm run dev`, open http://localhost:44100, and go through the feature's golden path and at least one edge case in the affected scope (`?scope=watch|listen|all`, `&view=channels|guide`). Take a screenshot as evidence. A passing typecheck doesn't replace this. Use whatever browser automation your agent has (Playwright, a preview tool, or similar). If it has none, ask the user to check and record what they saw.
 - Evidence is recorded in `feature_list.json` or `frequency-progress.md`, including the screenshot path or a description of what you saw in the browser.
 - README and `docs/` are updated if the change is user-visible, and `CLAUDE.md`/`AGENTS.md` if the architecture or commands changed.
 - The repository can still be restarted from `./init.sh`.
@@ -114,7 +114,7 @@ Update `session-handoff.md` **immediately**, before any other work, whenever any
 
 - A commit is created: record the hash and what changed.
 - A PR is opened, updated or merged: record the number and status.
-- A verification (`npm run check`, a browser check, `npm run sync:iptv -- --check`) runs: record pass/fail and the exact command.
+- A verification (`pnpm run check`, a browser check, `pnpm sync:iptv --check`) runs: record pass/fail and the exact command.
 - A feature changes state: record its id and new status.
 - A blocker or unexpected finding comes up: record what it is and what you tried.
 
@@ -135,7 +135,7 @@ Before ending a session:
 
 ## CLI Tools (Preferred)
 
-Prefer CLI tools (`gh`, `npm`, `git`) for GitHub and build work. Use MCP tools as a fallback, and tell the user if a required MCP server isn't running.
+Prefer CLI tools (`gh`, `pnpm`, `git`) for GitHub and build work. Use MCP tools as a fallback, and tell the user if a required MCP server isn't running.
 
 ## Rules
 

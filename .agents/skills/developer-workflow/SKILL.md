@@ -7,7 +7,7 @@ description: Developer workflow for Frequency — issue creation, PR process, ve
 
 This skill covers the whole contribution process for Frequency, from picking up a feature to merging a reviewed, verified PR. It applies to any coding agent (Claude Code, Codex, Cursor, Copilot) and to people.
 
-Repository: `machinescapes/FrequencyPlayer`. Package manager: `npm`.
+Repository: `machinescapes/FrequencyPlayer`. Package manager: `pnpm` (pinned via `packageManager` in `package.json`; never commit a `package-lock.json`).
 
 ---
 
@@ -66,19 +66,19 @@ Run these in order and record the results in the PR body and in `session-handoff
 
 ### 4a. Typecheck, lint, tests
 ```sh
-npm run check
+pnpm run check
 ```
 It must exit 0. Note the test count (e.g. `48/48`). This is the same command CI's Quality workflow runs.
 
 ### 4b. Data snapshots (only if `scripts/` or `public/iptv.json` changed)
 ```sh
-npm run sync:iptv -- --check     # committed iptv.json matches what the script would produce
+pnpm sync:iptv --check     # committed iptv.json matches what the script would produce
 ```
 `--check` needs the network and reflects live upstream data, so a diff can come from upstream drift rather than your change. Say which one it is.
 
 ### 4c. Browser smoke test
 ```sh
-npm run dev
+pnpm run dev
 ```
 Open http://localhost:44100 and confirm the following:
 - `?scope=watch&view=channels`, `?scope=listen&view=channels` and `?scope=all` render. Check that the counts and ordering look right.
@@ -92,7 +92,7 @@ Use the browser automation your agent has. If it has none, ask the user to check
 
 ### 4d. Production build (if the shell, assets, service worker or base path changed)
 ```sh
-npm run build
+pnpm run build
 ```
 Then serve `dist/` and repeat the smoke test.
 
@@ -101,7 +101,7 @@ Then serve `dist/` and repeat the smoke test.
 ## 5. Before You Push
 
 1. Confirm the feature is `in_progress` in `feature_list.json`.
-2. Run `npm run check` one final time.
+2. Run `pnpm run check` one final time.
 3. Update `frequency-progress.md` and `session-handoff.md`, and commit them.
 4. Push the branch and open the PR using the template.
 5. After merge, set the feature to `passing` with its verification evidence.
@@ -155,7 +155,7 @@ Create `docs/plans/frq-NN-short-slug.md`. For the id, take the next number after
 <!-- Table of files to create or modify and what changes in each. -->
 
 ## Verification
-<!-- npm run check, browser smoke test (which scope/view), sync --check if relevant. -->
+<!-- pnpm run check, browser smoke test (which scope/view), sync --check if relevant. -->
 ```
 
 ### 8b. Get approval

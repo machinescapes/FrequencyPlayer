@@ -4,15 +4,15 @@ name = "Frequency"
 [setup]
 script = '''
 cd "$CODEX_WORKTREE_PATH"
-npm ci
+pnpm install
 '''
 
 [[actions]]
 name = "Dev"
 icon = "tool"
-command = "npm run dev"
+command = "pnpm run dev"
 
 [[actions]]
 name = "Check"
 icon = "tool"
-command = "npm run check"
+command = "pnpm run check"

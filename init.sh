@@ -5,11 +5,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-INSTALL_CMD=(npm ci)
-START_CMD=(npm run dev)
+INSTALL_CMD=(pnpm install --frozen-lockfile)
+START_CMD=(pnpm run dev)
 
 run_verify() {
-  npm run check
+  pnpm run check
 }
 
 echo "==> Working directory: $PWD"

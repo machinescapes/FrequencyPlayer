@@ -53,14 +53,14 @@ or rate limit. `guides.json` (EPG) is deliberately unused for now.
    non-`ok` channels; it does not hide them.
 9. Writes `public/iptv.json`, committed so the Pages build needs no network.
 
-Run it with `npm run sync:iptv`; `npm run sync:iptv -- --check` verifies the
+Run it with `pnpm run sync:iptv`; `pnpm sync:iptv --check` verifies the
 committed file is current. `.github/workflows/iptv-sync.yml` refreshes it weekly
 (Monday 04:17 UTC, or on demand with `gh workflow run iptv-sync.yml`) and
 commits to `main` only when the file changed; that push redeploys Pages.
 
 The health probe in that workflow runs on a GitHub-hosted runner outside the
 UK, so UK geo-blocked streams are always recorded as `offline` there even if
-they play for UK viewers. A local `npm run sync:iptv` from the UK gives a truer
+they play for UK viewers. A local `pnpm run sync:iptv` from the UK gives a truer
 picture for those channels.
 
 ## Known limitations

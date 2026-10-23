@@ -11,12 +11,12 @@ Closes #
 ## Verification
 
 ### Automated
-- [ ] `npm run check` — typecheck, lint and tests pass (N/N)
-- [ ] `npm run sync:iptv -- --check` — if `scripts/` or `public/iptv.json` changed
+- [ ] `pnpm run check` — typecheck, lint and tests pass (N/N)
+- [ ] `pnpm sync:iptv --check` — if `scripts/` or `public/iptv.json` changed
 - [ ] `session-handoff.md` updated and committed
 
 ### Browser
-- [ ] Golden path: `npm run dev`, opened http://localhost:44100 in the affected scope/view (`?scope=watch|listen|all&view=channels|guide`), changed behaviour confirmed, no console errors
+- [ ] Golden path: `pnpm run dev`, opened http://localhost:44100 in the affected scope/view (`?scope=watch|listen|all&view=channels|guide`), changed behaviour confirmed, no console errors
 - [ ] Screenshot attached or linked
 
 ### Notes

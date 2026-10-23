@@ -96,7 +96,7 @@ if (process.argv.includes('--check')) {
   const current = await readFile(output, 'utf8').catch(() => '')
   const strip = value => value.replace(/"generatedAt":"[^"]*"/, '')
   if (strip(current) !== strip(serialised)) {
-    console.error('public/iptv.json is out of date. Run npm run sync:iptv.')
+    console.error('public/iptv.json is out of date. Run pnpm run sync:iptv.')
     process.exit(1)
   }
   console.log(`public/iptv.json is current (${snapshot.counts.channels} channels).`)

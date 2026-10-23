@@ -7,14 +7,14 @@ A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. Use
 Node **24.3+** is needed only to install dependencies and build the static site. The deployed app runs entirely in the browser from GitHub Pages; it has no application server or runtime backend.
 
 ```sh
-npm ci
-npm run dev
+pnpm install
+pnpm run dev
 # http://localhost:44100
-npm test
-npm run build
+pnpm test
+pnpm run build
 ```
 
-`npm run dev` starts the local development server. `npm run build` type-checks, lints, tests, and compiles a minimized static site into `dist/`. GitHub Pages serves those files directly. Its workflow deploys the `dist/` folder after changes land on `main`; no Node process runs in production. Use HTTPS for the PWA; localhost is allowed for service-worker development. The Pages workflow refreshes the radio schedule extract every six hours and before deployment. Run `node scripts/sync-epg.mjs` to fetch the current feed for local development.
+`pnpm run dev` starts the local development server. `pnpm run build` type-checks, lints, tests, and compiles a minimized static site into `dist/`. GitHub Pages serves those files directly. Its workflow deploys the `dist/` folder after changes land on `main`; no Node process runs in production. Use HTTPS for the PWA; localhost is allowed for service-worker development. The Pages workflow refreshes the radio schedule extract every six hours and before deployment. Run `node scripts/sync-epg.mjs` to fetch the current feed for local development.
 
 ## What works
 
@@ -92,18 +92,18 @@ This repo uses the same session harness for every coding agent:
 | `AGENTS.md` | Canonical instructions: startup workflow, plan gate, definition of done, architecture | Codex, Cursor, Copilot coding agent (natively); Claude Code via `CLAUDE.md` |
 | `CLAUDE.md` | Imports `AGENTS.md` plus Claude-only notes | Claude Code |
 | `.github/copilot-instructions.md` | Pointer to `AGENTS.md` | GitHub Copilot |
-| `.codex/environments/environment.toml` | Setup (`npm ci`) and Dev/Check actions | Codex app |
+| `.codex/environments/environment.toml` | Setup (`pnpm install`) and Dev/Check actions | Codex app |
 | `feature_list.json` | Backlog; implementation needs `plan_status: "approved"` | all |
 | `frequency-progress.md` | Long-running verified state and session log | all |
 | `session-handoff.md` | Per-session handoff, reset at the start of each session | all |
-| `init.sh` | `npm ci` + `npm run check` baseline | all |
+| `init.sh` | `pnpm install` + `pnpm run check` baseline | all |
 | `.agents/skills/` | Shared procedures (symlinked into `.claude/skills/`) | all |
 
 Cursor needs no extra file. Put shared rules in `AGENTS.md` only.
 
 ## Validation
 
-`npm test` covers catalogue/import compatibility, unsafe URLs, duplicate IDs, styling, playback lifecycle, timeout/retry, HLS selection and autoplay handling. Browser smoke tests using an already-installed external Playwright/Chrome verified collection loading, favourites, add content, search, arrow focus, offline reload, and mobile overflow with no runtime errors. Additional production browser checks verified all 17 direct streams in Chrome and native-HLS WebKit, plus broadcaster filtering, config additions, artwork fallback, official tabs, audio cleanup and mobile overflow under a Pages subpath. Chrome offline reload and simulated gamepad navigation passed; WebKit offline emulation failed internally and remains unverified. These browser tools are not project dependencies. Actual Safari, UK-network, iPad and real controller testing remain manual.
+`pnpm test` covers catalogue/import compatibility, unsafe URLs, duplicate IDs, styling, playback lifecycle, timeout/retry, HLS selection and autoplay handling. Browser smoke tests using an already-installed external Playwright/Chrome verified collection loading, favourites, add content, search, arrow focus, offline reload, and mobile overflow with no runtime errors. Additional production browser checks verified all 17 direct streams in Chrome and native-HLS WebKit, plus broadcaster filtering, config additions, artwork fallback, official tabs, audio cleanup and mobile overflow under a Pages subpath. Chrome offline reload and simulated gamepad navigation passed; WebKit offline emulation failed internally and remains unverified. These browser tools are not project dependencies. Actual Safari, UK-network, iPad and real controller testing remain manual.
 
 The current browser check also verified first-use favourites setup, the empty-favourites action, schedule loading and failure states, all 23 station rows, 215 programme blocks, and horizontal Guide scrolling with no page-width overflow at 390 px. The screenshots use the Freeview-EPG snapshot fetched on 18 October 2026; live listings naturally change between builds.
 

@@ -1,7 +1,7 @@
 {
   "project": "frequency",
   "last_updated": "2026-10-24",
-  "backlog_note": "2026-10-24: harness adopted from unscatteredweb. Seeded with two TV-catalogue features from the IPTV review (145 channels in the 2026-10-19 snapshot: 73 ok, 31 cors, 41 offline). Both need an approved plan before implementation.",
+  "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
   "rules": {
     "single_active_feature": false,
     "parallel_execution": "One feature per isolated branch/worktree; shared-file integration is coordinator-owned and dependency-gated.",
@@ -27,22 +27,27 @@
       "title": "FRQ-01 Control TV channel order and essentials",
       "status": "not_started",
       "type": "feature",
-      "plan": null,
-      "plan_status": "pending",
+      "plan": "docs/plans/frq-01-channel-order-control.md",
+      "plan_status": "approved",
       "summary": "TV channel order is fixed in code: orderChannels() sorts at runtime by guide, favourites, stream health and then title, and ESSENTIAL_BRANDS decides at sync time which channels are 'essential'. Make the order and the essentials set deliberate and easy to change.",
       "summary_of_intent": "User: 'Order: edit orderChannels() for runtime order, or ESSENTIAL_BRANDS for what counts as essential'",
       "scope": [
         "app/public/media.ts — orderChannels() runtime sort",
+        "app/public/entry.tsx — orderChannels call sites",
         "scripts/iptv-parse.mjs — ESSENTIAL_BRANDS and the toItems() snapshot sort",
-        "test/ — ordering coverage"
+        "test/media.test.js — ordering tiers"
       ],
       "verification": {
         "check": "not_run",
         "browser": "not_run"
       },
       "next_steps": [
-        "Create an approved plan at docs/plans/frq-01-channel-order-control.md before starting work — implementation is blocked until plan_status is 'approved'.",
-        "Decide whether order is driven from code, from the channel config (frq-02), or both."
+        "Read the implementation plan at docs/plans/frq-01-channel-order-control.md before starting work.",
+        "Implement after frq-02 (or on the same branch); missing `pin` is treated as unpinned.",
+        "Verify ordering in the browser at ?scope=watch&view=channels and that radio order is unchanged."
+      ],
+      "depends_on": [
+        "frq-02-channel-config"
       ]
     },
     {
@@ -50,8 +55,8 @@
       "title": "FRQ-02 Channel config file to pin, hide and add TV channels",
       "status": "not_started",
       "type": "feature",
-      "plan": null,
-      "plan_status": "pending",
+      "plan": "docs/plans/frq-02-channel-config.md",
+      "plan_status": "approved",
       "summary": "A committed config (e.g. scripts/iptv-config.json) applied during sync:iptv. It has a pinned list of ids in display order, a hide list of ids, and an add list of known-good streams iptv-org lacks or filters out. Gives manual control over the catalogue without editing parser code.",
       "summary_of_intent": "User: 'can i control the order and get rid of some' — chose 'Channel config (pin/hide/add)' when asked which IPTV problems to add to the feature list.",
       "scope": [
@@ -59,15 +64,17 @@
         "scripts/iptv-parse.mjs — pin/hide/add in toItems()",
         "scripts/iptv-config.json — new",
         "test/ — config application tests",
-        "docs/iptv.md — document the config"
+        "docs/iptv.md — document the config",
+        "app/public/tv-catalogue.js — pass through `pin`"
       ],
       "verification": {
         "check": "not_run",
         "browser": "not_run"
       },
       "next_steps": [
-        "Create an approved plan at docs/plans/frq-02-channel-config.md before starting work — implementation is blocked until plan_status is 'approved'.",
-        "Check that added streams still pass the HTTPS/HLS/health checks rather than bypassing them."
+        "Read the implementation plan at docs/plans/frq-02-channel-config.md before starting work.",
+        "Add validateConfig/applyConfig to scripts/iptv-parse.mjs with tests, then wire into sync-iptv.mjs before the health probe.",
+        "Run pnpm sync:iptv, then pnpm sync:iptv --check, then verify hidden/added channels in the browser."
       ]
     }
   ]
