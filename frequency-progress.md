@@ -17,3 +17,9 @@
 - Brought `docs/iptv.md` up to date with what the sync really does (GB filter, guide join, health probe, US-runner geo caveat).
 - Verification: `./init.sh` (`pnpm install` + `pnpm run check`).
 - Standardised on pnpm: `packageManager: pnpm@12.9.1`, `package-lock.json` removed, CI workflows use `pnpm/action-setup` + `pnpm install --frozen-lockfile`, all docs and scripts updated.
+
+### Session 2026-10-24 (cont.): frq-02 channel config
+
+- `scripts/iptv-config.json` (pin/hide/add) applied by `applyConfig()` in `scripts/iptv-parse.mjs` before the health probe; `validateConfig()` rejects bad entries; unmatched ids warn.
+- Verified: `pnpm run check` 56/56; `pnpm sync:iptv` then `--check` clean; browser (Chrome) hide + add + playback confirmed, screenshot `docs/screenshots/frq-02-config-added-playing.png`.
+- `pnpm sync:iptv --check` compares live health probes, so it can fail on upstream drift rather than code changes.

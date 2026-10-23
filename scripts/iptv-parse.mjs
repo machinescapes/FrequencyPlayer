@@ -305,11 +305,96 @@ function hash(value) {
   return Math.abs(result).toString(36)
 }
 
+const CONFIG_KEYS = new Set(['pin', 'hide', 'add'])
+const ADD_KEYS = new Set(['id', 'title', 'streamUrl', 'category', 'tags', 'logoUrl', 'broadcaster', 'countryCode', 'quality', 'labels', 'epgId'])
+
+/**
+ * Check the hand-edited catalogue config (scripts/iptv-config.json). A bad
+ * entry stops the sync rather than being skipped: a typo should be loud.
+ * @returns {{ pin: string[], hide: string[], add: object[] }}
+ */
+export function validateConfig(config = {}) {
+  if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('iptv config must be an object.')
+  for (const key of Object.keys(config)) if (!CONFIG_KEYS.has(key)) throw new Error(`iptv config: unknown key "${key}".`)
+  const ids = name => {
+    const value = config[name] ?? []
+    if (!Array.isArray(value) || value.some(id => typeof id !== 'string' || !id.trim())) throw new Error(`iptv config: "${name}" must be a list of channel ids.`)
+    return value.map(id => id.trim())
+  }
+  const add = config.add ?? []
+  if (!Array.isArray(add)) throw new Error('iptv config: "add" must be a list.')
+  const seen = new Set()
+  for (const entry of add) {
+    const label = entry?.id ?? JSON.stringify(entry)
+    if (!entry || typeof entry !== 'object') throw new Error(`iptv config: add entry ${label} must be an object.`)
+    for (const key of Object.keys(entry)) if (!ADD_KEYS.has(key)) throw new Error(`iptv config: add entry ${label} has unknown key "${key}".`)
+    if (typeof entry.id !== 'string' || !entry.id) throw new Error(`iptv config: add entry ${label} needs an id.`)
+    if (typeof entry.title !== 'string' || !entry.title.trim()) throw new Error(`iptv config: add entry ${label} needs a title.`)
+    if (typeof entry.streamUrl !== 'string' || !isPlayable({ streamUrl: entry.streamUrl, needsHeaders: false })) throw new Error(`iptv config: add entry ${label} needs an https .m3u8 streamUrl.`)
+    if (seen.has(entry.id)) throw new Error(`iptv config: add entry ${label} is listed twice.`)
+    seen.add(entry.id)
+  }
+  return { pin: ids('pin'), hide: ids('hide'), add }
+}
+
+/** A config id without `@` names every feed of a channel; with `@`, one feed. */
+function matchesId(configId, itemId) {
+  return configId.includes('@') ? configId === itemId : configId === itemId.split('@')[0]
+}
+
+/**
+ * Apply the hand-edited config: hide, then add (replacing same-id rows), then
+ * stamp `pin` positions. Hide always wins. Returns the items and which config
+ * ids matched nothing, so the sync can warn about typos.
+ */
+export function applyConfig(items, config) {
+  const { pin, hide, add } = validateConfig(config)
+  const hidden = item => hide.some(id => matchesId(id, item.id))
+  const byId = new Map(items.filter(item => !hidden(item)).map(item => [item.id, item]))
+  for (const entry of add) {
+    const row = {
+      id: entry.id,
+      title: entry.title.trim(),
+      category: entry.category ?? entry.tags?.[0] ?? 'General',
+      tags: entry.tags ?? [entry.category ?? 'General'],
+      broadcaster: entry.broadcaster ?? broadcasterFor(entry.id, null),
+      essential: false,
+      countryCode: entry.countryCode ?? 'GB',
+      logoUrl: entry.logoUrl ?? null,
+      streamUrl: entry.streamUrl,
+      quality: entry.quality ?? null,
+      labels: entry.labels ?? [],
+      epgId: entry.epgId ?? null,
+      source: 'config',
+    }
+    if (!hidden(row)) byId.set(row.id, row)
+  }
+  const result = [...byId.values()]
+  for (const item of result) {
+    const position = pin.findIndex(id => matchesId(id, item.id))
+    item.pin = position < 0 ? null : position
+  }
+  const unmatched = [
+    ...pin.filter(id => !result.some(item => matchesId(id, item.id))).map(id => `pin:${id}`),
+    ...hide.filter(id => !items.some(item => matchesId(id, item.id)) && !add.some(entry => matchesId(id, entry.id))).map(id => `hide:${id}`),
+  ]
+  result.sort((a, b) =>
+    (a.pin ?? Infinity) - (b.pin ?? Infinity) ||
+    Number(b.essential) - Number(a.essential) ||
+    a.title.localeCompare(b.title, 'en'))
+  return { items: result, hidden: items.length - items.filter(item => !hidden(item)).length, added: add.filter(entry => byId.get(entry.id)?.source === 'config').length, unmatched }
+}
+
 /** Build the committed snapshot document from fetched playlist bodies. */
-export function buildSnapshot(sources, { blocked, limit, networks, countries = null, epgChannels = null, generatedAt = new Date().toISOString() } = {}) {
+export function buildSnapshot(sources, { blocked, limit, networks, countries = null, epgChannels = null, config = null, generatedAt = new Date().toISOString() } = {}) {
   const entries = []
   for (const source of sources) entries.push(...parseM3u(source.text, { group: source.group }))
-  const items = toItems(entries, { blocked, limit, networks, countries, epgChannels })
+  let items = toItems(entries, { blocked, limit, networks, countries, epgChannels })
+  let applied = null
+  if (config) {
+    applied = applyConfig(items, config)
+    items = applied.items
+  }
   return {
     version: 1,
     generatedAt,
@@ -324,7 +409,9 @@ export function buildSnapshot(sources, { blocked, limit, networks, countries = n
       broadcasters: new Set(items.map(item => item.broadcaster).filter(Boolean)).size,
       countries: new Set(items.map(item => item.countryCode).filter(Boolean)).size,
       withGuide: items.filter(item => item.epgId).length,
+      ...(applied ? { pinned: items.filter(item => item.pin !== null).length, hidden: applied.hidden, added: applied.added } : {}),
     },
+    ...(applied ? { unmatched: applied.unmatched } : {}),
     items,
   }
 }

@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { buildSnapshot } from './iptv-parse.mjs'
+import { buildSnapshot, validateConfig } from './iptv-parse.mjs'
 
 const INDEX = 'https://iptv-org.github.io/iptv/index.m3u'
 const CHANNELS = 'https://iptv-org.github.io/api/channels.json'
@@ -57,6 +57,17 @@ async function verifyStreams(urls, { concurrency = 16, timeout = 8000 } = {}) {
   return results
 }
 
+const CONFIG_PATH = path.join(process.cwd(), 'scripts/iptv-config.json')
+
+/** Hand-edited pin/hide/add lists. Missing is fine; malformed stops the sync. */
+async function readConfig() {
+  let text
+  try { text = await readFile(CONFIG_PATH, 'utf8') } catch { return validateConfig({}) }
+  return validateConfig(JSON.parse(text))
+}
+
+const config = await readConfig()
+
 const [index, channels, blocklist, epg] = await Promise.all([
   getText(INDEX),
   getJson(CHANNELS),
@@ -74,14 +85,16 @@ for (const channel of channels) {
   })
 }
 
-const snapshot = buildSnapshot([{ url: INDEX, group: 'General', text: index }], {
+const { unmatched = [], ...snapshot } = buildSnapshot([{ url: INDEX, group: 'General', text: index }], {
   blocked: new Set(blocklist.map(entry => entry.channel)),
   limit: LIMIT,
   networks,
   countries: COUNTRIES,
   epgChannels: epg,
+  config,
 })
 
+// Config is applied before the probe so added streams are checked like the rest.
 // Stream links rot. Probe each one now so the app can lead with channels that
 // actually play instead of surfacing 40% dead links as equals.
 const health = await verifyStreams(snapshot.items.map(item => item.streamUrl))
@@ -91,6 +104,8 @@ snapshot.counts.noCors = snapshot.items.filter(item => item.health === 'cors').l
 snapshot.counts.unreachable = snapshot.items.filter(item => item.health === 'offline').length
 const output = path.join(process.cwd(), 'public/iptv.json')
 const serialised = JSON.stringify(snapshot) + '\n'
+
+for (const id of unmatched) console.warn(`iptv config: ${id} matched no channel (typo, or dropped upstream?)`)
 
 if (process.argv.includes('--check')) {
   const current = await readFile(output, 'utf8').catch(() => '')
@@ -106,6 +121,7 @@ if (process.argv.includes('--check')) {
   console.log(`Wrote ${counts.channels} channels (${(serialised.length / 1024).toFixed(0)} KB) to ${output}`)
   console.log(`  countries: ${[...COUNTRIES].join(', ')} · with guide: ${counts.withGuide} · broadcasters: ${counts.broadcasters}`)
   console.log(`  playable: ${counts.playable} · no CORS: ${counts.noCors} · unreachable: ${counts.unreachable}`)
+  console.log(`  config: ${counts.pinned} pinned · ${counts.hidden} hidden · ${counts.added} added`)
   if (!epg) console.log('  guide coverage not recorded (feed unavailable)')
   const withGuide = items.filter(item => item.epgId)
   if (withGuide.length) console.log(`  channels with listings: ${withGuide.map(item => item.title).join(', ')}`)

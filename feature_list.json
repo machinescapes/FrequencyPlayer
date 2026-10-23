@@ -25,7 +25,7 @@
     {
       "id": "frq-01-channel-order-control",
       "title": "FRQ-01 Control TV channel order and essentials",
-      "status": "not_started",
+      "status": "in_progress",
       "type": "feature",
       "plan": "docs/plans/frq-01-channel-order-control.md",
       "plan_status": "approved",
@@ -53,7 +53,7 @@
     {
       "id": "frq-02-channel-config",
       "title": "FRQ-02 Channel config file to pin, hide and add TV channels",
-      "status": "not_started",
+      "status": "passing",
       "type": "feature",
       "plan": "docs/plans/frq-02-channel-config.md",
       "plan_status": "approved",
@@ -68,13 +68,12 @@
         "app/public/tv-catalogue.js — pass through `pin`"
       ],
       "verification": {
-        "check": "not_run",
-        "browser": "not_run"
+        "check": "pnpm run check — 56/56 tests, typecheck and lint clean (2026-10-24); 8 new tests in test/iptv-config.test.js",
+        "sync": "pnpm sync:iptv — 144 channels, 13 pinned/0 hidden/0 added; seed pin ids ITV1.uk and SkyNews.uk were flagged as unmatched and corrected; pnpm sync:iptv --check then passed twice",
+        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels: with hide:[StarPlus.uk] and one add entry, StarPlus absent from grid and search, added channel rendered, health 'ok' and played (video readyState 4, 6.6s elapsed), no console errors. Screenshot docs/screenshots/frq-02-config-added-playing.png. Temporary config reverted."
       },
       "next_steps": [
-        "Read the implementation plan at docs/plans/frq-02-channel-config.md before starting work.",
-        "Add validateConfig/applyConfig to scripts/iptv-parse.mjs with tests, then wire into sync-iptv.mjs before the health probe.",
-        "Run pnpm sync:iptv, then pnpm sync:iptv --check, then verify hidden/added channels in the browser."
+        "Merge with PR. Pinned positions are in iptv.json but not yet reflected in UI order — that is frq-01."
       ]
     }
   ]

@@ -51,7 +51,9 @@ or rate limit. `guides.json` (EPG) is deliberately unused for now.
    `ok` (200, HLS, `Access-Control-Allow-Origin: *`), `cors` (plays upstream but
    the browser will refuse it) or `offline`. The app sorts by this and labels
    non-`ok` channels; it does not hide them.
-9. Writes `public/iptv.json`, committed so the Pages build needs no network.
+9. Applies `scripts/iptv-config.json` (see below) before the probe, so added
+   streams are health-checked too.
+10. Writes `public/iptv.json`, committed so the Pages build needs no network.
 
 Run it with `pnpm run sync:iptv`; `pnpm sync:iptv --check` verifies the
 committed file is current. `.github/workflows/iptv-sync.yml` refreshes it weekly
@@ -62,6 +64,34 @@ The health probe in that workflow runs on a GitHub-hosted runner outside the
 UK, so UK geo-blocked streams are always recorded as `offline` there even if
 they play for UK viewers. A local `pnpm run sync:iptv` from the UK gives a truer
 picture for those channels.
+
+## Customising the catalogue
+
+`scripts/iptv-config.json` is the hand-edited layer on top of iptv-org. Edit it,
+then run `pnpm sync:iptv` and commit both files.
+
+```json
+{
+  "pin": ["BBCOne.uk", "BBCNews.uk", "Channel4.uk"],
+  "hide": ["StarPlus.uk", "DAZNCombat.uk@SD"],
+  "add": [
+    { "id": "Example.uk@HD", "title": "Example HD", "streamUrl": "https://example.com/live/index.m3u8", "category": "General" }
+  ]
+}
+```
+
+- **Ids**: an id without `@` (`BBCOne.uk`) matches every feed of that channel;
+  with `@` (`BBCOne.uk@Scotland`) it matches one feed. Ids are the `id` values in
+  `public/iptv.json`.
+- **`pin`**: list order is display order. Each matching channel gets a `pin`
+  position in `iptv.json`.
+- **`hide`**: removes channels. Hide always wins over `pin` and `add`.
+- **`add`**: channels iptv-org lacks, or a better stream for one it has (same id
+  replaces). Needs `id`, `title` and an HTTPS `.m3u8` `streamUrl`; optional
+  `category`, `tags`, `logoUrl`, `broadcaster`, `countryCode` (default `GB`),
+  `quality`, `labels`, `epgId`. Added rows carry `"source": "config"`.
+- A malformed config stops the sync. Ids that match nothing are printed as
+  warnings — usually a typo, or a channel iptv-org dropped.
 
 ## Known limitations
 
