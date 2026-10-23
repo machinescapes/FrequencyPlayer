@@ -1,0 +1,18 @@
+version = 1
+name = "Frequency"
+
+[setup]
+script = '''
+cd "$CODEX_WORKTREE_PATH"
+npm ci
+'''
+
+[[actions]]
+name = "Dev"
+icon = "tool"
+command = "npm run dev"
+
+[[actions]]
+name = "Check"
+icon = "tool"
+command = "npm run check"

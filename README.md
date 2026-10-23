@@ -83,6 +83,24 @@ Themes use CSS custom properties, cascade layers, logical properties, `color-mix
 - Guide: [desktop](docs/screenshots/frequency-guide-desktop.png) · [mobile](docs/screenshots/frequency-guide-mobile.png)
 - Setup and schedule states: [favourites picker](docs/screenshots/frequency-picker-desktop.png) · [empty favourites](docs/screenshots/frequency-empty-favourites.png) · [loading](docs/screenshots/frequency-schedule-loading.png) · [unavailable](docs/screenshots/frequency-schedule-unavailable.png)
 
+## Working with coding agents
+
+This repo uses the same session harness for every coding agent:
+
+| File | Purpose | Read by |
+| --- | --- | --- |
+| `AGENTS.md` | Canonical instructions: startup workflow, plan gate, definition of done, architecture | Codex, Cursor, Copilot coding agent (natively); Claude Code via `CLAUDE.md` |
+| `CLAUDE.md` | Imports `AGENTS.md` plus Claude-only notes | Claude Code |
+| `.github/copilot-instructions.md` | Pointer to `AGENTS.md` | GitHub Copilot |
+| `.codex/environments/environment.toml` | Setup (`npm ci`) and Dev/Check actions | Codex app |
+| `feature_list.json` | Backlog; implementation needs `plan_status: "approved"` | all |
+| `frequency-progress.md` | Long-running verified state and session log | all |
+| `session-handoff.md` | Per-session handoff, reset at the start of each session | all |
+| `init.sh` | `npm ci` + `npm run check` baseline | all |
+| `.agents/skills/` | Shared procedures (symlinked into `.claude/skills/`) | all |
+
+Cursor needs no extra file. Put shared rules in `AGENTS.md` only.
+
 ## Validation
 
 `npm test` covers catalogue/import compatibility, unsafe URLs, duplicate IDs, styling, playback lifecycle, timeout/retry, HLS selection and autoplay handling. Browser smoke tests using an already-installed external Playwright/Chrome verified collection loading, favourites, add content, search, arrow focus, offline reload, and mobile overflow with no runtime errors. Additional production browser checks verified all 17 direct streams in Chrome and native-HLS WebKit, plus broadcaster filtering, config additions, artwork fallback, official tabs, audio cleanup and mobile overflow under a Pages subpath. Chrome offline reload and simulated gamepad navigation passed; WebKit offline emulation failed internally and remains unverified. These browser tools are not project dependencies. Actual Safari, UK-network, iPad and real controller testing remain manual.
