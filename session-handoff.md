@@ -14,13 +14,13 @@
 
 - Known defect: none found.
 - Unverified path: real iOS Safari (webkitEnterFullscreen fallback, orientation lock) and Android Chrome on a device; only emulated so far.
-- Risk for the next session: running `node scripts/sync-epg.mjs` rewrites the tracked public/iptv.json, so restore it before committing.
+- Risk for the next session: frq-03 went to main without a PR, so there's no review record; the local branch feat/frq-03-video-player-ux is now redundant. Running `node scripts/sync-epg.mjs` rewrites the tracked public/iptv.json, so restore it before committing.
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: none open. Open a PR for frq-03 (branch feat/frq-03-video-player-ux) once the user asks.
-- Why it is next: the feature is verified locally.
-- What counts as passing: Quality CI green on the PR; device check on iOS.
+- Highest-priority unfinished feature: none open. frq-03 is live; the next step is a real-device check on iPhone Safari and Android Chrome.
+- Why it is next: full screen on iOS uses a Safari-only fallback that emulation can't exercise.
+- What counts as passing: on a phone, play pins the player at the top, collapse keeps playing in the bottom bar, and full screen works with the controls visible.
 - What must not change during that step: radio/Listen playback and channel ordering.
 
 ## Commands
@@ -36,3 +36,6 @@
 - frq-03 plan approved by user; status in_progress.
 - frq-03 verified: pnpm run check 60/60; Chrome desktop inline/mini/expanded/fullscreen + phone sticky/mini + edge cases → passing. iOS Safari device check outstanding.
 - Commit 3fb57e6: frq-03 implementation, docs, screenshots.
+- frq-03 pushed by the user directly to main (3fb57e6, c88158f), no PR. Pages deploy run 40054753293 succeeded; frequency.wtf serves the new player.
+- Five dev servers were found running locally (two from the old amazing-feistel worktree); only the one on :44100 is used.
+- feature_list.json and this handoff updated on main to record the direct ship.

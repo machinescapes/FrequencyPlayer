@@ -2,7 +2,7 @@
 
 ## Current Verified State
 
-- 2026-10-24: `main` at `81de95b` (deploys to frequency.wtf root). `pnpm run check` passes: typecheck, lint and 48/48 tests.
+- 2026-10-24: `main` includes frq-01, frq-02 (PR #10) and frq-03 (direct push, `c88158f`), all live on frequency.wtf. Earlier today: `main` at `81de95b` (deploys to frequency.wtf root). `pnpm run check` passes: typecheck, lint and 48/48 tests.
 - TV catalogue: `public/iptv.json` was generated locally on 2026-10-19. It has 145 GB channels: 73 `ok`, 31 `cors`, 41 `offline`. 13 are essentials, and only BBC News South Asia is `ok` among them. 22 channels have guide coverage.
 - `iptv-sync.yml` hasn't run yet. It reached `main` on Tue 2026-10-20, after that week's Monday 04:17 UTC slot, so the first scheduled run is Mon 2026-10-26. It can be triggered early with `gh workflow run iptv-sync.yml`.
 - Known catalogue gap: BBC Two, Three and Four, CBBC and CBeebies are missing because iptv-org only lists them as `http://` or DASH `.mpd`, and the sync accepts HTTPS HLS only.
@@ -34,3 +34,4 @@
 - One shared `<video>` moves between three hosts in `entry.tsx`: inline (inside the selected card), mini (bottom bar thumbnail) and expanded (stage). An IntersectionObserver docks inline → mini when the card scrolls away and restores it on return. Phones (≤540 px) open a sticky 16:9 stage instead of inline.
 - Overlay controls (`videoControls`) on the video: play/pause, LIVE, PiP, expand/collapse, full screen on the container (webkit fallback for iOS). Idle fade after 3 s; `f`/`k`/`Esc` shortcuts; double-tap for full screen.
 - Verified: `pnpm run check` 60/60; Chrome desktop + phone emulation golden paths and edge cases (guide, listen scope, failed stream). Screenshots `docs/screenshots/frq-03-*.png`. Real iOS Safari not yet checked.
+- Shipped: pushed directly to `main` (`3fb57e6`, `c88158f`) without a PR; the Pages deploy succeeded and frequency.wtf serves the new player.

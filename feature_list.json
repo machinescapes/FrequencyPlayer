@@ -43,7 +43,7 @@
         "regression": "Radio order compared against main's orderChannels on public/catalogue.json (with and without listings): identical, 29 items."
       },
       "next_steps": [
-        "Merge with PR."
+        "Merged to main in PR #10."
       ],
       "depends_on": [
         "frq-02-channel-config"
@@ -72,7 +72,7 @@
         "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels: with hide:[StarPlus.uk] and one add entry, StarPlus absent from grid and search, added channel rendered, health 'ok' and played (video readyState 4, 6.6s elapsed), no console errors. Screenshot docs/screenshots/frq-02-config-added-playing.png. Temporary config reverted."
       },
       "next_steps": [
-        "Merge with PR. Pinned positions are in iptv.json but not yet reflected in UI order — that is frq-01."
+        "Merged to main in PR #10."
       ]
     },
     {
@@ -91,11 +91,11 @@
       ],
       "verification": {
         "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24). No new unit tests: the mode logic is UI-bound in entry.tsx; covered by the browser checks below.",
-        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels. Desktop 1366×860: Afrobeat TV played inside its card (readyState 4, no stage); scrolled away → docked in bottom bar, still playing; scrolled back → inline; ⤢ → stage with overlay controls; ⛶ and `f` → .player-frame is document.fullscreenElement with controls visible; controls go idle after 3 s and wake on pointer move; `k` pauses. Guide view → mini; Listen scope keeps the TV mini; playing radio shows no stage/mini video. Phone 390×844 touch: Brit Asia TV from mid-grid → sticky 16:9 player at top:0 immediately and still pinned after scrolling 900px; collapse → mini thumbnail keeps playing (videoWidth 1920). Failed ITV2 shows 'Stream unavailable' over the stage. Only console error: one geo-blocked logo ERR_NAME_NOT_RESOLVED (pre-existing). Screenshots docs/screenshots/frq-03-*.png."
+        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels. Desktop 1366×860: Afrobeat TV played inside its card (readyState 4, no stage); scrolled away → docked in bottom bar, still playing; scrolled back → inline; ⤢ → stage with overlay controls; ⛶ and `f` → .player-frame is document.fullscreenElement with controls visible; controls go idle after 3 s and wake on pointer move; `k` pauses. Guide view → mini; Listen scope keeps the TV mini; playing radio shows no stage/mini video. Phone 390×844 touch: Brit Asia TV from mid-grid → sticky 16:9 player at top:0 immediately and still pinned after scrolling 900px; collapse → mini thumbnail keeps playing (videoWidth 1920). Failed ITV2 shows 'Stream unavailable' over the stage. Only console error: one geo-blocked logo ERR_NAME_NOT_RESOLVED (pre-existing). Screenshots docs/screenshots/frq-03-*.png.",
+        "ci": "Pushed directly to main as 3fb57e6 + c88158f (no PR). Pages 'Build and deploy' run 40054753293 succeeded on c88158f (build runs pnpm run check); frequency.wtf/assets/app.js contains the new player (2026-10-24)."
       },
       "next_steps": [
-        "Merge with PR.",
-        "Unverified: real iOS Safari (webkitEnterFullscreen fallback, orientation lock) — needs a device check."
+        "Shipped to production. Check full screen and sticky player on a real iPhone (webkitEnterFullscreen fallback, orientation lock) and Android Chrome."
       ]
     }
   ]
