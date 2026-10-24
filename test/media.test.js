@@ -67,7 +67,7 @@ test('filters combine scope, query, country, category and broadcaster', () => {
   assert.equal(count({ favouritesOnly: true, favourites: ['listen:bbc6'] }), 1)
 })
 
-test('channels with listings lead, then favourites, then alphabetical', () => {
+test('channels with listings lead, then alphabetical', () => {
   const items = [
     { id: 'c', title: 'Zed', hasGuide: false },
     { id: 'b', title: 'Bravo', hasGuide: false },
@@ -75,7 +75,42 @@ test('channels with listings lead, then favourites, then alphabetical', () => {
     { id: 'd', title: 'Delta', hasGuide: false },
   ]
   assert.deepEqual(orderChannels(items).map(item => item.id), ['a', 'b', 'd', 'c'])
-  assert.deepEqual(orderChannels(items.filter(item => !item.hasGuide), ['c']).map(item => item.id), ['c', 'b', 'd'])
+})
+
+test('pinned channels lead in pin order, then essentials, then health, then title', () => {
+  const items = [
+    { id: 'plain-ok', title: 'Alpha', hasGuide: false, health: 'ok' },
+    { id: 'plain-off', title: 'Aardvark', hasGuide: false, health: 'offline' },
+    { id: 'plain-cors', title: 'Able', hasGuide: false, health: 'cors' },
+    { id: 'ess', title: 'Zulu Essential', hasGuide: false, essential: true, health: 'ok' },
+    { id: 'pin1-off', title: 'Yankee', hasGuide: false, pin: 1, health: 'offline' },
+    { id: 'pin0', title: 'X-ray', hasGuide: false, pin: 0, health: 'ok' },
+  ]
+  // A pinned offline channel keeps its slot; unpinned ones sink by health.
+  assert.deepEqual(orderChannels(items).map(item => item.id), ['pin0', 'pin1-off', 'ess', 'plain-ok', 'plain-cors', 'plain-off'])
+})
+
+test('listings still lead pinned channels when rows are not split', () => {
+  const items = [
+    { id: 'pinned', title: 'Pinned', hasGuide: false, pin: 0 },
+    { id: 'guide', title: 'Guide', hasGuide: true },
+  ]
+  assert.deepEqual(orderChannels(items).map(item => item.id), ['guide', 'pinned'])
+})
+
+test('radio order is unchanged: listings, then title', () => {
+  const merged = mergeMedia([radio, { ...radio, id: 'abc', title: 'Absolute Radio', scheduleId: undefined }], [], new Set(['bbc6']))
+  assert.deepEqual(orderChannels(merged).map(item => item.title), ['BBC Radio 6 Music', 'Absolute Radio'])
+  assert.ok(merged.every(item => item.pin === undefined && !item.essential))
+})
+
+test('TV rows carry pin and essential from the snapshot', () => {
+  const [pinned] = mergeMedia([], [{ ...tv, pin: 2, essential: true }], new Set())
+  assert.equal(pinned.pin, 2)
+  assert.equal(pinned.essential, true)
+  const [bad] = mergeMedia([], [{ ...tv, pin: 1.5 }], new Set())
+  assert.equal(bad.pin, undefined)
+  assert.equal(bad.essential, false)
 })
 
 test('guides are grouped by source and skip empty groups', () => {

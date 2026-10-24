@@ -14,13 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Rebuild public/iptv.json from iptv-org
-        run: npm run sync:iptv
+        run: pnpm run sync:iptv
       - name: Commit if the catalogue changed
         run: |
           if git diff --quiet -- public/iptv.json; then

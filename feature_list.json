@@ -1,0 +1,79 @@
+{
+  "project": "frequency",
+  "last_updated": "2026-10-24",
+  "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
+  "rules": {
+    "single_active_feature": false,
+    "parallel_execution": "One feature per isolated branch/worktree; shared-file integration is coordinator-owned and dependency-gated.",
+    "passing_requires_evidence": true,
+    "do_not_skip_verification": true,
+    "feature_requires_approved_plan": true
+  },
+  "plan_status_legend": {
+    "pending": "Feature added; no plan created yet. Implementation is blocked.",
+    "draft": "Plan file written but not yet reviewed and approved by the user.",
+    "approved": "User reviewed and explicitly approved the plan. Implementation may begin.",
+    "null": "Passing features grandfathered before this rule was introduced."
+  },
+  "status_legend": {
+    "not_started": "Work has not begun.",
+    "in_progress": "The feature is the current active task.",
+    "blocked": "Work cannot continue until a documented blocker is resolved.",
+    "passing": "Required verification has passed and evidence is recorded."
+  },
+  "features": [
+    {
+      "id": "frq-01-channel-order-control",
+      "title": "FRQ-01 Control TV channel order and essentials",
+      "status": "passing",
+      "type": "feature",
+      "plan": "docs/plans/frq-01-channel-order-control.md",
+      "plan_status": "approved",
+      "summary": "TV channel order is fixed in code: orderChannels() sorts at runtime by guide, favourites, stream health and then title, and ESSENTIAL_BRANDS decides at sync time which channels are 'essential'. Make the order and the essentials set deliberate and easy to change.",
+      "summary_of_intent": "User: 'Order: edit orderChannels() for runtime order, or ESSENTIAL_BRANDS for what counts as essential'",
+      "scope": [
+        "app/public/media.ts — orderChannels() runtime sort",
+        "app/public/entry.tsx — orderChannels call sites",
+        "scripts/iptv-parse.mjs — ESSENTIAL_BRANDS and the toItems() snapshot sort",
+        "test/media.test.js — ordering tiers"
+      ],
+      "verification": {
+        "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24); new ordering tests in test/media.test.js",
+        "browser": "Chrome via Playwright against pnpm run dev: ?scope=watch grid opens BBC One Scotland · BBC News South Asia · BBC News Asia Pacific · ITV2 · ITV3 · ITV4 · Channel 4 · Channel 5 · E4 · More4 · 5USA · Sky News Weather · GB News (config pin order, offline pinned kept), then essentials StarPlus · CNBC UK · DAZN Combat. watch 144 / listen 29 / all 173 cards, no duplicates, no console errors. Screenshot docs/screenshots/frq-01-watch-order.png.",
+        "regression": "Radio order compared against main's orderChannels on public/catalogue.json (with and without listings): identical, 29 items."
+      },
+      "next_steps": [
+        "Merge with PR."
+      ],
+      "depends_on": [
+        "frq-02-channel-config"
+      ]
+    },
+    {
+      "id": "frq-02-channel-config",
+      "title": "FRQ-02 Channel config file to pin, hide and add TV channels",
+      "status": "passing",
+      "type": "feature",
+      "plan": "docs/plans/frq-02-channel-config.md",
+      "plan_status": "approved",
+      "summary": "A committed config (e.g. scripts/iptv-config.json) applied during sync:iptv. It has a pinned list of ids in display order, a hide list of ids, and an add list of known-good streams iptv-org lacks or filters out. Gives manual control over the catalogue without editing parser code.",
+      "summary_of_intent": "User: 'can i control the order and get rid of some' — chose 'Channel config (pin/hide/add)' when asked which IPTV problems to add to the feature list.",
+      "scope": [
+        "scripts/sync-iptv.mjs — load and apply config",
+        "scripts/iptv-parse.mjs — pin/hide/add in toItems()",
+        "scripts/iptv-config.json — new",
+        "test/ — config application tests",
+        "docs/iptv.md — document the config",
+        "app/public/tv-catalogue.js — pass through `pin`"
+      ],
+      "verification": {
+        "check": "pnpm run check — 56/56 tests, typecheck and lint clean (2026-10-24); 8 new tests in test/iptv-config.test.js",
+        "sync": "pnpm sync:iptv — 144 channels, 13 pinned/0 hidden/0 added; seed pin ids ITV1.uk and SkyNews.uk were flagged as unmatched and corrected; pnpm sync:iptv --check then passed twice",
+        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels: with hide:[StarPlus.uk] and one add entry, StarPlus absent from grid and search, added channel rendered, health 'ok' and played (video readyState 4, 6.6s elapsed), no console errors. Screenshot docs/screenshots/frq-02-config-added-playing.png. Temporary config reverted."
+      },
+      "next_steps": [
+        "Merge with PR. Pinned positions are in iptv.json but not yet reflected in UI order — that is frq-01."
+      ]
+    }
+  ]
+}

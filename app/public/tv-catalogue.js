@@ -15,6 +15,7 @@ export const MAX_ITEMS = 20000
  * @property {string[]} labels
  * @property {string|null} broadcaster
  * @property {boolean} essential
+ * @property {number|null} pin position from scripts/iptv-config.json, or null
  */
 
 /**
@@ -43,6 +44,7 @@ export function validateTvCatalogue(data) {
       labels,
       broadcaster: typeof item.broadcaster === 'string' && item.broadcaster ? item.broadcaster : null,
       essential: item.essential === true,
+      pin: Number.isInteger(item.pin) && item.pin >= 0 ? item.pin : null,
       countryCode: item.countryCode ?? null,
       logoUrl: item.logoUrl ?? null,
       quality: typeof item.quality === 'string' ? item.quality : null,

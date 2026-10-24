@@ -27,6 +27,10 @@ export type MediaItem = {
   hasGuide: boolean
   /** Whether the stream was reachable and CORS-open as of the last sync. */
   health?: 'ok' | 'cors' | 'offline' | 'unknown'
+  /** Position in scripts/iptv-config.json `pin`, if the channel is pinned. */
+  pin?: number
+  /** Best stream for an ESSENTIAL_BRANDS brand. */
+  essential?: boolean
 }
 
 const PALETTE = ['#c5e762', '#cfa3e9', '#f2c14e', '#7ad0c5', '#e88f6b', '#8fa9e8', '#e07b9a', '#9fd8a0']
@@ -99,6 +103,8 @@ export function fromWatch(item: any, programmeIds: Set<string>): MediaItem {
     rawId: item.id,
     hasGuide: Boolean(item.epgId) && programmeIds.has(`watch:${item.id}`),
     health: item.health ?? 'unknown',
+    pin: Number.isInteger(item.pin) && item.pin >= 0 ? item.pin : undefined,
+    essential: item.essential === true,
   }
 }
 
@@ -175,14 +181,24 @@ export function healthWarning(item: MediaItem): string | null {
 }
 
 /**
- * Playable-first ordering: channels with a schedule that also play lead, then
- * favourites, then the rest — with known-dead links pushed to the end.
+ * Channel order, first key wins:
+ * 1. channels with listings (callers that split rows by guide see no effect)
+ * 2. pinned, in scripts/iptv-config.json `pin` order — kept even when offline,
+ *    because pinning is a deliberate choice and the card already warns
+ * 3. essentials (ESSENTIAL_BRANDS in scripts/iptv-parse.mjs)
+ * 4. stream health from the last sync, so dead links sink
+ * 5. title
+ * Radio rows carry no pin, essential flag or health, so they sort by 1 and 5.
+ * Favourites are not a key: the UI gives them their own row.
  */
-export function orderChannels(items: MediaItem[], favourites: string[] = []) {
+export function orderChannels(items: MediaItem[]) {
+  const pinned = (item: MediaItem) => item.pin ?? Infinity
+  const health = (item: MediaItem) => item.pin === undefined ? HEALTH_RANK[item.health ?? 'unknown'] ?? 1 : 0
   return [...items].sort((a, b) =>
     Number(b.hasGuide) - Number(a.hasGuide) ||
-    Number(favourites.includes(b.id)) - Number(favourites.includes(a.id)) ||
-    (HEALTH_RANK[a.health ?? 'unknown'] ?? 1) - (HEALTH_RANK[b.health ?? 'unknown'] ?? 1) ||
+    pinned(a) - pinned(b) ||
+    Number(Boolean(b.essential)) - Number(Boolean(a.essential)) ||
+    health(a) - health(b) ||
     a.title.localeCompare(b.title, 'en'))
 }
 

@@ -1,0 +1,18 @@
+version = 1
+name = "Frequency"
+
+[setup]
+script = '''
+cd "$CODEX_WORKTREE_PATH"
+pnpm install
+'''
+
+[[actions]]
+name = "Dev"
+icon = "tool"
+command = "pnpm run dev"
+
+[[actions]]
+name = "Check"
+icon = "tool"
+command = "pnpm run check"
