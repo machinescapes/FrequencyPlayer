@@ -35,3 +35,4 @@
 - frq-04-freetv-catalogue added (in_progress, plan approved).
 - Full pnpm sync:tv: 86 countries, 714 KB, Free-TV@05a6685, ~2 min; malformed rows skipped BA1 HU1 JP6 RS2.
 - frq-04 → passing: check 50/50, build ok, full sync 86 countries, Chrome desktop+phone verified.
+- PR #12 opened (issue #11), branch feat/frq-04-freetv pushed; BBC-on-VPN check handed to user.
