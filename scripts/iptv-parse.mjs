@@ -144,7 +144,10 @@ export const BROADCASTERS = [
 ]
 
 /**
- * Curated "essentials": one card per household-name brand. Patterns are matched
+ * Curated "essentials": one card per household-name brand. Essentials are the
+ * second tier of the app's channel order (orderChannels in app/public/media.ts),
+ * after channels pinned in scripts/iptv-config.json — use `pin` there for exact
+ * positions; edit this list to change which brands count as essential. Patterns are matched
  * against the channel id, and the best stream per brand is kept — so BBC One,
  * Bloomberg and Red Bull each appear once rather than once per regional feed.
  */

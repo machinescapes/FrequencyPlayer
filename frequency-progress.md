@@ -23,3 +23,8 @@
 - `scripts/iptv-config.json` (pin/hide/add) applied by `applyConfig()` in `scripts/iptv-parse.mjs` before the health probe; `validateConfig()` rejects bad entries; unmatched ids warn.
 - Verified: `pnpm run check` 56/56; `pnpm sync:iptv` then `--check` clean; browser (Chrome) hide + add + playback confirmed, screenshot `docs/screenshots/frq-02-config-added-playing.png`.
 - `pnpm sync:iptv --check` compares live health probes, so it can fail on upstream drift rather than code changes.
+
+### Session 2026-10-24 (cont.): frq-01 channel order
+
+- `orderChannels()` tiers: listings → config `pin` → essentials → health → title; `fromWatch` carries `pin`/`essential`; unused favourites param dropped. Documented in `docs/iptv.md` "Channel order".
+- Verified: `pnpm run check` 60/60; Chrome — Watch grid follows pin list then essentials; scopes have no duplicates; radio order identical to main. Screenshot `docs/screenshots/frq-01-watch-order.png`.

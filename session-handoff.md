@@ -30,3 +30,4 @@
 - Focused debug command: `node --test test/iptv-parse.test.js`
 - frq-02-channel-config → in_progress on feat/frq-02-channel-config (stacked on chore/agent-harness; PR #10 merge blocked pending user approval).
 - frq-02 verified: pnpm run check 56/56; pnpm sync:iptv + --check clean; Chrome hide/add/playback ok → passing.
+- frq-01 verified: pnpm run check 60/60; Chrome watch order + radio-order parity with main → passing.

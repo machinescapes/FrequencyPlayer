@@ -25,7 +25,7 @@
     {
       "id": "frq-01-channel-order-control",
       "title": "FRQ-01 Control TV channel order and essentials",
-      "status": "in_progress",
+      "status": "passing",
       "type": "feature",
       "plan": "docs/plans/frq-01-channel-order-control.md",
       "plan_status": "approved",
@@ -38,13 +38,12 @@
         "test/media.test.js — ordering tiers"
       ],
       "verification": {
-        "check": "not_run",
-        "browser": "not_run"
+        "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24); new ordering tests in test/media.test.js",
+        "browser": "Chrome via Playwright against pnpm run dev: ?scope=watch grid opens BBC One Scotland · BBC News South Asia · BBC News Asia Pacific · ITV2 · ITV3 · ITV4 · Channel 4 · Channel 5 · E4 · More4 · 5USA · Sky News Weather · GB News (config pin order, offline pinned kept), then essentials StarPlus · CNBC UK · DAZN Combat. watch 144 / listen 29 / all 173 cards, no duplicates, no console errors. Screenshot docs/screenshots/frq-01-watch-order.png.",
+        "regression": "Radio order compared against main's orderChannels on public/catalogue.json (with and without listings): identical, 29 items."
       },
       "next_steps": [
-        "Read the implementation plan at docs/plans/frq-01-channel-order-control.md before starting work.",
-        "Implement after frq-02 (or on the same branch); missing `pin` is treated as unpinned.",
-        "Verify ordering in the browser at ?scope=watch&view=channels and that radio order is unchanged."
+        "Merge with PR."
       ],
       "depends_on": [
         "frq-02-channel-config"

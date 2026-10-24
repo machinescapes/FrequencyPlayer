@@ -410,9 +410,9 @@ function App(handle: Handle) {
     const media = allMedia()
     const scoped = filterMedia(media, { scope, country, category, broadcaster })
     const favouritesList = media.filter(item => favourites.includes(item.id) && inScope(item, scope))
-    // Listings first (the useful subset), then favourites, then alphabetical.
-    // Each card appears exactly once: favourites, then the listings-first
-    // On now row, then everything else in the grid, then on demand.
+    // Each card appears exactly once: favourites, then the On now row (channels
+    // with listings), then everything else in the grid, then on demand. Within
+    // each row orderChannels puts pinned channels first, then essentials.
     const live = scoped.filter(item => item.kind === 'live' && !favourites.includes(item.id))
     const onNow = orderChannels(live.filter(item => item.hasGuide))
     const listingsFirst = orderChannels(live.filter(item => !item.hasGuide))

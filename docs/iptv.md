@@ -93,6 +93,22 @@ then run `pnpm sync:iptv` and commit both files.
 - A malformed config stops the sync. Ids that match nothing are printed as
   warnings — usually a typo, or a channel iptv-org dropped.
 
+## Channel order
+
+Within each row of the Watch grid (favourites have their own row, and channels
+with listings sit in "On now"), channels are ordered by `orderChannels()` in
+`app/public/media.ts`:
+
+| Tier | Controlled by |
+| --- | --- |
+| 1. Pinned, in list order (kept even if offline) | `pin` in `scripts/iptv-config.json` |
+| 2. Essentials | `ESSENTIAL_BRANDS` in `scripts/iptv-parse.mjs` |
+| 3. Stream health: ok → unknown → cors → offline | the sync's health probe |
+| 4. Title | — |
+
+Changing tiers 1–2 needs `pnpm sync:iptv`; the app reads the result from
+`public/iptv.json`.
+
 ## Known limitations
 
 - Roughly a fifth of catalogue links are plain `http://` and are excluded.
