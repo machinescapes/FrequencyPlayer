@@ -114,7 +114,9 @@ export function parseList(markdown, { code }) {
  * Regional channels map to one representative region.
  */
 export const EPG_ALIASES = {
-  'BBCOne.uk': 'BBCOneLondonHD.uk',
+  // Free-TV's BBC One is the Yorkshire feed; BBC One London is added in
+  // scripts/tv-config.json with its own guide id.
+  'BBCOne.uk': 'BBCOneYorkshire.uk',
   'BBCTwo.uk': 'BBCTwoHD.uk',
   'BBCThree.uk': 'BBCThreeHD.uk',
   'BBCFour.uk': 'BBCFourHD.uk',

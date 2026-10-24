@@ -12,7 +12,12 @@ test('the committed UK catalogue validates and keeps Free-TV order',async()=>{
   assert.ok(items.length>30&&items.length<=MAX_ITEMS)
   assert.equal(data.source.name,'Free-TV/IPTV')
   assert.equal(items[0].title,'BBC One','uk.md starts with BBC One')
-  assert.deepEqual(items.map(item=>item.order),[...items.map(item=>item.order)].sort((a,b)=>a-b))
+  // Pinned channels (scripts/tv-config.json) lead; the rest keep Free-TV order.
+  const pinned=items.filter(item=>item.pin!==null), rest=items.filter(item=>item.pin===null)
+  assert.deepEqual(items.slice(0,pinned.length),pinned)
+  assert.deepEqual(pinned.map(item=>item.pin),[...pinned.map(item=>item.pin)].sort((a,b)=>a-b))
+  assert.deepEqual(rest.map(item=>item.order),[...rest.map(item=>item.order)].sort((a,b)=>a-b))
+  assert.ok(items.some(item=>item.id==='GB:bbc-one-london'&&item.source==='config'),'BBC One London is added from the config')
   for(const item of items){
     assert.equal(item.countryCode,'GB')
     if(item.playback==='hls'){
