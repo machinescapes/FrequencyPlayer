@@ -1,4 +1,4 @@
-import { safeLogoUrl, safeUrl, loadSaved, save } from './catalogue.js'
+import { safeLogoUrl, safeUrl } from './catalogue.js'
 
 export const MAX_ITEMS = 20000
 
@@ -6,107 +6,128 @@ export const MAX_ITEMS = 20000
  * @typedef {object} Channel
  * @property {string} id
  * @property {string} title
- * @property {string} category
+ * @property {string} category Free-TV section, e.g. "Freeview"
  * @property {string[]} tags
- * @property {string|null} countryCode
+ * @property {string|null} countryCode ISO 3166-1 (the UK is `GB` in data)
  * @property {string|null} logoUrl
- * @property {string} streamUrl
+ * @property {string} url what opens in a new tab
+ * @property {string} [streamUrl] HTTPS HLS, only when it can play inline
+ * @property {'hls'|'external'} playback
  * @property {string|null} quality
- * @property {string[]} labels
- * @property {string|null} broadcaster
- * @property {boolean} essential
- * @property {number|null} pin position from scripts/iptv-config.json, or null
+ * @property {string[]} labels e.g. "Geo-blocked", "YouTube"
+ * @property {number} order position in the Free-TV list
+ * @property {number|null} pin position from scripts/tv-config.json, or null
+ * @property {string|null} epgId
+ * @property {string} [health]
  */
 
+/** Plain http or https: external rows may open an http stream in a new tab. */
+function openableUrl(value) {
+  try { const url = new URL(value); return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : null } catch { return null }
+}
+
 /**
- * Validate an iptv-org snapshot. Deliberately separate from validateCatalogue:
- * TV rows must be playable (HTTPS HLS) and carry a category, and the radio
- * app's 500-item cap stays where it is.
+ * Validate one country's Free-TV catalogue (public/tv/<CC>.json). Deliberately
+ * separate from validateCatalogue: inline TV must be HTTPS HLS, and anything
+ * else is only ever opened in a new tab, never fed to the player.
  * @param {any} data
  * @returns {Channel[]}
  */
 export function validateTvCatalogue(data) {
   if (data?.version !== 1 || !Array.isArray(data.items) || data.items.length > MAX_ITEMS) throw new Error('Use a version 1 TV catalogue with up to 20000 channels.')
   const ids = new Set()
-  return data.items.map(item => {
+  return data.items.map((item, index) => {
     if (!item || typeof item.id !== 'string' || !item.id || ids.has(item.id)) throw new Error('Each channel needs a unique id.')
     if (typeof item.title !== 'string' || !item.title.trim()) throw new Error('Each channel needs a title.')
-    if (!safeUrl(item.streamUrl) || !/\.m3u8(?:[?#]|$)/i.test(item.streamUrl)) throw new Error('Channel streams must be HTTPS HLS playlists.')
+    const playback = item.playback === 'external' ? 'external' : 'hls'
+    if (playback === 'hls' && (!safeUrl(item.streamUrl) || !/\.m3u8(?:[?#]|$)/i.test(item.streamUrl))) throw new Error('Inline channel streams must be HTTPS HLS playlists.')
+    const url = playback === 'hls' ? item.streamUrl : openableUrl(item.url)
+    if (!url) throw new Error('External channels need an http(s) link.')
     if (item.logoUrl !== undefined && item.logoUrl !== null && !safeLogoUrl(item.logoUrl)) throw new Error('Channel logos must be HTTPS or an app-relative image path.')
     if (item.countryCode !== undefined && item.countryCode !== null && !/^[A-Z]{2}$/.test(item.countryCode)) throw new Error('Country code must be two uppercase letters.')
     ids.add(item.id)
-    const labels = Array.isArray(item.labels) ? item.labels.filter(label => typeof label === 'string') : []
+    const rest = { ...item }
+    delete rest.streamUrl
     return {
-      ...item,
+      ...rest,
       title: item.title.trim(),
       category: typeof item.category === 'string' && item.category.trim() ? item.category : 'General',
       tags: Array.isArray(item.tags) ? item.tags.filter(tag => typeof tag === 'string') : [],
-      labels,
-      broadcaster: typeof item.broadcaster === 'string' && item.broadcaster ? item.broadcaster : null,
-      essential: item.essential === true,
+      labels: Array.isArray(item.labels) ? item.labels.filter(label => typeof label === 'string') : [],
+      url,
+      // An external row never carries a streamUrl, so the player cannot be
+      // handed an http:// or YouTube URL by mistake.
+      ...(playback === 'hls' ? { streamUrl: item.streamUrl } : {}),
+      playback,
+      order: Number.isInteger(item.order) ? item.order : index,
       pin: Number.isInteger(item.pin) && item.pin >= 0 ? item.pin : null,
       countryCode: item.countryCode ?? null,
       logoUrl: item.logoUrl ?? null,
       quality: typeof item.quality === 'string' ? item.quality : null,
+      epgId: typeof item.epgId === 'string' && item.epgId ? item.epgId : null,
     }
   })
 }
 
 /**
- * @param {{ fetchJson: () => Promise<any>, cached: any }} options
- * @returns {Promise<{ items: Channel[], saved: boolean }>}
+ * @typedef {object} TvCountry
+ * @property {string} code ISO 3166-1
+ * @property {string} name menu name ("UK", "France")
+ * @property {number} channels
  */
-export function loadTvCatalogue({ fetchJson, cached }) {
-  return fetchJson().then(data => {
-    const items = validateTvCatalogue(data)
-    save('frequency.tv.catalogue', data)
-    return { items, saved: true }
-  }).catch(() => {
-    try {
-      return { items: validateTvCatalogue(cached), saved: false }
-    } catch {
-      throw new Error('Channel list unavailable.')
-    }
+
+/**
+ * Validate public/tv/index.json, the list of countries with a catalogue.
+ * @param {any} data
+ * @returns {TvCountry[]}
+ */
+export function validateTvIndex(data) {
+  if (data?.version !== 1 || !Array.isArray(data.countries)) throw new Error('Use a version 1 TV country index.')
+  const codes = new Set()
+  return data.countries.map(country => {
+    if (!country || typeof country.code !== 'string' || !/^[A-Z]{2}$/.test(country.code) || codes.has(country.code)) throw new Error('Each country needs a unique two-letter code.')
+    if (typeof country.name !== 'string' || !country.name.trim()) throw new Error('Each country needs a name.')
+    codes.add(country.code)
+    return { code: country.code, name: country.name.trim(), channels: Number.isInteger(country.channels) ? country.channels : 0 }
   })
 }
 
-/** @returns {any} */
-export function readTvCache() {
-  return loadSaved('frequency.tv.catalogue', { version: 1, items: [] })
-}
-
-const PALETTE = ['#c5e762', '#cfa3e9', '#f2c14e', '#7ad0c5', '#e88f6b', '#8fa9e8', '#e07b9a', '#9fd8a0']
-
 /**
- * Stable accent per category, so the grid reads as grouped without extra chrome.
- * @param {string} category
- * @returns {string}
+ * The code shown in menus and URLs. The UK is "UK" to people, even though
+ * ISO 3166-1 (and every data file) calls it GB.
+ * @param {string} code
  */
-export function categoryColor(category) {
-  let hash = 0
-  for (const character of category) hash = (hash * 31 + character.charCodeAt(0)) | 0
-  return PALETTE[Math.abs(hash) % PALETTE.length]
+export function displayCode(code) {
+  return code === 'GB' ? 'UK' : code
 }
 
 /**
- * @param {Channel[]} items
- * @param {{ query?: string, category?: string, country?: string, broadcaster?: string, essentials?: boolean, onlyFavourites?: boolean, favourites?: string[] }} [filters]
- * @returns {Channel[]}
+ * Accept what a person might type or bookmark (`UK`, `uk`, `GB`) and return
+ * the data code.
+ * @param {string|null|undefined} value
+ * @returns {string|null}
  */
-export function searchChannels(items, { query = '', category = 'All', country = 'All', broadcaster = 'All', essentials = false, onlyFavourites = false, favourites = [] } = {}) {
-  const needle = query.trim().toLowerCase()
-  return items
-    .filter(item => !needle || `${item.title} ${item.category} ${item.broadcaster ?? ''} ${item.tags.join(' ')}`.toLowerCase().includes(needle))
-    .filter(item => category === 'All' || item.category === category)
-    .filter(item => country === 'All' || item.countryCode === country)
-    .filter(item => broadcaster === 'All' || item.broadcaster === broadcaster)
-    .filter(item => !essentials || item.essential)
-    .filter(item => !onlyFavourites || favourites.includes(item.id))
+export function parseCountryParam(value) {
+  if (typeof value !== 'string') return null
+  const code = value.trim().toUpperCase()
+  if (code === 'UK') return 'GB'
+  return /^[A-Z]{2}$/.test(code) ? code : null
 }
 
-/** Broadcaster families present in the catalogue, most channels first. */
-export function broadcasterFacets(items) {
-  const counts = new Map()
-  for (const item of items) if (item.broadcaster) counts.set(item.broadcaster, (counts.get(item.broadcaster) ?? 0) + 1)
-  return [...counts].sort((a, b) => b[1] - a[1])
+/**
+ * The country as it reads in a sentence: "the UK", "the USA", "France".
+ * @param {{ code: string, name: string }} country
+ */
+export function countryInSentence(country) {
+  return ['GB', 'US', 'AE', 'NL', 'CZ', 'DO'].includes(country.code) ? `the ${country.name}` : country.name
+}
+
+/**
+ * Regional-indicator flag emoji for an ISO code (GB → 🇬🇧). XK (Kosovo) has
+ * no standard flag and falls back to the letters.
+ * @param {string} code
+ */
+export function flagEmoji(code) {
+  if (!/^[A-Z]{2}$/.test(code) || code === 'XK') return ''
+  return String.fromCodePoint(...[...code].map(letter => 0x1F1E6 + letter.charCodeAt(0) - 65))
 }

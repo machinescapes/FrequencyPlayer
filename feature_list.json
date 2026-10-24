@@ -47,7 +47,8 @@
       ],
       "depends_on": [
         "frq-02-channel-config"
-      ]
+      ],
+      "superseded_by": "frq-04-freetv-catalogue"
     },
     {
       "id": "frq-02-channel-config",
@@ -73,7 +74,8 @@
       },
       "next_steps": [
         "Merge with PR. Pinned positions are in iptv.json but not yet reflected in UI order — that is frq-01."
-      ]
+      ],
+      "superseded_by": "frq-04-freetv-catalogue"
     },
     {
       "id": "frq-03-video-player-ux",
@@ -96,6 +98,41 @@
       "next_steps": [
         "Merge with PR.",
         "Unverified: real iOS Safari (webkitEnterFullscreen fallback, orientation lock) — needs a device check."
+      ]
+    },
+    {
+      "id": "frq-04-freetv-catalogue",
+      "title": "FRQ-04 Free-TV/IPTV catalogue, all countries, country selector and VPN note",
+      "status": "passing",
+      "type": "feature",
+      "plan": "docs/plans/frq-04-freetv-catalogue.md",
+      "plan_status": "approved",
+      "summary": "Replace iptv-org with the hand-curated Free-TV/IPTV markdown lists for every country, keeping file order and logos. A weekly sync writes per-country JSON. The top bar gets a subtle country selector (UK shown as 'UK'), and every page notes that a VPN for that country should be used. http and YouTube rows open externally; geo-blocked rows are kept.",
+      "summary_of_intent": "User: 'https://github.com/Free-TV/IPTV is a much better list. i want to use this instead of the current one for tv ... plan to include all the countries listed and all the channels in there that have a link (not an x) ... sync process ... scheduled weekly ... subtle country selector at the top. each page should say a vpn for the country should be used ... logos ... preserve the order in the files.' Also: 'geo blocking is fine as i use vpn' and 'it should be \"UK\" and not \"GB\" when referring to the UK for menus.'",
+      "scope": [
+        "scripts/freetv-parse.mjs",
+        "scripts/sync-tv.mjs",
+        "scripts/tv-config.json",
+        "scripts/sync-epg.mjs",
+        "public/tv/",
+        "app/public/tv-catalogue.js",
+        "app/public/media.ts",
+        "app/public/entry.tsx",
+        "public/styles.css",
+        "public/sw.js",
+        ".github/workflows/tv-sync.yml",
+        "test/",
+        "docs/tv-sources.md"
+      ],
+      "verification": {
+        "check": "pnpm run check — 50/50 tests (new test/freetv-parse.test.js, rewritten tv-catalogue/media tests), typecheck and lint clean; pnpm run build ok, dist/tv has 87 files (2026-10-24)",
+        "sync": "pnpm sync:tv — 86 countries, 714 KB, Free-TV@05a6685, ~2 min. UK: 44 channels (Freeview/Freesat/Sky, radio skipped), 40 with guide. sync --check re-probes live streams, so a stream that flips between cors and ok (seen on Japan) fails it; this is upstream drift, not a code change.",
+        "browser": "Chrome via Playwright on pnpm run dev: UK grid opens BBC One · BBC Two · ITV 1 · STV · S4C … in uk.md order, 44 logos, 13 Geo-blocked tags; picker shows '🇬🇧 UK', URL ?country=UK, ?country=GB rewrites to UK; VPN note 'Use a VPN set to the UK'; ITV 1 (http) calls window.open with its URL; BBC News and Bloomberg play inline (readyState 4); switching to France changes URL, cards and VPN note, and survives reload; Listen has no picker or note; UK Guide shows 40 TV rows and 448 programme blocks once public/epg exists; phone 390px no overflow. No console errors. Screenshots docs/screenshots/frq-04-*.png.",
+        "not_verified": "Geo-blocked BBC playback: this machine is not on a UK connection (segments return 403); needs a check on a UK VPN."
+      },
+      "next_steps": [
+        "Open PR. Check BBC playback on a UK VPN.",
+        "Optional: Free-TV's 'Radio' sections for non-UK countries could feed Listen later."
       ]
     }
   ]

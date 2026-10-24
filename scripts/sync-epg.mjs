@@ -65,7 +65,8 @@ export async function syncSchedule({ output = 'public/epg/freeview.json', fallba
     if (xml.length > 80000000) throw Error('Feed exceeds size limit')
     const { items } = JSON.parse(await readFile('public/catalogue.json', 'utf8'))
     // The TV snapshot is optional: a radio-only checkout still builds.
-    const tvItems = JSON.parse(await readFile('public/iptv.json', 'utf8').catch(() => '{"items":[]}')).items ?? []
+    // Only UK TV channels share the Freeview guide.
+    const tvItems = JSON.parse(await readFile('public/tv/GB.json', 'utf8').catch(() => '{"items":[]}')).items ?? []
     result = extractSchedule(xml, items, Date.now(), tvItems)
     const tvCount = new Set(result.programmes.filter(p => p.stationId.startsWith('watch:')).map(p => p.stationId)).size
     console.log(`Extracted ${result.programmes.length} programmes (${tvCount} TV channels)`)

@@ -1,4 +1,4 @@
-name: Sync IPTV catalogue
+name: Sync TV catalogue
 
 on:
   schedule:
@@ -20,16 +20,18 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Rebuild public/iptv.json from iptv-org
-        run: pnpm run sync:iptv
+      - name: Rebuild public/tv from Free-TV/IPTV
+        run: pnpm sync:tv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit if the catalogue changed
         run: |
-          if git diff --quiet -- public/iptv.json; then
+          git add -A public/tv
+          if git diff --cached --quiet; then
             echo "Catalogue unchanged."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/iptv.json
-          git commit -m "Refresh IPTV catalogue from iptv-org"
+          git commit -m "Refresh TV catalogue from Free-TV/IPTV"
           git push

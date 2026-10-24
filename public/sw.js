@@ -1,5 +1,5 @@
 const CACHE='frequency-shell-v__BUILD_VERSION__'
-const CORE=['./','./styles.css','./catalogue.json','./iptv.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./offline-assets.json']
+const CORE=['./','./styles.css','./catalogue.json','./tv/index.json','./tv/GB.json','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png','./offline-assets.json']
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(CACHE)
   // Fetch the asset manifest but don't let a missing or invalid response block
