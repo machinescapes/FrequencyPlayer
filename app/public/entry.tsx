@@ -1,8 +1,8 @@
 import { createRoot, on, ref, type Handle } from 'remix/component'
 import { validateCatalogue, loadSaved, save, safeUrl, parseFeed } from './catalogue.js'
-import { validateTvCatalogue } from './tv-catalogue.js'
+import { validateTvCatalogue, validateTvIndex, displayCode, parseCountryParam, countryInSentence, flagEmoji, type TvCountry } from './tv-catalogue.js'
 import {
-  filterMedia, mergeMedia, orderChannels, guideSections, countryOptions,
+  filterMedia, mergeMedia, orderChannels, guideSections,
   categoryOptions, migrateFavourites, guideStationId, healthWarning, inScope,
   type MediaItem, type Scope,
 } from './media.ts'
@@ -57,24 +57,32 @@ const SCOPES: { id: Scope; label: string }[] = [
   { id: 'all', label: 'All' },
 ]
 
-function readHash(): { scope: Scope | null; view: View | null } {
+function readHash(): { scope: Scope | null; view: View | null; country: string | null } {
   const params = new URLSearchParams(location.search)
   const scope = params.get('scope')
   const view = params.get('view')
   return {
     scope: scope === 'watch' || scope === 'listen' || scope === 'all' ? scope : null,
     view: view === 'guide' ? 'Guide' : view === 'channels' ? 'Channels' : null,
+    country: parseCountryParam(params.get('country')),
   }
 }
+
+// Per-country TV catalogues are cached for offline use; keep the last few so
+// browsing many countries cannot fill localStorage.
+const TV_CACHE_LIMIT = 3
 
 function App(handle: Handle) {
   const initial = readHash()
   let radioItems: CatalogueItem[] = [], custom = loadSaved('frequency.custom', []) as CatalogueItem[], tvItems: TvRow[] = []
   let tvUnavailable = false
+  let tvCountries: TvCountry[] = []
+  let tvCountry = initial.country ?? parseCountryParam(loadSaved('frequency.tv.country', 'GB') as string) ?? 'GB'
+  let tvRequest: AbortController | undefined
   let favourites = migrateFavourites(loadSaved, save)
   let scope: Scope = initial.scope ?? (loadSaved('frequency.scope', 'all') as Scope)
   let view: View = initial.view ?? (loadSaved('frequency.view', 'Channels') as View)
-  let query = '', country = 'All', category = 'All', broadcaster = 'All'
+  let query = '', category = 'All', broadcaster = 'All'
   let paletteOpen = false
   let online = navigator.onLine, notice = '', updateAvailable = false
   let selected: MediaItem | null = null
@@ -133,19 +141,60 @@ function App(handle: Handle) {
   function persistContext() {
     save('frequency.scope', scope)
     save('frequency.view', view)
+    save('frequency.tv.country', tvCountry)
     const params = new URLSearchParams(location.search)
     params.set('scope', scope)
     params.set('view', view === 'Guide' ? 'guide' : 'channels')
+    // Radio is UK-only, so the country only belongs in the URL while TV shows.
+    if (scope === 'listen') params.delete('country')
+    else params.set('country', displayCode(tvCountry))
     history.replaceState(null, '', `${location.pathname}?${params}`)
   }
 
   function setScope(next: Scope) {
     scope = next
-    country = 'All'; category = 'All'; broadcaster = 'All'
+    category = 'All'; broadcaster = 'All'
     // A scope with no listings must not leave Guide selected.
     if (view === 'Guide' && !currentMedia().some(item => item.hasGuide)) view = 'Channels'
     persistContext()
     update()
+  }
+
+  function tvCountryInfo(code = tvCountry): TvCountry {
+    return tvCountries.find(country => country.code === code) ?? { code, name: displayCode(code), channels: 0 }
+  }
+
+  /** Load one country's channels, falling back to the copy saved offline. */
+  function loadTvCountry(code: string) {
+    tvRequest?.abort()
+    const request = new AbortController()
+    tvRequest = request
+    handle.signal.addEventListener('abort', () => request.abort(), { once: true })
+    const key = `frequency.tv.${code}`
+    return fetch(`${APP_BASE_PATH}tv/${code}.json`, { signal: request.signal })
+      .then(response => { if (!response.ok) throw Error(); return response.json() })
+      .then(data => {
+        if (request !== tvRequest) return
+        tvItems = validateTvCatalogue(data); tvUnavailable = false
+        save(key, data)
+        const recent = [code, ...(loadSaved('frequency.tv.recent', []) as string[]).filter(saved => saved !== code)]
+        for (const stale of recent.slice(TV_CACHE_LIMIT)) { try { localStorage.removeItem(`frequency.tv.${stale}`) } catch { /* storage unavailable */ } }
+        save('frequency.tv.recent', recent.slice(0, TV_CACHE_LIMIT))
+      })
+      .catch(() => {
+        if (request !== tvRequest) return
+        try { tvItems = validateTvCatalogue(loadSaved(key, { version: 1, items: [] })); tvUnavailable = !tvItems.length }
+        catch { tvItems = []; tvUnavailable = true }
+      })
+  }
+
+  function setTvCountry(code: string) {
+    if (code === tvCountry) return
+    tvCountry = code; category = 'All'
+    // The new country has no listings unless it is the UK.
+    if (view === 'Guide' && code !== 'GB' && scope === 'watch') view = 'Channels'
+    persistContext()
+    void loadTvCountry(code).then(update)
   }
 
   function setView(next: View) {
@@ -193,7 +242,9 @@ function App(handle: Handle) {
       const fallback = media.find(item => item.source === 'listen' && item.rawId === 'bbc6')
       if (fallback) favourites = [fallback.id]
     }
-    favourites = normalizeFavourites(favourites, media.map(item => item.id))
+    // Only one TV country is loaded at a time; keep favourites from the others.
+    const otherCountries = favourites.filter(id => id.startsWith('watch:') && !id.startsWith(`watch:${tvCountry}:`))
+    favourites = [...normalizeFavourites(favourites, media.map(item => item.id)), ...otherCountries]
     save('frequency.favourites.v2', favourites)
     const saved = loadSaved('frequency.selected', '') as string
     selected = media.find(item => item.id === saved) ?? media.find(item => favourites.includes(item.id)) ?? null
@@ -328,15 +379,18 @@ function App(handle: Handle) {
         try { radioItems = validateCatalogue(loadSaved('frequency.catalogue', { version: 1, items: [] })); initializeSelection(); notify('Using your saved catalogue.') }
         catch { notify('Catalogue unavailable. Check catalogue.json.') }
       })
-    // The TV catalogue is small enough (UK-only) to load eagerly alongside radio.
-    fetch(`${APP_BASE_PATH}iptv.json`, { signal: handle.signal })
+    // TV loads one country at a time (public/tv/<CC>.json); the index lists
+    // which countries exist for the selector.
+    fetch(`${APP_BASE_PATH}tv/index.json`, { signal: handle.signal })
       .then(response => { if (!response.ok) throw Error(); return response.json() })
-      .then(data => { tvItems = validateTvCatalogue(data); save('frequency.tv.catalogue', data) })
-      .catch(() => {
-        try { tvItems = validateTvCatalogue(loadSaved('frequency.tv.catalogue', { version: 1, items: [] })) }
-        catch { tvUnavailable = true }
+      .then(data => { tvCountries = validateTvIndex(data); save('frequency.tv.index', data) })
+      .catch(() => { try { tvCountries = validateTvIndex(loadSaved('frequency.tv.index', { version: 1, countries: [] })) } catch { tvCountries = [] } })
+      .finally(() => {
+        if (tvCountries.length && !tvCountries.some(country => country.code === tvCountry)) tvCountry = 'GB'
+        persistContext()
+        update()
       })
-      .finally(() => { initializeSelection(); update() })
+    loadTvCountry(tvCountry).finally(() => { initializeSelection(); update() })
     if ('serviceWorker' in navigator) navigator.serviceWorker.register(`${APP_BASE_PATH}sw.js`, { scope: APP_BASE_PATH, updateViaCache: 'none' }).then(serviceWorkerRegistration => {
       registration = serviceWorkerRegistration
       let startupCheckInProgress = true
@@ -528,7 +582,8 @@ function App(handle: Handle) {
       <div class="card-info">
         <div>
           <h3>{item.title}</h3>
-          <p>{item.streamUrl ? playLabel : 'Official player ↗'}</p>
+          <p>{item.streamUrl ? playLabel : item.source === 'watch' ? `${item.category} ↗` : 'Official player ↗'}</p>
+          {item.source === 'watch' && item.labels.length ? <span class="channel-tags">{item.labels.map(label => <small key={label} class={'channel-tag' + (label === 'Geo-blocked' ? ' geo' : '')}>{label}</small>)}</span> : null}
           {healthWarning(item) ? <small class="health-note">{healthWarning(item)}</small> : null}
         </div>
         <button class="favourite" aria-label={(favourites.includes(item.id) ? 'Remove favourite ' : 'Favourite ') + item.title} aria-pressed={favourites.includes(item.id)} mix={on('click', () => toggleFavourite(item.id))}>{favourites.includes(item.id) ? '♥' : '♡'}</button>
@@ -543,19 +598,30 @@ function App(handle: Handle) {
     </div>
   }
 
+  /** Compact TV country picker for the top bar; menus call the UK "UK". */
+  function countryPicker() {
+    if (scope === 'listen' || tvCountries.length < 2) return null
+    const current = tvCountryInfo()
+    return <label class="country-picker" title={`TV channels from ${current.name}`}>
+      <span aria-hidden="true">{flagEmoji(current.code)} {displayCode(current.code)}</span>
+      <select aria-label="TV country" value={tvCountry} mix={on('change', event => setTvCountry(event.currentTarget.value))}>
+        {tvCountries.map(country => <option key={country.code} value={country.code}>{flagEmoji(country.code)} {country.name} · {country.channels}</option>)}
+      </select>
+    </label>
+  }
+
+  function vpnNote() {
+    if (scope === 'listen') return null
+    const where = countryInSentence(tvCountryInfo())
+    return <p class="vpn-note" role="note">Many of these channels only stream inside {where}. Use a VPN set to {where}.</p>
+  }
+
   function facetRow() {
-    const media = allMedia()
-    const countries = countryOptions(media)
+    const media = allMedia().filter(item => inScope(item, scope))
     const categories = categoryOptions(media).slice(0, 12)
     const broadcasters = [...new Set(media.filter(item => item.broadcaster).map(item => item.broadcaster!))].sort()
     const showBroadcasters = scope === 'listen'
     return <div class="facet-row">
-      <label class="facet-select">Country
-        <select aria-label="Filter by country" value={country} mix={on('change', event => { country = event.currentTarget.value; update() })}>
-          <option value="All">All countries</option>
-          {countries.map(code => <option key={code} value={code}>{code === 'GB' ? 'United Kingdom' : code}</option>)}
-        </select>
-      </label>
       {showBroadcasters
         ? <div class="collection-filters" role="group" aria-label="Filter by broadcaster">
             {['All', ...broadcasters].map(name => <button key={name} aria-pressed={broadcaster === name} mix={on('click', () => { broadcaster = name; update() })}>{name === 'All' ? 'All broadcasters' : name}</button>)}
@@ -569,7 +635,7 @@ function App(handle: Handle) {
   return () => {
     const playing = playbackState.status === 'playing', loading = playbackState.status === 'connecting'
     const media = allMedia()
-    const scoped = filterMedia(media, { scope, country, category, broadcaster })
+    const scoped = filterMedia(media, { scope, category, broadcaster })
     const favouritesList = media.filter(item => favourites.includes(item.id) && inScope(item, scope))
     // Each card appears exactly once: favourites, then the On now row (channels
     // with listings), then everything else in the grid, then on demand. Within
@@ -603,6 +669,7 @@ function App(handle: Handle) {
           <h1 class="visually-hidden">{scope} · {view}</h1>
           {scopeChips()}
           <div class="topbar-tools">
+            {countryPicker()}
             <button class="search-toggle" aria-label="Search channels and stations" aria-expanded={paletteOpen} mix={on('click', () => paletteOpen ? closePalette() : openPalette())}>⌕</button>
             <button class="collection-tool" aria-label="Manage collection" mix={on('click', () => dialog.showModal())}><span>＋</span><span>Collection</span></button>
             <button class="avatar" aria-label="Change colour theme" mix={on('click', () => { theme = theme === 'moss' ? 'lilac' : 'moss'; document.documentElement.dataset.theme = theme; save('frequency.theme', theme); update() })}>◐</button>
@@ -617,6 +684,7 @@ function App(handle: Handle) {
             </div>
           </div>
 
+          {vpnNote()}
           {notice && !updateAvailable ? <div class="notice" role="status">{notice}<button aria-label="Dismiss notification" mix={on('click', () => { notice = ''; update() })}>×</button></div> : null}
           {selected && playbackState.message ? <div class="playback-feedback" role="status"><p>{playbackState.message}</p><div><button mix={on('click', () => { if (selected) void play(selected) })}>{playbackState.status === 'failed' ? 'Retry' : 'Play'}</button>{destination(selected, selected.url, 'Open stream')}</div></div> : null}
           <div class="schedule-status" role="status">
@@ -675,7 +743,7 @@ function App(handle: Handle) {
               <div class="card-grid">{onDemand.map(card)}</div>
             </section> : null}
 
-            {tvUnavailable && scope !== 'listen' ? <p class="empty-message">TV channels unavailable. Check iptv.json.</p> : null}
+            {tvUnavailable && scope !== 'listen' ? <p class="empty-message">TV channels for {tvCountryInfo().name} are unavailable. Check tv/{tvCountry}.json.</p> : null}
           </div> : <section class="guide">
             <div class="guide-controls">
               <label>Date <input aria-label="Guide date" type="date" value={guideDate} mix={on('change', event => selectGuideDate(event.currentTarget.value))}/></label>

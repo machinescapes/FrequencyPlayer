@@ -2,37 +2,38 @@
 
 ## Verified Now
 
-- What is currently working: frq-03 YouTube-style TV player. Overlay controls on the video, inline-in-card playback, a mini player docked in the bottom bar, an expanded stage, full screen on the container, and a sticky player on phones.
-- What verification actually ran: `pnpm run check` 60/60, typecheck and lint clean; Chrome (Playwright, desktop 1366×860 and phone 390×844 touch) golden paths and edge cases (2026-10-24). Screenshots in docs/screenshots/frq-03-*.png.
+- What is currently working: Free-TV catalogue for 86 countries, top-bar country picker (UK shown as 'UK'), VPN note, http/YouTube rows open in a new tab, UK guide join (40 channels).
+- What verification actually ran: pnpm run check 50/50; pnpm run build; pnpm sync:tv (full); Chrome Playwright desktop + phone on pnpm run dev (2026-10-24).
 
 ## Changed This Session
 
-- Code or behavior added: `app/public/entry.tsx` (player modes, video host routing, IntersectionObserver, `videoControls`, `toggleFullscreen`, shortcuts); `public/styles.css` (overlay, inline tile, mini video, sticky mobile stage, :fullscreen); README "Watching TV" bullet.
-- Infrastructure or harness changes: plan docs/plans/frq-03-video-player-ux.md; feature frq-03 added and marked passing.
+- Code or behavior added: scripts/freetv-parse.mjs, scripts/sync-tv.mjs, scripts/tv-config.json, public/tv/*.json; tv-catalogue.js validators + UK/GB display helpers; media.ts external rows + file-order sort; entry.tsx country picker, per-country loading, VPN note, labels; styles.
+- Infrastructure or harness changes: tv-sync.yml replaces iptv-sync.yml; iptv-org code, data, tests and docs removed; docs/tv-sources.md.
 
 ## Broken Or Unverified
 
 - Known defect: none found.
-- Unverified path: real iOS Safari (webkitEnterFullscreen fallback, orientation lock) and Android Chrome on a device; only emulated so far.
-- Risk for the next session: running `node scripts/sync-epg.mjs` rewrites the tracked public/iptv.json, so restore it before committing.
+- Unverified path: geo-blocked BBC playback (this machine is outside the UK; segments 403) — check on a UK VPN.
+- Risk for the next session: a fresh worktree has no public/epg/freeview.json, so the Guide looks empty until `node scripts/sync-epg.mjs` runs. pnpm sync:tv --check can fail on live stream drift.
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: none open. Open a PR for frq-03 (branch feat/frq-03-video-player-ux) once the user asks.
-- Why it is next: the feature is verified locally.
-- What counts as passing: Quality CI green on the PR; device check on iOS.
-- What must not change during that step: radio/Listen playback and channel ordering.
+- Highest-priority unfinished feature: none open; open the PR for feat/frq-04-freetv.
+- Why it is next: frq-04 is verified locally.
+- What counts as passing: Quality CI green; BBC plays on a UK VPN.
+- What must not change during that step: radio/Listen catalogue and Freeview guide.
 
 ## Commands
 
-- Startup: `./init.sh`
-- Verification: `pnpm run check`; browser script /tmp/frq-shots/verify.mjs (Playwright from ../unscatteredweb, channel chrome)
-- Focused debug command: `pnpm run dev` then http://localhost:44100/?scope=watch&view=channels
+- Startup: `./init.sh` then `node scripts/sync-epg.mjs` for guide data
+- Verification: `pnpm run check`; `TV_COUNTRIES=GB pnpm sync:tv`; browser script /tmp/frq04-pw/verify.mjs
+- Focused debug command: `node --test test/freetv-parse.test.js`
 
-## Event log
+## Session Log
 
-- Baseline: ./init.sh passed 60/60, typecheck+lint clean (2026-10-24). Branch feat/frq-03-video-player-ux from origin/main a5aa430.
-- frq-03-video-player-ux added, plan_status draft (docs/plans/frq-03-video-player-ux.md); awaiting approval.
-- frq-03 plan approved by user; status in_progress.
-- frq-03 verified: pnpm run check 60/60; Chrome desktop inline/mini/expanded/fullscreen + phone sticky/mini + edge cases → passing. iOS Safari device check outstanding.
-- Commit 3fb57e6: frq-03 implementation, docs, screenshots.
+- Startup: worktree .claude/worktrees/frq-04-freetv on feat/frq-04-freetv from origin/main c88158f; gh = mintsource; `pnpm run check` baseline 60/60.
+- frq-04-freetv-catalogue added (in_progress, plan approved).
+- Full pnpm sync:tv: 86 countries, 714 KB, Free-TV@05a6685, ~2 min; malformed rows skipped BA1 HU1 JP6 RS2.
+- frq-04 → passing: check 50/50, build ok, full sync 86 countries, Chrome desktop+phone verified.
+- PR #12 opened (issue #11), branch feat/frq-04-freetv pushed; BBC-on-VPN check handed to user.
+- Added BBC One London via scripts/tv-config.json (pinned after BBC One); BBC One guide alias → BBCOneYorkshire.uk (Free-TV's feed is Yorkshire). check 50/50; Chrome on UK VPN: London plays inline, guide row present.

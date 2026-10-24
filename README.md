@@ -68,7 +68,7 @@ Without `streamUrl`, live/show cards open `url` in an official tab; `feed` cards
 
 Manage collection provides separate official/direct addresses, logo, colour, broadcaster, schedule and show inputs. For an audio episode, a single URL still becomes its direct audio address. Device JSON import replaces only device additions, leaving the built-in file intact. Export contains device additions. Existing version-1 catalogues and localStorage entries remain supported; storage stays in that browser profile.
 
-TV channels: pin, hide or add channels in `scripts/iptv-config.json`, then run `pnpm sync:iptv` (see [docs/iptv.md](docs/iptv.md)).
+TV channels come from [Free-TV/IPTV](https://github.com/Free-TV/IPTV), one country at a time; pick the country in the top bar (the UK by default). Geo-blocked channels need a VPN set to that country. To pin, hide or add channels, edit `scripts/tv-config.json` and run `pnpm sync:tv` (see [docs/tv-sources.md](docs/tv-sources.md)).
 
 ## Offline and updates
 
