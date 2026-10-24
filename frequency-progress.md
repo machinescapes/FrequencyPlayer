@@ -28,3 +28,9 @@
 
 - `orderChannels()` tiers: listings → config `pin` → essentials → health → title; `fromWatch` carries `pin`/`essential`; unused favourites param dropped. Documented in `docs/iptv.md` "Channel order".
 - Verified: `pnpm run check` 60/60; Chrome — Watch grid follows pin list then essentials; scopes have no duplicates; radio order identical to main. Screenshot `docs/screenshots/frq-01-watch-order.png`.
+
+### Session 2026-10-24 (cont.): frq-03 YouTube-style TV player
+
+- One shared `<video>` moves between three hosts in `entry.tsx`: inline (inside the selected card), mini (bottom bar thumbnail) and expanded (stage). An IntersectionObserver docks inline → mini when the card scrolls away and restores it on return. Phones (≤540 px) open a sticky 16:9 stage instead of inline.
+- Overlay controls (`videoControls`) on the video: play/pause, LIVE, PiP, expand/collapse, full screen on the container (webkit fallback for iOS). Idle fade after 3 s; `f`/`k`/`Esc` shortcuts; double-tap for full screen.
+- Verified: `pnpm run check` 60/60; Chrome desktop + phone emulation golden paths and edge cases (guide, listen scope, failed stream). Screenshots `docs/screenshots/frq-03-*.png`. Real iOS Safari not yet checked.

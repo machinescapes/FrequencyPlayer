@@ -74,6 +74,29 @@
       "next_steps": [
         "Merge with PR. Pinned positions are in iptv.json but not yet reflected in UI order — that is frq-01."
       ]
+    },
+    {
+      "id": "frq-03-video-player-ux",
+      "title": "FRQ-03 YouTube-style TV player: overlay controls, inline + mini player, sticky mobile",
+      "status": "passing",
+      "type": "feature",
+      "plan": "docs/plans/frq-03-video-player-ux.md",
+      "plan_status": "approved",
+      "summary": "Move full screen and other controls onto the video, play TV inline in the card with a docked miniplayer, and pin the player under the top bar on mobile so pressing play always shows the video.",
+      "summary_of_intent": "User: 'i would like the tv player to behave like the leading stream sites eg youtube. where the fullscreen toggle is overlaying the video. pressing play should get the player oupuput windows in focus on mobile. it should be possible to launch the stream without going into the full open window' — chose both inline-in-card and miniplayer, and sticky top player on mobile.",
+      "scope": [
+        "app/public/entry.tsx — player modes, overlay controls, fullscreen",
+        "public/styles.css — overlay, inline tile, mini video, sticky mobile stage",
+        "README.md — Watching section"
+      ],
+      "verification": {
+        "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24). No new unit tests: the mode logic is UI-bound in entry.tsx; covered by the browser checks below.",
+        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels. Desktop 1366×860: Afrobeat TV played inside its card (readyState 4, no stage); scrolled away → docked in bottom bar, still playing; scrolled back → inline; ⤢ → stage with overlay controls; ⛶ and `f` → .player-frame is document.fullscreenElement with controls visible; controls go idle after 3 s and wake on pointer move; `k` pauses. Guide view → mini; Listen scope keeps the TV mini; playing radio shows no stage/mini video. Phone 390×844 touch: Brit Asia TV from mid-grid → sticky 16:9 player at top:0 immediately and still pinned after scrolling 900px; collapse → mini thumbnail keeps playing (videoWidth 1920). Failed ITV2 shows 'Stream unavailable' over the stage. Only console error: one geo-blocked logo ERR_NAME_NOT_RESOLVED (pre-existing). Screenshots docs/screenshots/frq-03-*.png."
+      },
+      "next_steps": [
+        "Merge with PR.",
+        "Unverified: real iOS Safari (webkitEnterFullscreen fallback, orientation lock) — needs a device check."
+      ]
     }
   ]
 }

@@ -540,7 +540,6 @@ main{margin-left:0}
     }
 
     .stage { margin-bottom: 22px; border-radius: 10px; }
-    .stage-view { aspect-ratio: 4 / 3; }
     .stage-status strong { font-size: 13px; }
     .stage-status p { font-size: 10px; }
     .stage-actions button,
@@ -590,4 +589,123 @@ main{margin-left:0}
   .stage.compact .stage-bar { padding: 8px 14px; }
   .stage.compact .stage-actions button,
   .stage.compact .stage-actions a { min-height: 36px; padding: 0 12px; font-size: 10px; }
+}
+
+/* Player modes (frq-03): one <video> moves between the card tile (inline),
+   the bottom bar (mini) and the stage (expanded). Controls overlay the
+   picture as on YouTube. This sits last in the responsive layer so it wins
+   over the card and stage rules above at every breakpoint. */
+@layer responsive {
+  .icon { inline-size: 22px; block-size: 22px; fill: currentColor; flex-shrink: 0; }
+
+  .player-media { position: absolute; inset: 0; display: grid; place-items: center; background: #050706; }
+  .player-media video { inline-size: 100%; block-size: 100%; object-fit: contain; background: #050706; }
+  .player-frame[data-status="connecting"] video,
+  .player-frame[data-status="failed"] video { opacity: .25; }
+
+  .vc {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+    transition: opacity .25s;
+  }
+  .vc[data-idle="true"] { opacity: 0; cursor: none; }
+  .vc-bar {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 28px 8px 6px;
+    background: linear-gradient(transparent, #000b);
+    color: #fff;
+  }
+  .vc-spacer { flex: 1; }
+  .vc-button {
+    inline-size: 42px;
+    min-height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: #fff;
+  }
+  .vc-button:hover { background: #fff2; }
+  .vc-live { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; color: #fffa; padding-inline: 6px; }
+  .vc-live.on { color: #fff; }
+  .vc-live.on::first-letter { color: #ff4e45; }
+
+  /* Inline: the card art becomes the player. */
+  .card.playing .art { padding: 0; background: #050706; container-type: inline-size; }
+  .card.playing .art:hover { transform: none; filter: none; }
+  .card.playing .art::after { display: none; }
+  .vc-inline .vc-bar { padding: 20px 4px 2px; gap: 0; }
+  .vc-inline .vc-button { inline-size: 36px; min-height: 36px; }
+  .vc-inline .icon { inline-size: 19px; block-size: 19px; }
+  @container (max-width: 210px) { .vc-inline .vc-live, .vc-inline [aria-label="Picture in picture"] { display: none; } }
+  .card.playing .stage-status { padding: 8px; }
+  .card.playing .stage-status strong { font-size: 11px; color: #fff; }
+
+  /* Mini: a live thumbnail docked in the bottom bar. */
+  .mini-video {
+    position: relative;
+    inline-size: 128px;
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #050706;
+  }
+  .mini-video-hit { position: absolute; inset: 0; z-index: 1; min-height: 0; border-radius: inherit; }
+  .mini-video-hit:hover { background: #fff1; }
+  .mini-action {
+    inline-size: 40px;
+    min-height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--muted);
+  }
+  .mini-action:hover { color: var(--text); background: var(--raised); }
+  .mini-action .icon { inline-size: 20px; block-size: 20px; }
+
+  /* A height-capped 16:9 frame is narrower than the stage: centre it on black. */
+  .stage { background: #050706; }
+  .stage-view { margin-inline: auto; }
+  .stage-bar { background: var(--panel); }
+  .stage-actions button { padding: 0 10px; }
+  .stage-actions .icon { inline-size: 18px; block-size: 18px; }
+
+  /* Full screen: the frame fills the screen and keeps its overlay. */
+  .player-frame:fullscreen { inline-size: 100vw; block-size: 100vh; max-height: none; aspect-ratio: auto; border-radius: 0; padding: 0; background: #000; }
+  .player-frame:fullscreen .vc-bar { padding: 48px 24px 18px; gap: 8px; }
+  .player-frame:fullscreen .vc-button { inline-size: 48px; min-height: 48px; }
+  .player-frame:fullscreen .icon { inline-size: 26px; block-size: 26px; }
+  .player-frame:fullscreen .vc-live { font-size: 11px; }
+  .player-frame:fullscreen .vc-inline .vc-live,
+  .player-frame:fullscreen [aria-label="Picture in picture"] { display: revert; }
+
+  @media (max-width: 540px) {
+    /* Phones: the stage pins under the top of the screen, full bleed, while
+       the channel list scrolls underneath. */
+    .stage {
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      margin: 0 -14px 18px;
+      border-radius: 0;
+      border-inline: 0;
+      border-top: 0;
+      box-shadow: 0 10px 24px #000a;
+    }
+    .stage-view { aspect-ratio: 16 / 9; max-height: none; }
+    .stage-bar { flex-direction: row; align-items: center; padding: 8px 12px; gap: 8px; }
+    .stage-actions { inline-size: auto; }
+    .stage-info strong { font-size: 12px; }
+    .player.has-video .now-playing { gap: 10px; }
+    .mini-video { inline-size: 96px; border-radius: 6px; }
+    .player.has-video .transport { gap: 2px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { .vc { transition: none; } }
 }

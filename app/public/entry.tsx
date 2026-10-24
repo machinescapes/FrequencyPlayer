@@ -36,6 +36,20 @@ type CatalogueItem = {
 
 type View = 'Channels' | 'Guide'
 type TvRow = Parameters<typeof mergeMedia>[1][number]
+// Where TV plays: inside its card, docked in the bottom bar, or on the stage.
+type PlayerMode = 'inline' | 'mini' | 'expanded'
+
+const ICONS = {
+  play: 'M8 5v14l11-7z',
+  pause: 'M6 19h4V5H6v14zm8-14v14h4V5h-4z',
+  fullscreen: 'M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z',
+  exitFullscreen: 'M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z',
+  pip: 'M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z',
+  expand: 'M21 11V3h-8l3.29 3.29-10 10L3 13v8h8l-3.29-3.29 10-10z',
+  collapse: 'M22 3.41 16.71 8.7 20 12h-8V4l3.29 3.29L20.59 2 22 3.41zM3.41 22l5.29-5.29L12 20v-8H4l3.29 3.29L2 20.59 3.41 22z',
+  close: 'M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
+}
+const icon = (name: keyof typeof ICONS) => <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d={ICONS[name]}/></svg>
 
 const SCOPES: { id: Scope; label: string }[] = [
   { id: 'watch', label: 'Watch' },
@@ -73,7 +87,7 @@ function App(handle: Handle) {
   // One element for the lifetime of the app: playback releases the previous
   // source itself, and a stable node means the stage never holds a detached
   // element after the second selection.
-  let video: HTMLVideoElement | undefined
+  let video: HTMLVideoElement | undefined, videoHostNode: HTMLElement | undefined
   const playback = createPlayback({
     createMedia: () => {
       if (video) return video
@@ -81,6 +95,8 @@ function App(handle: Handle) {
       video.playsInline = true
       video.setAttribute('playsinline', '')
       video.controls = false
+      // The host may already be on screen (a restored selection).
+      videoHostNode?.append(video)
       return video
     },
     onChange: state => {
@@ -90,7 +106,13 @@ function App(handle: Handle) {
   } })
   let schedules: Schedule[] = [], scheduleLoading = true, scheduleFailed = false
   let clock = Date.now(), guideDate = dateInput(), programme: Programme | null = null
-  let timeline: HTMLDivElement | undefined, stage: HTMLDivElement | undefined, metadataKey = ''
+  let timeline: HTMLDivElement | undefined, stageSection: HTMLElement | undefined, metadataKey = ''
+  // Phones skip inline: a third-of-the-screen tile is too small to watch in.
+  const narrow = matchMedia('(max-width: 540px)')
+  let playerMode: PlayerMode = 'mini', inlineAvailable = false
+  // autoMini: the inline card scrolled away, so scrolling back restores it.
+  let autoMini = false, selectedCardVisible = false, observedCard: Element | null = null
+  let controlsIdle = false, idleTimer: ReturnType<typeof setTimeout> | undefined, lastTap = 0
   const firstUse = loadSaved('frequency.favourites.v2', null) === null && loadSaved('frequency.favouritesSetup', false) === false
   let initialized = false
   const failedLogos = new Set<string>()
@@ -208,6 +230,14 @@ function App(handle: Handle) {
   async function play(item: MediaItem) {
     if (item.kind === 'feed') { await openFeed(item); return }
     if (!item.streamUrl) { openOfficial(item); return }
+    if (item.source === 'watch') {
+      // Phones get the sticky stage so the video is in view straight away.
+      // Elsewhere the card plays inline unless a visible stage is already open.
+      const stageOnScreen = playerMode === 'expanded' && stageSection && stageSection.getBoundingClientRect().bottom > 0
+      if (narrow.matches) playerMode = 'expanded'
+      else if (!stageOnScreen) playerMode = view === 'Channels' ? 'inline' : 'mini'
+      autoMini = false
+    }
     selected = item; notice = ''; save('frequency.selected', item.id); metadataKey = ''
     if (!navigator.onLine) { playback.stop(); notify('You’re offline. Connect to play this stream.'); return }
     if ('mediaSession' in navigator) {
@@ -269,9 +299,22 @@ function App(handle: Handle) {
     handle.signal.addEventListener('abort', () => { window.clearInterval(tick); window.clearInterval(refresh) }, { once: true })
     setupNavigation(handle.signal, () => {})
     document.addEventListener('keydown', event => {
-      const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement
+      const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement
       if (event.key === '/' && !typing) { event.preventDefault(); openPalette() }
       if (event.key === 'Escape' && paletteOpen) closePalette()
+      // Player shortcuts, as on YouTube: f full screen, k play/pause, Esc collapses.
+      const busy = typing || paletteOpen || event.metaKey || event.ctrlKey || event.altKey || document.querySelector('dialog[open]')
+      if (busy || selected?.source !== 'watch' || playbackState.status === 'idle') return
+      if (event.key === 'f') { event.preventDefault(); toggleFullscreen(document.querySelector('.player-frame:not(.mini-video)')) }
+      else if (event.key === 'k') { event.preventDefault(); toggle(); wakeControls() }
+      else if (event.key === 'Escape' && !document.fullscreenElement && playerMode === 'expanded') collapse()
+    }, { signal: handle.signal })
+    document.addEventListener('fullscreenchange', () => { wakeControls(); update() }, { signal: handle.signal })
+    // Crossing the phone breakpoint moves inline playback to the sticky stage and back.
+    narrow.addEventListener('change', () => {
+      if (selected?.source !== 'watch') return
+      if (narrow.matches && playerMode === 'inline') playerMode = 'expanded'
+      update()
     }, { signal: handle.signal })
     for (const event of ['online', 'offline']) window.addEventListener(event, () => { online = navigator.onLine; update() }, { signal: handle.signal })
     if ('mediaSession' in navigator) {
@@ -328,22 +371,132 @@ function App(handle: Handle) {
   function closeUpdatePrompt() { updateAvailable = false; if (updateDialog.open) updateDialog.close(); update() }
   function applyUpdate() { const waiting = registration?.waiting; if (waiting) waiting.postMessage({ type: 'SKIP_WAITING' }); closeUpdatePrompt() }
 
-  // The video element lives outside the component tree (playback creates it),
-  // so re-attach it after each render when the stage is on screen.
-  function mountVideo(node: HTMLDivElement | null) {
-    stage = node ?? undefined
-    if (!node) return
-    if (video && video.parentElement !== node) node.append(video)
+  // The video element lives outside the component tree (playback creates it).
+  // Only the current mode renders a host, and the shared element moves into it
+  // synchronously on insert: a media element re-inserted before the next
+  // stable state keeps playing instead of pausing.
+  function videoHost() {
+    return ref((node, signal) => {
+      videoHostNode = node as HTMLElement
+      if (video && video.parentElement !== node) node.append(video)
+      signal.addEventListener('abort', () => {
+        if (videoHostNode === node) videoHostNode = undefined
+        if (video?.parentElement === node) parkVideo()
+      })
+    })
+  }
+  // A host can disappear without a replacement (radio selected, player
+  // closed); keep the element in the document so it isn't paused mid-stream.
+  let parking: HTMLDivElement | undefined
+  function parkVideo() {
+    if (!video) return
+    parking ??= Object.assign(document.createElement('div'), { hidden: true })
+    if (!parking.isConnected) document.body.append(parking)
+    parking.append(video)
   }
 
-  let mountedVideo = false
-  function attachVideoSoon() {
-    if (mountedVideo || !stage) return
-    mountedVideo = true
-    requestAnimationFrame(() => {
-      mountedVideo = false
-      if (stage && video && video.parentElement !== stage) stage.append(video)
-    })
+  // Inline needs its card on screen and the Channels view; otherwise it docks.
+  function effectiveMode(): PlayerMode {
+    return playerMode === 'inline' && (view !== 'Channels' || !inlineAvailable) ? 'mini' : playerMode
+  }
+
+  // The selected card reports whether it is on screen so inline playback can
+  // dock into the bottom bar as it scrolls away, and come back when it returns.
+  const cardObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (entry.target !== observedCard) continue
+      selectedCardVisible = entry.intersectionRatio >= 0.25
+      if (selected?.source !== 'watch') continue
+      if (!selectedCardVisible && playerMode === 'inline') { playerMode = 'mini'; autoMini = true; update() }
+      else if (selectedCardVisible && playerMode === 'mini' && autoMini) { playerMode = 'inline'; autoMini = false; update() }
+    }
+  }, { threshold: [0, 0.25, 1] })
+  handle.signal.addEventListener('abort', () => cardObserver.disconnect())
+  function observeSelectedCard() {
+    const node = selected?.source === 'watch' ? document.querySelector('.card.selected') : null
+    if (node === observedCard) return
+    if (observedCard) cardObserver.unobserve(observedCard)
+    observedCard = node
+    if (node) cardObserver.observe(node)
+    else selectedCardVisible = false
+  }
+
+  function setPlayerMode(mode: PlayerMode) {
+    playerMode = mode === 'inline' && !selectedCardVisible ? 'mini' : mode
+    autoMini = false
+    if (narrow.matches && playerMode === 'inline') playerMode = 'mini'
+    wakeControls()
+    void update().then(() => { if (playerMode === 'expanded' && !narrow.matches) stageSection?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) })
+  }
+  function collapse() { setPlayerMode(view === 'Channels' && !narrow.matches ? 'inline' : 'mini') }
+  function closePlayer() {
+    playback.stop(); playerMode = 'mini'; autoMini = false
+    if (document.fullscreenElement) void document.exitFullscreen()
+    update()
+  }
+
+  // Full screen the whole player so the overlay controls come along. iOS Safari
+  // only allows a <video> to go full screen, so fall back to its own player.
+  function toggleFullscreen(container: Element | null) {
+    if (document.fullscreenElement) { void document.exitFullscreen(); return }
+    const element = video as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | undefined
+    if (container?.requestFullscreen) {
+      void container.requestFullscreen().then(() => {
+        if (matchMedia('(pointer: coarse)').matches) void (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> }).lock?.('landscape').catch(() => {})
+      }).catch(() => notify('Full screen is unavailable here.'))
+    } else if (element?.webkitEnterFullscreen) element.webkitEnterFullscreen()
+    else notify('Full screen is unavailable here.')
+  }
+  function togglePictureInPicture() {
+    const element = video
+    if (!element) return
+    if (document.pictureInPictureElement) void document.exitPictureInPicture()
+    else void element.requestPictureInPicture?.().catch(() => notify('Picture in picture is unavailable here.'))
+  }
+
+  // Overlay controls fade out after a few seconds of playback with no activity.
+  function wakeControls() {
+    clearTimeout(idleTimer)
+    if (controlsIdle) { controlsIdle = false; update() }
+    idleTimer = setTimeout(() => { if (playbackState.status === 'playing') { controlsIdle = true; update() } }, 3000)
+  }
+  handle.signal.addEventListener('abort', () => clearTimeout(idleTimer))
+
+  function stageStatus(item: MediaItem, compact = false) {
+    const status = playbackState.status
+    if (status === 'playing') return null
+    return <div class="stage-status">
+      {status === 'failed' ? <><strong>Stream unavailable</strong>{compact ? null : <p>{playbackState.message}</p>}</>
+        : status === 'connecting' ? <><strong>Connecting…</strong>{compact ? null : <p>{item.title}</p>}</>
+        : <><strong>{compact ? 'Paused' : item.title}</strong>{compact ? null : <p>{item.category}{item.quality ? ` · ${item.quality}` : ''} · Paused</p>}</>}
+    </div>
+  }
+
+  function videoControls(variant: 'stage' | 'inline') {
+    const playing = playbackState.status === 'playing', loading = playbackState.status === 'connecting'
+    const fullscreen = Boolean(document.fullscreenElement)
+    return <div class={'vc vc-' + variant} data-idle={controlsIdle && playing ? 'true' : 'false'}
+      mix={[on('pointermove', wakeControls), on('focusin', wakeControls), on('click', event => {
+        // Clicks on the picture (not a button) toggle the controls on touch and
+        // play/pause with a mouse; a quick second tap toggles full screen.
+        if ((event.target as Element).closest('button, a')) return
+        const now = Date.now()
+        if (now - lastTap < 320) { lastTap = 0; toggleFullscreen((event.currentTarget as Element).closest('.player-frame')); return }
+        lastTap = now
+        if (matchMedia('(pointer: coarse)').matches) { if (controlsIdle) wakeControls(); else { controlsIdle = playing; update() } }
+        else { toggle(); wakeControls() }
+      })]}>
+      <div class="vc-bar">
+        <button class="vc-button" aria-label={playing || loading ? 'Pause' : 'Play'} mix={on('click', () => { toggle(); wakeControls() })}>{icon(playing || loading ? 'pause' : 'play')}</button>
+        <span class={'vc-live' + (playing ? ' on' : '')}>● LIVE</span>
+        <span class="vc-spacer"/>
+        <button class="vc-button" aria-label="Picture in picture" mix={on('click', togglePictureInPicture)}>{icon('pip')}</button>
+        {variant === 'inline'
+          ? <button class="vc-button" aria-label="Expand player" mix={on('click', () => setPlayerMode('expanded'))}>{icon('expand')}</button>
+          : <button class="vc-button" aria-label="Collapse player" mix={on('click', collapse)}>{icon('collapse')}</button>}
+        <button class="vc-button" aria-label={fullscreen ? 'Exit full screen' : 'Full screen'} mix={on('click', event => toggleFullscreen((event.currentTarget as Element).closest('.player-frame')))}>{icon(fullscreen ? 'exitFullscreen' : 'fullscreen')}</button>
+      </div>
+    </div>
   }
 
   function artwork(item: MediaItem) {
@@ -359,11 +512,19 @@ function App(handle: Handle) {
   function card(item: MediaItem) {
     const now = info(item).current
     const playLabel = now?.title ?? (item.source === 'watch' ? item.category : item.broadcaster ?? item.category)
-    return <article class={'card' + (selected?.id === item.id ? ' selected' : '')} key={item.id}>
-      <button class="art" style={{ '--station': item.color }} aria-label={(item.streamUrl ? 'Play ' : 'Open ') + item.title} mix={on('click', () => play(item))}>
-        {artwork(item)}
-        <span class="art-play">{item.streamUrl ? '▶' : '↗'}</span>
-      </button>
+    const isSelected = selected?.id === item.id
+    const inline = isSelected && item.source === 'watch' && effectiveMode() === 'inline'
+    return <article class={'card' + (isSelected ? ' selected' : '') + (inline ? ' playing' : '')} key={item.id}>
+      {inline
+        ? <div class="art player-frame" style={{ '--station': item.color }} data-status={playbackState.status} role="region" aria-label={'Playing ' + item.title}>
+            <div class="player-media" mix={videoHost()}/>
+            {stageStatus(item, true)}
+            {videoControls('inline')}
+          </div>
+        : <button class="art" style={{ '--station': item.color }} aria-label={(item.streamUrl ? 'Play ' : 'Open ') + item.title} mix={on('click', () => play(item))}>
+            {artwork(item)}
+            <span class="art-play">{item.streamUrl ? '▶' : '↗'}</span>
+          </button>}
       <div class="card-info">
         <div>
           <h3>{item.title}</h3>
@@ -428,7 +589,12 @@ function App(handle: Handle) {
     const sections = guideSections(scoped)
     const paletteResults = query.trim() ? filterMedia(media, { scope, query }).slice(0, 12) : []
     const onDemand = scoped.filter(item => item.kind !== 'live')
+    // Inline playback needs the selected card in this render; filters or a
+    // scope change can hide it, and then the video docks in the bottom bar.
+    inlineAvailable = view === 'Channels' && [favouritesList, onNow, listingsFirst, onDemand].some(list => list.some(item => item.id === selected?.id))
+    handle.queueTask(observeSelectedCard)
     const watching = selected?.source === 'watch'
+    const miniVideo = watching && effectiveMode() === 'mini' && playbackState.status !== 'idle'
 
     return <div class="app">
       <main>
@@ -463,14 +629,11 @@ function App(handle: Handle) {
               : null}
           </div>
 
-          {watching && selected ? <section class={"stage" + (view === 'Guide' ? ' compact' : '')} data-status={playbackState.status} aria-label="Video player">
-            <div class="stage-view">
-              <div class="stage-media" mix={ref(node => { mountVideo(node as HTMLDivElement); attachVideoSoon() })}/>
-              {playbackState.status !== 'playing' ? <div class="stage-status">
-                {playbackState.status === 'failed' ? <><strong>Stream unavailable</strong><p>{playbackState.message}</p></>
-                  : playbackState.status === 'connecting' ? <><strong>Connecting…</strong><p>{selected.title}</p></>
-                  : <><strong>{selected.title}</strong><p>{selected.category}{selected.quality ? ` · ${selected.quality}` : ''} · {playing ? 'Live' : 'Paused'}</p></>}
-              </div> : null}
+          {watching && selected && effectiveMode() === 'expanded' ? <section class={"stage" + (view === 'Guide' ? ' compact' : '')} data-status={playbackState.status} aria-label="Video player" mix={ref((node, signal) => { stageSection = node as HTMLElement; signal.addEventListener('abort', () => { if (stageSection === node) stageSection = undefined }) })}>
+            <div class="stage-view player-frame" data-status={playbackState.status}>
+              <div class="stage-media player-media" mix={videoHost()}/>
+              {stageStatus(selected)}
+              {videoControls('stage')}
             </div>
             <div class="stage-bar">
               <div class="stage-info">
@@ -478,10 +641,8 @@ function App(handle: Handle) {
                 <p>{selected.title}{current ? ` · ${time(current.start)}–${time(current.end)}` : ''}{next ? ` · Next ${time(next.start)} ${next.title}` : ''}</p>
               </div>
               <div class="stage-actions">
-                <button class="primary" mix={on('click', toggle)}>{playing || loading ? 'Pause' : 'Play'}</button>
-                <button aria-label="Picture in picture" mix={on('click', () => { const element = video; if (!element) return; if (document.pictureInPictureElement) void document.exitPictureInPicture(); else void element.requestPictureInPicture?.().catch(() => notify('Picture in picture is unavailable here.')) })}>PiP</button>
-                <button aria-label="Full screen" mix={on('click', () => { const element = video; if (!element) return; if (document.fullscreenElement) void document.exitFullscreen(); else void element.requestFullscreen?.().catch(() => notify('Full screen is unavailable here.')) })}>⛶</button>
                 {destination(selected, selected.streamUrl ?? selected.url, 'Open stream')}
+                <button aria-label="Close player" mix={on('click', closePlayer)}>{icon('close')}</button>
               </div>
             </div>
           </section> : null}
@@ -549,9 +710,14 @@ function App(handle: Handle) {
         </div>
       </main>
 
-      <section class="player" aria-label="Media player">
+      <section class={'player' + (miniVideo ? ' has-video' : '')} aria-label="Media player">
         <div class="now-playing">
-          <div class="mini-art" style={{ background: selected?.color ?? 'var(--accent)' }}>{current?.artwork && !failedLogos.has(current.artwork) ? <img class="programme-art" src={current.artwork} alt="" mix={on('error', () => { failedLogos.add(current.artwork!); update() })}/> : selected ? artwork(selected) : 'ƒ'}</div>
+          {miniVideo
+            ? <div class="mini-video player-frame" data-status={playbackState.status}>
+                <div class="player-media" mix={videoHost()}/>
+                <button class="mini-video-hit" aria-label="Expand player" mix={on('click', () => setPlayerMode('expanded'))}/>
+              </div>
+            : <div class="mini-art" style={{ background: selected?.color ?? 'var(--accent)' }}>{current?.artwork && !failedLogos.has(current.artwork) ? <img class="programme-art" src={current.artwork} alt="" mix={on('error', () => { failedLogos.add(current.artwork!); update() })}/> : selected ? artwork(selected) : 'ƒ'}</div>}
           <div class="now-copy">
             <span class="now-label">{selected?.source === 'watch' ? 'WATCHING' : 'LISTENING'}</span>
             <strong>{current?.title ?? (selected ? info(selected).current?.title ?? selected.title : 'Select something to play')}</strong>
@@ -562,6 +728,8 @@ function App(handle: Handle) {
         <div class="transport">
           <button class="play-button" disabled={!selected} aria-label={playing || loading ? 'Pause' : playbackState.status === 'failed' ? 'Retry' : selected && !selected.streamUrl ? 'Open official player' : 'Play'} mix={on('click', toggle)}>{playing || loading ? 'Ⅱ' : '▶'}</button>
           <span class="player-label">{playing ? '● LIVE' : selected?.source === 'watch' ? '● WATCH' : '● LISTEN'}</span>
+          {miniVideo ? <button class="mini-action" aria-label="Expand player" mix={on('click', () => setPlayerMode('expanded'))}>{icon('expand')}</button> : null}
+          {miniVideo ? <button class="mini-action" aria-label="Close player" mix={on('click', closePlayer)}>{icon('close')}</button> : null}
         </div>
         <div class="player-extra">
           {selected?.streamUrl ? <a href={selected.streamUrl} target="_blank" rel="noopener" class="official">Open stream ↗</a> : null}

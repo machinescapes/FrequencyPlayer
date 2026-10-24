@@ -23,6 +23,7 @@ pnpm run build
 - 23 UK live stations: BBC Radio 1–6, nine Global stations, six Bauer stations and NTS 1–2. BBC, Global and NTS play directly; Bauer opens its official Rayo player.
 - Official players, schedules and show destinations open in a new tab after releasing current audio. Broadcaster filters, official station logos, brand colours and text fallback artwork.
 - The fixed player shows current programme information and playback controls. Channels opens directly to favourites and stations; Guide displays programmes on a horizontally scrolling timeline and caches downloaded schedules in IndexedDB for later sessions and offline use.
+- **Watching TV** works like YouTube. On desktop and tablet, pressing play on a channel plays it inside its card. Scrolling the card away docks the live picture in the bottom bar, and scrolling back returns it to the card. ⤢ expands to the stage, ⤡ collapses, and × stops. On phones, play pins the player under the top of the screen while the channel list keeps scrolling. Controls (play/pause, PiP, expand, full screen) overlay the video and fade during playback. Shortcuts: `f` full screen, `k` play/pause, `Esc` collapses the stage; double-click or double-tap the picture for full screen.
 - Show destinations for Craig Charles, Chris Moyles and X-Posure, plus broadcaster collections.
 - Add/remove device-local items, JSON import/export, RSS episode browsing when CORS is allowed.
 - Directional keyboard focus; Enter/Space activation; `/` focuses search. Text fields retain normal arrow-key editing. Native dialogs support Escape.
