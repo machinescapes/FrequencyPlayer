@@ -1,0 +1,20 @@
+{
+  "GB": {
+    "pin": [
+      "GB:bbc-one",
+      "GB:bbc-one-london"
+    ],
+    "hide": [],
+    "add": [
+      {
+        "id": "GB:bbc-one-london",
+        "title": "BBC One London",
+        "url": "https://vs-hls-push-uk-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_one_london/pc_hd_abr_v2.m3u8",
+        "category": "Freeview",
+        "logoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/BBC_One_logo_2021.svg/500px-BBC_One_logo_2021.svg.png",
+        "labels": ["Geo-blocked"],
+        "epgId": "BBCOneLondonHD.uk"
+      }
+    ]
+  }
+}

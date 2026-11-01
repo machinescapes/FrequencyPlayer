@@ -40,7 +40,7 @@ pnpm run lint               # eslint app server.ts scripts test
 pnpm run check              # typecheck + lint + test (this is what CI's Quality workflow runs)
 pnpm run build              # check, then scripts/build.mjs → dist/
 node scripts/sync-epg.mjs  # fetch the Freeview XMLTV guide into public/epg/freeview.json (gitignored)
-pnpm run sync:iptv          # rebuild public/iptv.json from iptv-org
+pnpm sync:tv               # rebuild public/tv/*.json from Free-TV/IPTV (TV_COUNTRIES=GB for one country)
 ```
 
 Tests import `.ts` sources directly and rely on Node's built-in type stripping, with no transpile step. IndexedDB code is tested with `fake-indexeddb`, and playback is tested with hand-written Audio/Hls stubs.
@@ -56,7 +56,7 @@ When you change how the page shell, assets or offline manifest work, update **bo
 ### Client (`app/public/`)
 - `entry.tsx` is the whole UI: a single `App(handle)` Remix component. State lives in closure variables, and re-rendering is explicit through `handle.update()`. Listeners, fetches and timers are tied to `handle.signal` so they are cleaned up when the component goes away.
 - The app has one shell with **scope** `watch | listen | all` and **view** `Channels | Guide`, both reflected in the `?scope=&view=` query string. Watch and Listen used to be separate apps; see `docs/plans/media-browser-ia.md`.
-- `media.ts` normalises radio rows (`public/catalogue.json`, validated by `catalogue.js`) and TV rows (`public/iptv.json`, validated by `tv-catalogue.js`) into a single `MediaItem` shape. IDs are **namespaced** (`listen:<id>`, `watch:<id>`) so the two sources can't collide in favourites or the guide. It also handles filtering, ordering (`orderChannels`: listings, then config `pin`, then essentials, then stream health, then title — see `docs/iptv.md` "Channel order") and the favourites migration.
+- `media.ts` normalises radio rows (`public/catalogue.json`, validated by `catalogue.js`) and TV rows (`public/tv/<CC>.json`, one country at a time, validated by `tv-catalogue.js`) into a single `MediaItem` shape. IDs are **namespaced** (`listen:<id>`, `watch:<id>`) so the two sources can't collide in favourites or the guide. It also handles filtering, ordering (`orderChannels`: listings, then config `pin`, then Free-TV list order, then title) and the favourites migration.
 - `epg.ts` validates schedules, computes now/next and caches schedules in IndexedDB for offline use. NTS schedules are parsed client-side. The Freeview guide is built at deploy time.
 - `playback.ts` drives a shared media element: connecting, playing, paused, failed or blocked, a 15 s connect timeout with retry, native HLS preferred over the lazy `hls.js` import, and Media Session integration.
 - `navigation.js` provides directional (arrow-key and gamepad) focus movement. Text inputs keep normal arrow-key editing.
@@ -64,7 +64,8 @@ When you change how the page shell, assets or offline manifest work, update **bo
 
 ### Data pipeline (`scripts/`)
 - `sync-epg.mjs` downloads the dp247 Freeview-EPG XMLTV feed and keeps only the stations mapped through `scheduleSource: "freeview"` + `scheduleId` (radio) or `epgId` (TV, stored as `watch:<id>`). The result is validated with `validateSchedule` from `app/public/epg.ts`. The Pages workflow runs it every 6 hours before building, with `EPG_FALLBACK_URL` pointing at the live site.
-- `sync-iptv.mjs` + `iptv-parse.mjs` turn the iptv-org M3U, channel metadata and blocklist into `public/iptv.json`. The steps are: keep HTTPS HLS only, keep GB only (`IPTV_COUNTRIES`), mark essentials, join guide coverage, then probe each stream's health. A weekly workflow commits the result. Details are in `docs/iptv.md`.
+- `sync-tv.mjs` + `freetv-parse.mjs` turn Free-TV/IPTV's per-country markdown lists into `public/tv/<CC>.json` plus `public/tv/index.json`. They keep `[>]` rows in file order with logos, mark HTTPS HLS rows as inline and everything else (http, YouTube) as external (opens in a new tab), keep geo-blocked rows, apply `scripts/tv-config.json`, join the UK to the Freeview guide, and probe stream health. Country codes are ISO in data (`GB`), but menus and URLs say **UK**. A weekly workflow commits the result. Details are in `docs/tv-sources.md`.
+- `sync-epg.mjs` reads `public/tv/GB.json` for the TV guide join. A fresh checkout or worktree has no `public/epg/freeview.json`, so the Guide is empty until you run `node scripts/sync-epg.mjs`.
 
 ### Service worker (`public/sw.js`)
 On install it precaches the core files plus whatever `offline-assets.json` lists. Same-origin core files and JS assets are served network-first with a cache fallback. Streams, media, Range requests and third-party URLs are never cached. Updates go through a `SKIP_WAITING` message from the in-app "Update now" dialog.
@@ -77,7 +78,7 @@ On install it precaches the core files plus whatever `offline-assets.json` lists
 
 - `quality.yml` runs `pnpm run check` on PRs and on pushes to non-main branches.
 - `pages.yml` runs on pushes to `main`, every 6 hours, or manually. It runs sync-epg, then `pnpm run build`, then deploys `dist/`.
-- `iptv-sync.yml` runs weekly (Monday 04:17 UTC) and commits a refreshed `public/iptv.json` to `main` when it changes. Its stream health probe runs from a GitHub-hosted (US) runner, so UK geo-blocked streams are recorded as `offline`.
+- `tv-sync.yml` runs weekly (Monday 04:17 UTC) and commits a refreshed `public/tv/` to `main` when it changes. Its health probe runs from a GitHub-hosted runner, so geo-blocked streams it cannot reach are recorded as `geo`, not `offline`.
 
 ## Skills
 
@@ -114,7 +115,7 @@ Update `session-handoff.md` **immediately**, before any other work, whenever any
 
 - A commit is created: record the hash and what changed.
 - A PR is opened, updated or merged: record the number and status.
-- A verification (`pnpm run check`, a browser check, `pnpm sync:iptv --check`) runs: record pass/fail and the exact command.
+- A verification (`pnpm run check`, a browser check, `pnpm sync:tv --check`) runs: record pass/fail and the exact command.
 - A feature changes state: record its id and new status.
 - A blocker or unexpected finding comes up: record what it is and what you tried.
 

@@ -41,7 +41,7 @@ Record the issue number. It goes in the PR title and body, and in the feature's 
 | Field | Values |
 |-------|--------|
 | `type` | `feat` · `fix` · `chore` · `docs` · `refactor` · `test` |
-| `scope` | The feature id or affected area, e.g. `frq-01`, `iptv`, `epg`, `player`, `sw` |
+| `scope` | The feature id or affected area, e.g. `frq-01`, `tv`, `epg`, `player`, `sw` |
 | description | Imperative, ≤ 60 chars, no trailing period |
 | `#issue` | The linked issue number |
 
@@ -49,7 +49,7 @@ Examples:
 ```
 feat(frq-02): add channel config for pinned and hidden channels (#12)
 fix(player): retry HLS connect after network change (#9)
-chore(ci): run iptv sync on workflow_dispatch only (#15)
+chore(ci): run tv sync on workflow_dispatch only (#15)
 ```
 
 ---
@@ -70,9 +70,9 @@ pnpm run check
 ```
 It must exit 0. Note the test count (e.g. `48/48`). This is the same command CI's Quality workflow runs.
 
-### 4b. Data snapshots (only if `scripts/` or `public/iptv.json` changed)
+### 4b. Data snapshots (only if `scripts/` or `public/tv/` changed)
 ```sh
-pnpm sync:iptv --check     # committed iptv.json matches what the script would produce
+pnpm sync:tv --check       # committed public/tv matches what the script would produce
 ```
 `--check` needs the network and reflects live upstream data, so a diff can come from upstream drift rather than your change. Say which one it is.
 
@@ -115,7 +115,7 @@ gh pr create --repo machinescapes/FrequencyPlayer          # uses the PR templat
 gh pr create --title "feat(frq-NN): description (#NN)" --body-file /tmp/pr.md
 gh pr status
 gh run list --repo machinescapes/FrequencyPlayer -L 5      # recent CI runs
-gh workflow run iptv-sync.yml --repo machinescapes/FrequencyPlayer   # manual IPTV refresh
+gh workflow run tv-sync.yml --repo machinescapes/FrequencyPlayer     # manual TV refresh
 ```
 
 ---

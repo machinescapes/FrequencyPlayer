@@ -25,12 +25,15 @@ export type MediaItem = {
   // The unprefixed catalogue id, needed to join against guide station ids.
   rawId: string
   hasGuide: boolean
-  /** Whether the stream was reachable and CORS-open as of the last sync. */
-  health?: 'ok' | 'cors' | 'offline' | 'unknown'
-  /** Position in scripts/iptv-config.json `pin`, if the channel is pinned. */
+  /**
+   * Stream state at the last sync. `geo`: geo-blocked and unreachable from the
+   * sync runner (expected to work over a VPN). `external`: opens in a new tab.
+   */
+  health?: 'ok' | 'cors' | 'offline' | 'geo' | 'external' | 'unknown'
+  /** Position in scripts/tv-config.json `pin`, if the channel is pinned. */
   pin?: number
-  /** Best stream for an ESSENTIAL_BRANDS brand. */
-  essential?: boolean
+  /** Position in the Free-TV list, which is the default display order. */
+  order?: number
 }
 
 const PALETTE = ['#c5e762', '#cfa3e9', '#f2c14e', '#7ad0c5', '#e88f6b', '#8fa9e8', '#e07b9a', '#9fd8a0']
@@ -86,10 +89,10 @@ export function fromWatch(item: any, programmeIds: Set<string>): MediaItem {
     source: 'watch',
     kind: 'live',
     title: item.title,
-    // TV items have no separate "official player" page; the stream is the page.
-    url: item.streamUrl,
-    streamUrl: item.streamUrl,
-    streamType: 'hls',
+    // Inline channels open their own stream; external ones (http://, YouTube)
+    // have no streamUrl, so the card opens `url` in a new tab instead.
+    url: item.url ?? item.streamUrl,
+    ...(item.playback === 'external' ? {} : { streamUrl: item.streamUrl, streamType: 'hls' as const }),
     logoUrl: item.logoUrl ?? undefined,
     color: categoryColor(label),
     mark: firstLetter(item.title),
@@ -104,7 +107,7 @@ export function fromWatch(item: any, programmeIds: Set<string>): MediaItem {
     hasGuide: Boolean(item.epgId) && programmeIds.has(`watch:${item.id}`),
     health: item.health ?? 'unknown',
     pin: Number.isInteger(item.pin) && item.pin >= 0 ? item.pin : undefined,
-    essential: item.essential === true,
+    order: Number.isInteger(item.order) ? item.order : undefined,
   }
 }
 
@@ -170,35 +173,32 @@ export function filterMedia(items: MediaItem[], filter: Filter = {}) {
     .filter(item => !listingsOnly || item.hasGuide)
 }
 
-const HEALTH_RANK: Record<string, number> = { ok: 0, unknown: 1, cors: 2, offline: 3 }
-
 /** Plain-language label for a stream the last sync could not verify. */
 export function healthWarning(item: MediaItem): string | null {
   if (item.source !== 'watch') return null
   if (item.health === 'offline') return 'Offline at last check'
   if (item.health === 'cors') return 'May be blocked by its host'
+  if (item.health === 'external') return 'Opens in a new tab'
   return null
 }
 
 /**
  * Channel order, first key wins:
  * 1. channels with listings (callers that split rows by guide see no effect)
- * 2. pinned, in scripts/iptv-config.json `pin` order — kept even when offline,
- *    because pinning is a deliberate choice and the card already warns
- * 3. essentials (ESSENTIAL_BRANDS in scripts/iptv-parse.mjs)
- * 4. stream health from the last sync, so dead links sink
- * 5. title
- * Radio rows carry no pin, essential flag or health, so they sort by 1 and 5.
- * Favourites are not a key: the UI gives them their own row.
+ * 2. pinned, in scripts/tv-config.json `pin` order
+ * 3. Free-TV list order, which follows each country's channel numbering
+ * 4. title
+ * Health never reorders: the list order is deliberate, and a dead or
+ * geo-blocked card says so itself. Radio rows have no pin or order, so they
+ * sort by 1 and 4. Favourites are not a key: the UI gives them their own row.
  */
 export function orderChannels(items: MediaItem[]) {
-  const pinned = (item: MediaItem) => item.pin ?? Infinity
-  const health = (item: MediaItem) => item.pin === undefined ? HEALTH_RANK[item.health ?? 'unknown'] ?? 1 : 0
+  // Missing positions sort last; compare explicitly because ∞ − ∞ is NaN.
+  const byPosition = (a?: number, b?: number) => a === b ? 0 : a === undefined ? 1 : b === undefined ? -1 : a - b
   return [...items].sort((a, b) =>
     Number(b.hasGuide) - Number(a.hasGuide) ||
-    pinned(a) - pinned(b) ||
-    Number(Boolean(b.essential)) - Number(Boolean(a.essential)) ||
-    health(a) - health(b) ||
+    byPosition(a.pin, b.pin) ||
+    byPosition(a.order, b.order) ||
     a.title.localeCompare(b.title, 'en'))
 }
 
@@ -208,10 +208,6 @@ export function guideSections(items: MediaItem[]) {
   return (['watch', 'listen'] as Source[])
     .map(source => ({ source, items: withGuide.filter(item => item.source === source) }))
     .filter(section => section.items.length > 0)
-}
-
-export function countryOptions(items: MediaItem[]) {
-  return [...new Set(items.map(item => item.countryCode).filter(Boolean) as string[])].sort()
 }
 
 export function categoryOptions(items: MediaItem[]) {

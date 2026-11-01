@@ -12,7 +12,7 @@ Closes #
 
 ### Automated
 - [ ] `pnpm run check` — typecheck, lint and tests pass (N/N)
-- [ ] `pnpm sync:iptv --check` — if `scripts/` or `public/iptv.json` changed
+- [ ] `pnpm sync:tv --check` — if `scripts/` or `public/tv/` changed
 - [ ] `session-handoff.md` updated and committed
 
 ### Browser

@@ -1,9 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { EPG_ALIASES, epgIdFor, toItems, parseM3u } from '../scripts/iptv-parse.mjs'
+import { EPG_ALIASES, epgIdFor } from '../scripts/freetv-parse.mjs'
 import {
   mergeMedia, filterMedia, orderChannels, guideSections,
-  guideStationId, countryOptions, categoryOptions, migrateFavourites, inScope,
+  guideStationId, categoryOptions, healthWarning, migrateFavourites, inScope,
   namespacedId,
 } from '../app/public/media.ts'
 
@@ -77,17 +77,15 @@ test('channels with listings lead, then alphabetical', () => {
   assert.deepEqual(orderChannels(items).map(item => item.id), ['a', 'b', 'd', 'c'])
 })
 
-test('pinned channels lead in pin order, then essentials, then health, then title', () => {
+test('pinned channels lead, then Free-TV list order; health never reorders', () => {
   const items = [
-    { id: 'plain-ok', title: 'Alpha', hasGuide: false, health: 'ok' },
-    { id: 'plain-off', title: 'Aardvark', hasGuide: false, health: 'offline' },
-    { id: 'plain-cors', title: 'Able', hasGuide: false, health: 'cors' },
-    { id: 'ess', title: 'Zulu Essential', hasGuide: false, essential: true, health: 'ok' },
-    { id: 'pin1-off', title: 'Yankee', hasGuide: false, pin: 1, health: 'offline' },
-    { id: 'pin0', title: 'X-ray', hasGuide: false, pin: 0, health: 'ok' },
+    { id: 'third', title: 'Alpha', hasGuide: false, order: 2, health: 'ok' },
+    { id: 'first', title: 'Zulu', hasGuide: false, order: 0, health: 'offline' },
+    { id: 'second', title: 'Bravo', hasGuide: false, order: 1, health: 'external' },
+    { id: 'pin1', title: 'Yankee', hasGuide: false, order: 9, pin: 1 },
+    { id: 'pin0', title: 'X-ray', hasGuide: false, order: 8, pin: 0 },
   ]
-  // A pinned offline channel keeps its slot; unpinned ones sink by health.
-  assert.deepEqual(orderChannels(items).map(item => item.id), ['pin0', 'pin1-off', 'ess', 'plain-ok', 'plain-cors', 'plain-off'])
+  assert.deepEqual(orderChannels(items).map(item => item.id), ['pin0', 'pin1', 'first', 'second', 'third'])
 })
 
 test('listings still lead pinned channels when rows are not split', () => {
@@ -99,18 +97,22 @@ test('listings still lead pinned channels when rows are not split', () => {
 })
 
 test('radio order is unchanged: listings, then title', () => {
-  const merged = mergeMedia([radio, { ...radio, id: 'abc', title: 'Absolute Radio', scheduleId: undefined }], [], new Set(['bbc6']))
-  assert.deepEqual(orderChannels(merged).map(item => item.title), ['BBC Radio 6 Music', 'Absolute Radio'])
-  assert.ok(merged.every(item => item.pin === undefined && !item.essential))
+  const merged = mergeMedia([radio, { ...radio, id: 'abc', title: 'Absolute Radio', scheduleId: undefined }, { ...radio, id: 'aaa', title: 'Aardvark FM', scheduleId: undefined }], [], new Set(['bbc6']))
+  assert.deepEqual(orderChannels(merged).map(item => item.title), ['BBC Radio 6 Music', 'Aardvark FM', 'Absolute Radio'])
+  assert.ok(merged.every(item => item.pin === undefined && item.order === undefined))
 })
 
-test('TV rows carry pin and essential from the snapshot', () => {
-  const [pinned] = mergeMedia([], [{ ...tv, pin: 2, essential: true }], new Set())
+test('TV rows carry pin and list order; external rows have no stream', () => {
+  const [pinned] = mergeMedia([], [{ ...tv, pin: 2, order: 5 }], new Set())
   assert.equal(pinned.pin, 2)
-  assert.equal(pinned.essential, true)
+  assert.equal(pinned.order, 5)
+  assert.equal(pinned.streamType, 'hls')
   const [bad] = mergeMedia([], [{ ...tv, pin: 1.5 }], new Set())
   assert.equal(bad.pin, undefined)
-  assert.equal(bad.essential, false)
+  const [external] = mergeMedia([], [{ ...tv, playback: 'external', streamUrl: undefined, url: 'http://45.14.84.37/itv1/index.m3u8', health: 'external' }], new Set())
+  assert.equal(external.streamUrl, undefined, 'the player is never handed an http stream')
+  assert.equal(external.url, 'http://45.14.84.37/itv1/index.m3u8')
+  assert.equal(healthWarning(external), 'Opens in a new tab')
 })
 
 test('guides are grouped by source and skip empty groups', () => {
@@ -121,9 +123,8 @@ test('guides are grouped by source and skip empty groups', () => {
   assert.deepEqual(guideSections(mergeMedia([], [], new Set())), [])
 })
 
-test('country and category options are deduped and ordered', () => {
+test('category options are deduped and ordered', () => {
   const merged = mergeMedia([radio], [tv, { ...tv, id: 'ITV2.uk@SD', category: 'Entertainment', epgId: null }], new Set())
-  assert.deepEqual(countryOptions(merged), ['GB'])
   assert.deepEqual(categoryOptions(merged), ['Entertainment', 'Music'])
 })
 
@@ -139,26 +140,12 @@ test('old favourites migrate once into the namespaced list', () => {
 })
 
 test('guide ids resolve direct hits and known aliases', () => {
-  const channels = new Set(['BBC6Music.uk', ...Object.values(EPG_ALIASES)])
-  assert.equal(epgIdFor('BBC6Music.uk@SD', channels), 'BBC6Music.uk')
-  assert.equal(epgIdFor('Channel4.uk@SD', channels), 'Channel4London.uk')
-  assert.equal(epgIdFor('Channel5.uk@UK', channels), '5.uk')
-  assert.equal(epgIdFor('Now80s.uk@SD', channels), null)
-  assert.equal(epgIdFor('Channel4.uk@SD', new Set()), null)
-})
-
-test('country filtering happens before the limit is applied', () => {
-  const playlist = `#EXTM3U
-#EXTINF:-1 tvg-id="Aau.uk@SD" group-title="General",AAU
-https://example.com/a.m3u8
-#EXTINF:-1 tvg-id="Aaa.us@SD" group-title="General",AAA
-https://example.com/b.m3u8
-#EXTINF:-1 tvg-id="Aab.uk@SD" group-title="General",AAB
-https://example.com/c.m3u8
-`
-  // Alphabetically the US row would survive a naive limit of 1; filtering first
-  // means the cap applies to the requested country only.
-  const items = toItems(parseM3u(playlist), { countries: new Set(['GB']), limit: 1 })
-  assert.equal(items.length, 1)
-  assert.ok(items.every(item => item.countryCode === 'GB'))
+  const channels = new Set(['BBCNews.uk', ...Object.values(EPG_ALIASES)])
+  assert.equal(epgIdFor('BBCNews.uk', channels), 'BBCNews.uk')
+  assert.equal(epgIdFor('BBCTwo.uk', channels), 'BBCTwoHD.uk')
+  assert.equal(epgIdFor('Channel4.uk', channels), 'Channel4London.uk')
+  assert.equal(epgIdFor('Channel5.uk', channels), '5.uk')
+  assert.equal(epgIdFor('Now80s.uk', channels), null)
+  assert.equal(epgIdFor('Channel4.uk', new Set()), null)
+  assert.equal(epgIdFor(null, channels), null)
 })
