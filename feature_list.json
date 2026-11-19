@@ -155,8 +155,8 @@
         "sync": "node scripts/sync-epg.mjs: 287 channels / 48,965 programmes in broad guide, existing extract 9,122 programmes. Default M3U compared directly to live source: matches (308 entries / 297 groups). pnpm sync:tv --check fails on upstream drift in optional Free-TV country snapshots; unrelated JSON unchanged.",
         "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md. PR review regressions: scripts/browser-tv-review.mjs passes in development and static Chrome; removal persists across feed/country/reload, timer/visible/online built-in/custom guide refresh, request deduplication, cache-on-failure and uploaded guide preservation. Twelve additional screenshots docs/screenshots/frq-05-review-{dev,static}-*.png.",
         "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked.",
-        "ci": "Review-fix commit cdfe497 Quality passed on push/PR runs 44473499414 and 44473506279.",
-        "review": "Both available Codex review threads valid, fixed in cdfe497, replied with test/browser evidence and resolved: 4625042529 and 4625042538. No Claude review thread was present."
+        "ci": "Quality passed on head 524c032: runs 44473789622 and 44473795189; ./init.sh recheck passes 73/73.",
+        "review": "Rechecked all review/inline/conversation comments: no new findings or Claude output. Both Codex threads valid, fixed in cdfe497, replied and resolved: 4625042529 and 4625042538."
       },
       "next_steps": [
         "Both available review threads are resolved and fix CI is green; review/merge PR #14.",
