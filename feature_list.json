@@ -1,6 +1,6 @@
 {
   "project": "frequency",
-  "last_updated": "2026-10-24",
+  "last_updated": "2026-11-18",
   "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
   "rules": {
     "single_active_feature": false,
@@ -32,14 +32,14 @@
       "summary": "TV channel order is fixed in code: orderChannels() sorts at runtime by guide, favourites, stream health and then title, and ESSENTIAL_BRANDS decides at sync time which channels are 'essential'. Make the order and the essentials set deliberate and easy to change.",
       "summary_of_intent": "User: 'Order: edit orderChannels() for runtime order, or ESSENTIAL_BRANDS for what counts as essential'",
       "scope": [
-        "app/public/media.ts — orderChannels() runtime sort",
-        "app/public/entry.tsx — orderChannels call sites",
-        "scripts/iptv-parse.mjs — ESSENTIAL_BRANDS and the toItems() snapshot sort",
-        "test/media.test.js — ordering tiers"
+        "app/public/media.ts \u2014 orderChannels() runtime sort",
+        "app/public/entry.tsx \u2014 orderChannels call sites",
+        "scripts/iptv-parse.mjs \u2014 ESSENTIAL_BRANDS and the toItems() snapshot sort",
+        "test/media.test.js \u2014 ordering tiers"
       ],
       "verification": {
-        "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24); new ordering tests in test/media.test.js",
-        "browser": "Chrome via Playwright against pnpm run dev: ?scope=watch grid opens BBC One Scotland · BBC News South Asia · BBC News Asia Pacific · ITV2 · ITV3 · ITV4 · Channel 4 · Channel 5 · E4 · More4 · 5USA · Sky News Weather · GB News (config pin order, offline pinned kept), then essentials StarPlus · CNBC UK · DAZN Combat. watch 144 / listen 29 / all 173 cards, no duplicates, no console errors. Screenshot docs/screenshots/frq-01-watch-order.png.",
+        "check": "pnpm run check \u2014 60/60 tests, typecheck and lint clean (2026-10-24); new ordering tests in test/media.test.js",
+        "browser": "Chrome via Playwright against pnpm run dev: ?scope=watch grid opens BBC One Scotland \u00b7 BBC News South Asia \u00b7 BBC News Asia Pacific \u00b7 ITV2 \u00b7 ITV3 \u00b7 ITV4 \u00b7 Channel 4 \u00b7 Channel 5 \u00b7 E4 \u00b7 More4 \u00b7 5USA \u00b7 Sky News Weather \u00b7 GB News (config pin order, offline pinned kept), then essentials StarPlus \u00b7 CNBC UK \u00b7 DAZN Combat. watch 144 / listen 29 / all 173 cards, no duplicates, no console errors. Screenshot docs/screenshots/frq-01-watch-order.png.",
         "regression": "Radio order compared against main's orderChannels on public/catalogue.json (with and without listings): identical, 29 items."
       },
       "next_steps": [
@@ -58,18 +58,18 @@
       "plan": "docs/plans/frq-02-channel-config.md",
       "plan_status": "approved",
       "summary": "A committed config (e.g. scripts/iptv-config.json) applied during sync:iptv. It has a pinned list of ids in display order, a hide list of ids, and an add list of known-good streams iptv-org lacks or filters out. Gives manual control over the catalogue without editing parser code.",
-      "summary_of_intent": "User: 'can i control the order and get rid of some' — chose 'Channel config (pin/hide/add)' when asked which IPTV problems to add to the feature list.",
+      "summary_of_intent": "User: 'can i control the order and get rid of some' \u2014 chose 'Channel config (pin/hide/add)' when asked which IPTV problems to add to the feature list.",
       "scope": [
-        "scripts/sync-iptv.mjs — load and apply config",
-        "scripts/iptv-parse.mjs — pin/hide/add in toItems()",
-        "scripts/iptv-config.json — new",
-        "test/ — config application tests",
-        "docs/iptv.md — document the config",
-        "app/public/tv-catalogue.js — pass through `pin`"
+        "scripts/sync-iptv.mjs \u2014 load and apply config",
+        "scripts/iptv-parse.mjs \u2014 pin/hide/add in toItems()",
+        "scripts/iptv-config.json \u2014 new",
+        "test/ \u2014 config application tests",
+        "docs/iptv.md \u2014 document the config",
+        "app/public/tv-catalogue.js \u2014 pass through `pin`"
       ],
       "verification": {
-        "check": "pnpm run check — 56/56 tests, typecheck and lint clean (2026-10-24); 8 new tests in test/iptv-config.test.js",
-        "sync": "pnpm sync:iptv — 144 channels, 13 pinned/0 hidden/0 added; seed pin ids ITV1.uk and SkyNews.uk were flagged as unmatched and corrected; pnpm sync:iptv --check then passed twice",
+        "check": "pnpm run check \u2014 56/56 tests, typecheck and lint clean (2026-10-24); 8 new tests in test/iptv-config.test.js",
+        "sync": "pnpm sync:iptv \u2014 144 channels, 13 pinned/0 hidden/0 added; seed pin ids ITV1.uk and SkyNews.uk were flagged as unmatched and corrected; pnpm sync:iptv --check then passed twice",
         "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels: with hide:[StarPlus.uk] and one add entry, StarPlus absent from grid and search, added channel rendered, health 'ok' and played (video readyState 4, 6.6s elapsed), no console errors. Screenshot docs/screenshots/frq-02-config-added-playing.png. Temporary config reverted."
       },
       "next_steps": [
@@ -84,15 +84,15 @@
       "plan": "docs/plans/frq-03-video-player-ux.md",
       "plan_status": "approved",
       "summary": "Move full screen and other controls onto the video, play TV inline in the card with a docked miniplayer, and pin the player under the top bar on mobile so pressing play always shows the video.",
-      "summary_of_intent": "User: 'i would like the tv player to behave like the leading stream sites eg youtube. where the fullscreen toggle is overlaying the video. pressing play should get the player oupuput windows in focus on mobile. it should be possible to launch the stream without going into the full open window' — chose both inline-in-card and miniplayer, and sticky top player on mobile.",
+      "summary_of_intent": "User: 'i would like the tv player to behave like the leading stream sites eg youtube. where the fullscreen toggle is overlaying the video. pressing play should get the player oupuput windows in focus on mobile. it should be possible to launch the stream without going into the full open window' \u2014 chose both inline-in-card and miniplayer, and sticky top player on mobile.",
       "scope": [
-        "app/public/entry.tsx — player modes, overlay controls, fullscreen",
-        "public/styles.css — overlay, inline tile, mini video, sticky mobile stage",
-        "README.md — Watching section"
+        "app/public/entry.tsx \u2014 player modes, overlay controls, fullscreen",
+        "public/styles.css \u2014 overlay, inline tile, mini video, sticky mobile stage",
+        "README.md \u2014 Watching section"
       ],
       "verification": {
-        "check": "pnpm run check — 60/60 tests, typecheck and lint clean (2026-10-24). No new unit tests: the mode logic is UI-bound in entry.tsx; covered by the browser checks below.",
-        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels. Desktop 1366×860: Afrobeat TV played inside its card (readyState 4, no stage); scrolled away → docked in bottom bar, still playing; scrolled back → inline; ⤢ → stage with overlay controls; ⛶ and `f` → .player-frame is document.fullscreenElement with controls visible; controls go idle after 3 s and wake on pointer move; `k` pauses. Guide view → mini; Listen scope keeps the TV mini; playing radio shows no stage/mini video. Phone 390×844 touch: Brit Asia TV from mid-grid → sticky 16:9 player at top:0 immediately and still pinned after scrolling 900px; collapse → mini thumbnail keeps playing (videoWidth 1920). Failed ITV2 shows 'Stream unavailable' over the stage. Only console error: one geo-blocked logo ERR_NAME_NOT_RESOLVED (pre-existing). Screenshots docs/screenshots/frq-03-*.png.",
+        "check": "pnpm run check \u2014 60/60 tests, typecheck and lint clean (2026-10-24). No new unit tests: the mode logic is UI-bound in entry.tsx; covered by the browser checks below.",
+        "browser": "Chrome via Playwright against pnpm run dev, ?scope=watch&view=channels. Desktop 1366\u00d7860: Afrobeat TV played inside its card (readyState 4, no stage); scrolled away \u2192 docked in bottom bar, still playing; scrolled back \u2192 inline; \u2922 \u2192 stage with overlay controls; \u26f6 and `f` \u2192 .player-frame is document.fullscreenElement with controls visible; controls go idle after 3 s and wake on pointer move; `k` pauses. Guide view \u2192 mini; Listen scope keeps the TV mini; playing radio shows no stage/mini video. Phone 390\u00d7844 touch: Brit Asia TV from mid-grid \u2192 sticky 16:9 player at top:0 immediately and still pinned after scrolling 900px; collapse \u2192 mini thumbnail keeps playing (videoWidth 1920). Failed ITV2 shows 'Stream unavailable' over the stage. Only console error: one geo-blocked logo ERR_NAME_NOT_RESOLVED (pre-existing). Screenshots docs/screenshots/frq-03-*.png.",
         "ci": "Pushed directly to main as 3fb57e6 + c88158f (no PR). Pages 'Build and deploy' run 40054753293 succeeded on c88158f (build runs pnpm run check); frequency.wtf/assets/app.js contains the new player (2026-10-24)."
       },
       "next_steps": [
@@ -124,15 +124,48 @@
         "docs/tv-sources.md"
       ],
       "verification": {
-        "check": "pnpm run check — 50/50 tests (new test/freetv-parse.test.js, rewritten tv-catalogue/media tests), typecheck and lint clean; pnpm run build ok, dist/tv has 87 files (2026-10-24)",
-        "sync": "pnpm sync:tv — 86 countries, 714 KB, Free-TV@05a6685, ~2 min. UK: 44 channels (Freeview/Freesat/Sky, radio skipped), 40 with guide. sync --check re-probes live streams, so a stream that flips between cors and ok (seen on Japan) fails it; this is upstream drift, not a code change.",
-        "browser": "Chrome via Playwright on pnpm run dev: UK grid opens BBC One · BBC Two · ITV 1 · STV · S4C … in uk.md order, 44 logos, 13 Geo-blocked tags; picker shows '🇬🇧 UK', URL ?country=UK, ?country=GB rewrites to UK; VPN note 'Use a VPN set to the UK'; ITV 1 (http) calls window.open with its URL; BBC News and Bloomberg play inline (readyState 4); switching to France changes URL, cards and VPN note, and survives reload; Listen has no picker or note; UK Guide shows 40 TV rows and 448 programme blocks once public/epg exists; phone 390px no overflow. No console errors. Screenshots docs/screenshots/frq-04-*.png.",
+        "check": "pnpm run check \u2014 50/50 tests (new test/freetv-parse.test.js, rewritten tv-catalogue/media tests), typecheck and lint clean; pnpm run build ok, dist/tv has 87 files (2026-10-24)",
+        "sync": "pnpm sync:tv \u2014 86 countries, 714 KB, Free-TV@05a6685, ~2 min. UK: 44 channels (Freeview/Freesat/Sky, radio skipped), 40 with guide. sync --check re-probes live streams, so a stream that flips between cors and ok (seen on Japan) fails it; this is upstream drift, not a code change.",
+        "browser": "Chrome via Playwright on pnpm run dev: UK grid opens BBC One \u00b7 BBC Two \u00b7 ITV 1 \u00b7 STV \u00b7 S4C \u2026 in uk.md order, 44 logos, 13 Geo-blocked tags; picker shows '\ud83c\uddec\ud83c\udde7 UK', URL ?country=UK, ?country=GB rewrites to UK; VPN note 'Use a VPN set to the UK'; ITV 1 (http) calls window.open with its URL; BBC News and Bloomberg play inline (readyState 4); switching to France changes URL, cards and VPN note, and survives reload; Listen has no picker or note; UK Guide shows 40 TV rows and 448 programme blocks once public/epg exists; phone 390px no overflow. No console errors. Screenshots docs/screenshots/frq-04-*.png.",
         "not_verified": "Geo-blocked BBC playback: this machine is not on a UK connection (segments return 403); needs a check on a UK VPN."
       },
       "next_steps": [
-        "Open PR. Check BBC playback on a UK VPN.",
-        "Optional: Free-TV's 'Radio' sections for non-UK countries could feed Listen later."
+        "PR #12 merged (5850d36 in local Git history). Prior handoff records BBC One London playback on a UK VPN; no new live playback check on 2026-11-14.",
+        "Optional: Free-TV radio sections for non-UK countries could feed Listen later."
       ]
+    },
+    {
+      "id": "frq-05-tv-feed-management",
+      "title": "FRQ-05 TV feeds, channel verification and XMLTV",
+      "status": "in_progress",
+      "type": "feature",
+      "plan": "docs/plans/frq-05-tv-feed-management.md",
+      "plan_status": "approved",
+      "summary": "Manage multiple TV feeds and channels, verify playback, group alternate streams and connect custom XMLTV guides.",
+      "summary_of_intent": "User: use https://iptv-org.github.io/iptv/countries/uk.m3u as default; enable feeds/channels with bulk toggles, verify channels, connect EPG, Add channels link; browser screenshots in PR. Please implement the plan.",
+      "scope": [
+        "app/public",
+        "scripts",
+        "public/sw.js",
+        "test",
+        "docs"
+      ],
+      "verification": {
+        "check": "pnpm run build (includes typecheck, lint, tests): 73/73 tests pass after PR review fixes. Baseline ./init.sh 70/70.",
+        "sync": "node scripts/sync-epg.mjs: 287 channels / 48,965 programmes in broad guide, existing extract 9,122 programmes. Default M3U compared directly to live source: matches (308 entries / 297 groups). pnpm sync:tv --check fails on upstream drift in optional Free-TV country snapshots; unrelated JSON unchanged.",
+        "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md. PR review regressions: scripts/browser-tv-review.mjs passes in development and static Chrome; removal persists across feed/country/reload, timer/visible/online built-in/custom guide refresh, request deduplication, cache-on-failure and uploaded guide preservation. Twelve additional screenshots docs/screenshots/frq-05-review-{dev,static}-*.png.",
+        "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked.",
+        "ci": "Quality passed on head 524c032: runs 44473789622 and 44473795189; ./init.sh recheck passes 73/73.",
+        "review": "Rechecked all review/inline/conversation comments: no new findings or Claude output. Both Codex threads valid, fixed in cdfe497, replied and resolved: 4625042529 and 4625042538."
+      },
+      "next_steps": [
+        "Both available review threads are resolved and fix CI is green; review/merge PR #14.",
+        "Keep in_progress until merge, then update status to passing per developer-workflow."
+      ],
+      "github_issue": 13,
+      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13",
+      "github_pr": 14,
+      "github_pr_url": "https://github.com/machinescapes/FrequencyPlayer/pull/14"
     }
   ]
 }

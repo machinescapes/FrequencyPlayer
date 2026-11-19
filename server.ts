@@ -13,6 +13,10 @@ router.get('/epg/freeview.json', async () => {
     return new Response(null, {status:204,headers:{'Cache-Control':'no-store'}})
   }
 })
+router.get('/epg/tv.json', async () => {
+  try { return new Response(await readFile('./public/epg/tv.json'), {headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'}}) }
+  catch { return new Response(null, {status:204}) }
+})
 router.get('/assets/*', async ({request}) => (await assets.fetch(request)) ?? new Response('Asset not found', {status:404}))
 type Entry = { scripts: { importMap: { imports?: Record<string,string> }; preloads: string[]; href: string }; title: string; noscript: string }
 function page(entry: Entry) {

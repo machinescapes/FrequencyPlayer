@@ -2,38 +2,36 @@
 
 ## Verified Now
 
-- What is currently working: Free-TV catalogue for 86 countries, top-bar country picker (UK shown as 'UK'), VPN note, http/YouTube rows open in a new tab, UK guide join (40 channels).
-- What verification actually ran: pnpm run check 50/50; pnpm run build; pnpm sync:tv (full); Chrome Playwright desktop + phone on pnpm run dev (2026-10-24).
+- What is currently working: PR #14 review fixes in cdfe497, current head 524c032; both Codex findings replied and resolved, no new review comments; Quality green and PR mergeable.
+- What verification actually ran: ./init.sh passes typecheck/lint/73 tests; fetched all review threads, review comments and issue comments through GitHub APIs; both threads remain resolved; head Quality checks pass.
 
 ## Changed This Session
 
-- Code or behavior added: scripts/freetv-parse.mjs, scripts/sync-tv.mjs, scripts/tv-config.json, public/tv/*.json; tv-catalogue.js validators + UK/GB display helpers; media.ts external rows + file-order sort; entry.tsx country picker, per-country loading, VPN note, labels; styles.
-- Infrastructure or harness changes: tv-sync.yml replaces iptv-sync.yml; iptv-org code, data, tests and docs removed; docs/tv-sources.md.
+- Code or behavior added: None. This was a fresh audit of the existing PR comments; prior fixes remain applied.
+- Infrastructure or harness changes: None; existing browser evidence and tests retained.
 
 ## Broken Or Unverified
 
-- Known defect: none found.
-- Unverified path: geo-blocked BBC playback (this machine is outside the UK; segments 403) — check on a UK VPN.
-- Risk for the next session: a fresh worktree has no public/epg/freeview.json, so the Guide looks empty until `node scripts/sync-epg.mjs` runs. pnpm sync:tv --check can fail on live stream drift.
+- Known defect: No new finding. The automated Codex summary still describes its original e7af642 review snapshot; authoritative GitHub thread state is resolved for both findings.
+- Unverified path: No Claude-authored review output exists in current PR reviews, inline comments or issue comments. Real stream/VPN and device limitations remain as previously documented.
+- Risk for the next session: Preserve user-owned AGENTS.md prefix. Do not reopen resolved discussions or duplicate existing replies. Feature remains in_progress until merge.
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: none open; open the PR for feat/frq-04-freetv.
-- Why it is next: frq-04 is verified locally.
-- What counts as passing: Quality CI green; BBC plays on a UK VPN.
-- What must not change during that step: radio/Listen catalogue and Freeview guide.
+- Highest-priority unfinished feature: frq-05-tv-feed-management, approved/in_progress; PR #14 awaiting review/merge.
+- Why it is next: All currently published review findings are already addressed and resolved.
+- What counts as passing: Review/merge PR #14, then set feature passing. Review-comment action requested this session is complete.
+- What must not change during that step: User-owned AGENTS.md prefix; existing verified fixes and screenshot evidence; no merge without user direction.
 
 ## Commands
 
-- Startup: `./init.sh` then `node scripts/sync-epg.mjs` for guide data
-- Verification: `pnpm run check`; `TV_COUNTRIES=GB pnpm sync:tv`; browser script /tmp/frq04-pw/verify.mjs
-- Focused debug command: `node --test test/freetv-parse.test.js`
+- Startup: ./init.sh; pnpm run dev.
+- Verification: ./init.sh; gh pr checks 14 --repo machinescapes/FrequencyPlayer; GitHub reviewThreads query.
+- Focused debug command: node --test test/tv-feeds.test.js; scripts/browser-tv-review.mjs with external Playwright.
 
 ## Session Log
 
-- Startup: worktree .claude/worktrees/frq-04-freetv on feat/frq-04-freetv from origin/main c88158f; gh = mintsource; `pnpm run check` baseline 60/60.
-- frq-04-freetv-catalogue added (in_progress, plan approved).
-- Full pnpm sync:tv: 86 countries, 714 KB, Free-TV@05a6685, ~2 min; malformed rows skipped BA1 HU1 JP6 RS2.
-- frq-04 → passing: check 50/50, build ok, full sync 86 countries, Chrome desktop+phone verified.
-- PR #12 opened (issue #11), branch feat/frq-04-freetv pushed; BBC-on-VPN check handed to user.
-- Added BBC One London via scripts/tv-config.json (pinned after BBC One); BBC One guide alias → BBCOneYorkshire.uk (Free-TV's feed is Yorkshire). check 50/50; Chrome on UK VPN: London plays inline, guide row present.
+- Rechecked GitHub identity mintsource and repository/feature branch; read previous verified state, risks and approved FRQ-05 record. Preserved uncommitted user-owned AGENTS.md change.
+- `./init.sh` PASS: install, typecheck, lint, 73/73 tests.
+- Audited all PR #14 review threads, reviews, inline comments and conversation comments: no new findings or Claude review output. Comments 4625042529 and 4625042538 remain resolved with evidence-linked replies 4625194988 and 4625195215.
+- Current head 524c032 is mergeable; Quality runs 44473789622 and 44473795189 both passed. No source changes or duplicate replies needed.

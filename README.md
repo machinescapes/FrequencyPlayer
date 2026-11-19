@@ -68,7 +68,7 @@ Without `streamUrl`, live/show cards open `url` in an official tab; `feed` cards
 
 Manage collection provides separate official/direct addresses, logo, colour, broadcaster, schedule and show inputs. For an audio episode, a single URL still becomes its direct audio address. Device JSON import replaces only device additions, leaving the built-in file intact. Export contains device additions. Existing version-1 catalogues and localStorage entries remain supported; storage stays in that browser profile.
 
-TV channels come from [Free-TV/IPTV](https://github.com/Free-TV/IPTV), one country at a time; pick the country in the top bar (the UK by default). Geo-blocked channels need a VPN set to that country. To pin, hide or add channels, edit `scripts/tv-config.json` and run `pnpm sync:tv` (see [docs/tv-sources.md](docs/tv-sources.md)).
+TV starts with [IPTV-org UK](https://iptv-org.github.io/iptv/countries/uk.m3u). Choose **Watch → Add channels** to import more M3U feeds, switch feeds and channels on/off, use bulk toggles, verify playback and connect XMLTV guides. Matching channels share a card with a remembered stream choice and inline fallback. Free-TV country catalogues remain optional sources. Settings and guides are saved on this device, with import/export. Geo-blocked channels may need a VPN. See [TV feeds and channels](docs/tv-feeds.md) and [browser evidence](docs/tv-feed-browser-evidence.md); repository-level Free-TV pin/hide/add configuration is documented in [TV sources](docs/tv-sources.md).
 
 ## Offline and updates
 
