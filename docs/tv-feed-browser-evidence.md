@@ -67,7 +67,7 @@ are in [TV feeds and channels](tv-feeds.md).
 ## PR review regressions
 
 The two available review threads were posted by Codex, not Claude; both were
-valid and were fixed. The expanded check/build passes **73/73** tests.
+valid, fixed in `cdfe497`, replied to with evidence and resolved ([favourites reply](https://github.com/machinescapes/FrequencyPlayer/pull/14#discussion_r4625194988), [guide reply](https://github.com/machinescapes/FrequencyPlayer/pull/14#discussion_r4625195215)). Quality CI passed on both review-fix runs. The expanded check/build passes **73/73** tests.
 Focused real-Chrome checks pass against development and built static output,
 with no page errors and twelve additional screenshots (six per serving mode).
 

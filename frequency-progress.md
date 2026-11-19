@@ -61,3 +61,5 @@
 - Consume only unambiguous legacy favourite mappings and persist explicit removals, including delayed metadata; retain unmatched/ambiguous dormant legacy IDs.
 - Refresh built-in/remote custom TV guides on six-hour/foreground/online paths, deduplicate concurrent built-in requests, retain cached failures/uploaded files, and refresh media metadata.
 - Check/build 73/73; focused real-Chrome dev/static regressions pass with 12 added screenshots. Existing original 36 screenshots retained. Push/reply/resolve and CI confirmation next.
+
+- Review-fix commit cdfe497 pushed. Quality CI passed (44473499414 / 44473506279). Both review threads replied with evidence and resolved: 4625042529 / 4625042538. PR #14 remains open for review/merge.

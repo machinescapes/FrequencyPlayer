@@ -2,7 +2,7 @@
 
 ## Verified Now
 
-- What is currently working: FRQ-05 on feat/frq-05-tv-feed-management, PR #14 open; review fixes implemented for persistent favourite removals and TV guide lifecycle refresh.
+- What is currently working: FRQ-05 on feat/frq-05-tv-feed-management, PR #14 open; review fixes pushed as cdfe497 for persistent favourite removals and TV guide lifecycle refresh. Quality green; both threads replied and resolved.
 - What verification actually ran: ./init.sh 70/70 baseline; pnpm run build including check 73/73; scripts/browser-tv-review.mjs real Chrome dev/static passes, 12 new screenshots; original full suites already documented.
 
 ## Changed This Session
@@ -18,9 +18,9 @@
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: frq-05-tv-feed-management approved/in_progress; PR #14 awaiting fixed-code push, thread replies/resolution and review/merge.
-- Why it is next: User explicitly requested review-comment fixes and appropriate thread resolution.
-- What counts as passing: Fixes pushed, Quality green, evidence-linked replies posted, both addressed threads resolved; PR remains unmerged.
+- Highest-priority unfinished feature: frq-05-tv-feed-management approved/in_progress; PR #14 open, both available review threads resolved, Quality green; awaiting review/merge.
+- Why it is next: Requested review fixes and thread resolution are complete; review/merge is the next step.
+- What counts as passing: Achieved: fixes pushed, Quality green, evidence-linked replies posted and both threads resolved. PR remains unmerged; feature stays in_progress until merge.
 - What must not change during that step: User-owned AGENTS.md prefix, unrelated catalogue data, Listen behaviour, original browser screenshots.
 
 ## Commands
@@ -48,3 +48,10 @@
 - `pnpm run build` PASS: 73/73 tests, typecheck/lint and production bundle with explicit favourite-removal markers. Final focused dev browser suite PASS; no page errors.
 
 - Final focused static browser suite PASS after removal-marker edge fix: all lifecycle/retention checks, no page errors; 12 new review screenshots total.
+- Commit cdfe497: fixed both valid review findings, added 3 unit regressions and focused real-browser dev/static harness with 12 screenshots; documentation updated. Pushing to existing PR #14.
+- PR #14 updated with review-fix summary, 73-test result, 48 total screenshots and two additional embedded regression images.
+- Review-fix Quality CI PASS on both push/PR runs: 44473499414 (32s) and 44473506279 (19s), head cdfe497. Proceeding with evidence-linked replies and thread resolution.
+- PR #14: replied to review comment 4625042529 with fix cdfe497, tests and browser evidence: https://github.com/machinescapes/FrequencyPlayer/pull/14#discussion_r4625194988.
+- PR #14: thread PRRT_kwDOVODbGs65WdNU / comment 4625042529 RESOLVED after fix push and green CI.
+- PR #14: replied to review comment 4625042538 with fix cdfe497, tests and browser evidence: https://github.com/machinescapes/FrequencyPlayer/pull/14#discussion_r4625195215.
+- PR #14: thread PRRT_kwDOVODbGs65WdNa / comment 4625042538 RESOLVED after fix push and green CI.
