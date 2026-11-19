@@ -183,3 +183,29 @@ When resetting `session-handoff.md` at startup, write exactly this content:
 - Verification:
 - Focused debug command:
 ```
+
+## TV feed management (FRQ-05)
+
+The feed library supersedes the one-country TV loader described above. Watch
+combines enabled IPTV-org/M3U and optional Free-TV feeds. `tv-feeds.ts` owns
+parsing, reconciliation, grouping, matching and IndexedDB persistence;
+`tv-library.ts` loads/refreshes snapshots; `tv-manager.tsx` renders the Add channels
+panel within the existing App lifecycle. `tv-verify.ts` runs isolated muted HLS
+probes with cancellation. `xmltv.ts` is a lazy native-DOMParser browser module;
+the Node guide sync uses fast-xml-parser with the same guide conversion.
+
+The default same-origin snapshot is `public/tv/default.m3u`, refreshed by
+`pnpm sync:tv`. Optional Free-TV JSON catalogues retain their existing pipeline.
+`sync-epg.mjs` also generates `public/epg/tv.json`, a broad guide indexed by XMLTV
+channel IDs, independent of installed feeds. Radio's guide extract stays separate.
+TV settings live in the `frequency-tv-feeds` IndexedDB database; guide records
+are stored separately so switches/probe results do not rewrite large listings.
+Grouped TV media IDs use `watch:channel:<canonical-id>` (or an explicit group);
+programme station IDs are resolved to the same group. Stream preferences include
+the feed identity. Preserve dormant legacy favourites during migration.
+
+`scripts/browser-tv-feeds.mjs` uses external Playwright/installed Chromium for
+real playback fixtures, desktop/mobile checks and screenshot evidence. Usage and
+known live-catalogue drift are documented in `docs/tv-feeds.md` and
+`docs/tv-feed-browser-evidence.md`. Production offline manifests include every JS
+chunk, including lazy HLS/XMLTV modules. Streams remain uncached.

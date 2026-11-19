@@ -1,6 +1,6 @@
 {
   "project": "frequency",
-  "last_updated": "2026-11-14",
+  "last_updated": "2026-11-18",
   "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
   "rules": {
     "single_active_feature": false,
@@ -133,6 +133,35 @@
         "PR #12 merged (5850d36 in local Git history). Prior handoff records BBC One London playback on a UK VPN; no new live playback check on 2026-11-14.",
         "Optional: Free-TV radio sections for non-UK countries could feed Listen later."
       ]
+    },
+    {
+      "id": "frq-05-tv-feed-management",
+      "title": "FRQ-05 TV feeds, channel verification and XMLTV",
+      "status": "in_progress",
+      "type": "feature",
+      "plan": "docs/plans/frq-05-tv-feed-management.md",
+      "plan_status": "approved",
+      "summary": "Manage multiple TV feeds and channels, verify playback, group alternate streams and connect custom XMLTV guides.",
+      "summary_of_intent": "User: use https://iptv-org.github.io/iptv/countries/uk.m3u as default; enable feeds/channels with bulk toggles, verify channels, connect EPG, Add channels link; browser screenshots in PR. Please implement the plan.",
+      "scope": [
+        "app/public",
+        "scripts",
+        "public/sw.js",
+        "test",
+        "docs"
+      ],
+      "verification": {
+        "check": "pnpm run check and pnpm run build: typecheck, lint, 70/70 tests pass (2026-11-18). ./init.sh baseline 50/50 before implementation.",
+        "sync": "node scripts/sync-epg.mjs: 287 channels / 48,965 programmes in broad guide, existing extract 9,122 programmes. Default M3U compared directly to live source: matches (308 entries / 297 groups). pnpm sync:tv --check fails on upstream drift in optional Free-TV country snapshots; unrelated JSON unchanged.",
+        "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md.",
+        "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked."
+      },
+      "next_steps": [
+        "Review implementation plan at docs/plans/frq-05-tv-feed-management.md and browser evidence at docs/tv-feed-browser-evidence.md.",
+        "Open linked-issue PR with embedded screenshots, confirm Quality CI, review and merge. Keep in_progress until merge per developer-workflow."
+      ],
+      "github_issue": 13,
+      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13"
     }
   ]
 }

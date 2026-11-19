@@ -1,12 +1,15 @@
 import { createRoot, on, ref, type Handle } from 'remix/component'
 import { validateCatalogue, loadSaved, save, safeUrl, parseFeed } from './catalogue.js'
-import { validateTvCatalogue, validateTvIndex, displayCode, parseCountryParam, countryInSentence, flagEmoji, type TvCountry } from './tv-catalogue.js'
+import { validateTvIndex, displayCode, parseCountryParam, countryInSentence, flagEmoji, type TvCountry } from './tv-catalogue.js'
 import {
   filterMedia, mergeMedia, orderChannels, guideSections,
   categoryOptions, migrateFavourites, guideStationId, healthWarning, inScope,
   type MediaItem, type Scope,
 } from './media.ts'
 import { createScheduleClient, nowAndNext, dateInput, localDay, normalizeFavourites, type Schedule, type Programme } from './epg.ts'
+import { TvLibrary } from './tv-library.ts'
+import { createTvManager } from './tv-manager.tsx'
+import { groupChannels, channelProgrammes, orderedStreams, channelKey, streamKey, type Channel, type Stream } from './tv-feeds.ts'
 import { setupNavigation } from './navigation.js'
 import { createPlayback, type PlaybackState } from './playback.ts'
 
@@ -64,21 +67,20 @@ function readHash(): { scope: Scope | null; view: View | null; country: string |
   return {
     scope: scope === 'watch' || scope === 'listen' || scope === 'all' ? scope : null,
     view: view === 'guide' ? 'Guide' : view === 'channels' ? 'Channels' : null,
-    country: parseCountryParam(params.get('country')),
+    country: params.get('country')?.toUpperCase() === 'ALL' ? 'ALL' : parseCountryParam(params.get('country')),
   }
 }
-
-// Per-country TV catalogues are cached for offline use; keep the last few so
-// browsing many countries cannot fill localStorage.
-const TV_CACHE_LIMIT = 3
 
 function App(handle: Handle) {
   const initial = readHash()
   let radioItems: CatalogueItem[] = [], custom = loadSaved('frequency.custom', []) as CatalogueItem[], tvItems: TvRow[] = []
   let tvUnavailable = false
   let tvCountries: TvCountry[] = []
-  let tvCountry = initial.country ?? parseCountryParam(loadSaved('frequency.tv.country', 'GB') as string) ?? 'GB'
-  let tvRequest: AbortController | undefined
+  let tvCountry = initial.country ?? (loadSaved('frequency.tv.country', 'GB') === 'ALL' ? 'ALL' : parseCountryParam(loadSaved('frequency.tv.country', 'GB') as string)) ?? 'GB'
+  let feedFilter = 'all'
+  let channels: Channel[] = [], allChannels: Channel[] = [], tvProgrammes: Programme[] = []
+  let activeStream: Stream | undefined
+  const triedStreams = new Set<string>()
   let favourites = migrateFavourites(loadSaved, save)
   let scope: Scope = initial.scope ?? (loadSaved('frequency.scope', 'all') as Scope)
   let view: View = initial.view ?? (loadSaved('frequency.view', 'Channels') as View)
@@ -109,6 +111,8 @@ function App(handle: Handle) {
     },
     onChange: state => {
     playbackState = state
+    if (state.status === 'playing' && notice === 'Trying another enabled stream…') notice = ''
+    if (state.status === 'failed' && selected?.source === 'watch') queueMicrotask(tryNextStream)
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = state.status === 'playing' ? 'playing' : state.status === 'paused' || state.status === 'blocked' ? 'paused' : 'none'
     update()
   } })
@@ -129,10 +133,71 @@ function App(handle: Handle) {
   const update = () => handle.update()
   const time = (value: number) => new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const programmes = () => schedules.flatMap(source => source.programmes)
+  const programmes = () => [...schedules.flatMap(source => source.programmes).filter(p => !p.stationId.startsWith('watch:')), ...tvProgrammes]
   const programmeIds = () => new Set(programmes().map(p => p.stationId))
   const info = (item: MediaItem) => nowAndNext(programmes(), guideStationId(item), clock)
   const allMedia = (): MediaItem[] => mergeMedia([...radioItems, ...custom].filter(i => i?.kind), tvItems, programmeIds())
+
+  const tvLibrary = new TvLibrary(APP_BASE_PATH, handle.signal, rebuildTv)
+  const tvManager = createTvManager(tvLibrary, update, handle.signal, () => tvCountries)
+
+  function rebuildTv() {
+    if (feedFilter !== 'all' && !tvLibrary.data.feeds.some(f => f.id === feedFilter && f.enabled)) feedFilter = 'all'
+    allChannels = groupChannels(tvLibrary.data)
+    channels = groupChannels(tvLibrary.data, feedFilter, tvCountry === 'ALL' ? 'all' : tvCountry)
+    tvProgrammes = channelProgrammes(channels)
+    tvItems = channels.map((channel, order) => {
+      const stream = orderedStreams(channel, tvLibrary.data.preferred[channel.id])[0]
+      return { id: channel.id, title: channel.title, url: stream.url, streamUrl: stream.playback === 'hls' ? stream.url : undefined, playback: stream.playback, logoUrl: stream.logoUrl, category: stream.category, countryCode: stream.countryCode, epgId: channel.guide?.channelId, labels: [stream.feedName, ...(stream.playback === 'external' ? ['External link'] : [])], order }
+    })
+    // Preserve dormant legacy favourites while migrating unambiguous grouped identities.
+    for (const channel of allChannels) if (channel.legacyIds.some(id => favourites.includes(id))) {
+      if (!favourites.includes(`watch:${channel.id}`)) favourites.push(`watch:${channel.id}`)
+    }
+    for (const feed of tvLibrary.data.feeds) for (const entry of feed.entries) {
+      if (entry.legacyId && favourites.includes(`watch:${entry.legacyId}`)) {
+        const match = allChannels.find(ch => ch.id === channelKey(entry))
+        if (match && !favourites.includes(`watch:${match.id}`)) favourites.push(`watch:${match.id}`)
+      }
+    }
+    save('frequency.favourites.v2', favourites)
+    if (selected?.source === 'watch' && activeStream) {
+      const group = allChannels.find(ch => ch.id === selected!.rawId)
+      if (!group?.streams.some(stream => stream.id === activeStream!.id && stream.feedId === activeStream!.feedId)) {
+        if (group?.streams.some(stream => stream.playback === 'hls')) queueMicrotask(tryNextStream)
+        else { playback.stop(); selected = null; activeStream = undefined }
+      }
+    }
+    tvUnavailable = tvLibrary.ready && !tvItems.length
+    update()
+  }
+
+  function streamSelector(item: MediaItem) {
+    if (item.source !== 'watch') return null
+    const channel = allChannels.find(ch => ch.id === item.rawId)
+    if (!channel || channel.streams.length < 2) return null
+    const chosen = selected?.id === item.id && activeStream ? streamKey(activeStream) : streamKey(orderedStreams(channel, tvLibrary.data.preferred[channel.id])[0])
+    return <label class="stream-selector">Stream<select aria-label={'Stream for ' + item.title} value={chosen} mix={on('change', event => {
+      const stream = channel.streams.find(entry => streamKey(entry) === event.currentTarget.value)
+      if (!stream) return
+      tvLibrary.data.preferred[channel.id] = streamKey(stream); tvLibrary.changed()
+      if (stream.playback === 'external') openOfficial(item, stream.url)
+      else void play({ ...item, url: stream.url, streamUrl: stream.url })
+    })}>{channel.streams.map(stream => <option key={stream.feedId + stream.id} value={streamKey(stream)} selected={streamKey(stream) === chosen}>{stream.feedName} · {stream.title} · {stream.check?.status ?? (stream.playback === 'external' ? 'External ↗' : 'Not verified')}</option>)}</select></label>
+  }
+
+  async function startTvStream(item: MediaItem, stream: Stream) {
+    triedStreams.add(stream.url); activeStream = stream
+    selected = { ...item, url: stream.url, streamUrl: stream.url, labels: [stream.feedName] }
+    await playback.play({ streamUrl: stream.url, streamType: 'hls' })
+  }
+  function tryNextStream() {
+    if (!selected || selected.source !== 'watch' || handle.signal.aborted) return
+    const channel = allChannels.find(ch => ch.id === selected!.rawId)
+    const stream = channel && orderedStreams(channel, tvLibrary.data.preferred[channel.id]).find(entry => entry.playback === 'hls' && !triedStreams.has(entry.url))
+    if (stream) { notice = 'Trying another enabled stream…'; void startTvStream(selected, stream) }
+    else if (playbackState.status !== 'failed') { playback.stop(); activeStream = undefined; selected = null; update() }
+  }
 
   function currentMedia(): MediaItem[] {
     return allMedia().filter(item => inScope(item, scope))
@@ -161,40 +226,11 @@ function App(handle: Handle) {
   }
 
   function tvCountryInfo(code = tvCountry): TvCountry {
-    return tvCountries.find(country => country.code === code) ?? { code, name: displayCode(code), channels: 0 }
-  }
-
-  /** Load one country's channels, falling back to the copy saved offline. */
-  function loadTvCountry(code: string) {
-    tvRequest?.abort()
-    const request = new AbortController()
-    tvRequest = request
-    handle.signal.addEventListener('abort', () => request.abort(), { once: true })
-    const key = `frequency.tv.${code}`
-    return fetch(`${APP_BASE_PATH}tv/${code}.json`, { signal: request.signal })
-      .then(response => { if (!response.ok) throw Error(); return response.json() })
-      .then(data => {
-        if (request !== tvRequest) return
-        tvItems = validateTvCatalogue(data); tvUnavailable = false
-        save(key, data)
-        const recent = [code, ...(loadSaved('frequency.tv.recent', []) as string[]).filter(saved => saved !== code)]
-        for (const stale of recent.slice(TV_CACHE_LIMIT)) { try { localStorage.removeItem(`frequency.tv.${stale}`) } catch { /* storage unavailable */ } }
-        save('frequency.tv.recent', recent.slice(0, TV_CACHE_LIMIT))
-      })
-      .catch(() => {
-        if (request !== tvRequest) return
-        try { tvItems = validateTvCatalogue(loadSaved(key, { version: 1, items: [] })); tvUnavailable = !tvItems.length }
-        catch { tvItems = []; tvUnavailable = true }
-      })
+    return tvCountries.find(country => country.code === code) ?? { code, name: code === 'ALL' ? 'All countries' : displayCode(code), channels: 0 }
   }
 
   function setTvCountry(code: string) {
-    if (code === tvCountry) return
-    tvCountry = code; category = 'All'
-    // The new country has no listings unless it is the UK.
-    if (view === 'Guide' && code !== 'GB' && scope === 'watch') view = 'Channels'
-    persistContext()
-    void loadTvCountry(code).then(update)
+    tvCountry = code; category = 'All'; persistContext(); rebuildTv()
   }
 
   function setView(next: View) {
@@ -243,8 +279,8 @@ function App(handle: Handle) {
       if (fallback) favourites = [fallback.id]
     }
     // Only one TV country is loaded at a time; keep favourites from the others.
-    const otherCountries = favourites.filter(id => id.startsWith('watch:') && !id.startsWith(`watch:${tvCountry}:`))
-    favourites = [...normalizeFavourites(favourites, media.map(item => item.id)), ...otherCountries]
+    const otherCountries = favourites.filter(id => id.startsWith('watch:'))
+    favourites = [...new Set([...normalizeFavourites(favourites, media.map(item => item.id)), ...otherCountries])]
     save('frequency.favourites.v2', favourites)
     const saved = loadSaved('frequency.selected', '') as string
     selected = media.find(item => item.id === saved) ?? media.find(item => favourites.includes(item.id)) ?? null
@@ -272,7 +308,7 @@ function App(handle: Handle) {
   }
 
   function openOfficial(item: MediaItem, url = item.url) {
-    playback.stop(); selected = item; save('frequency.selected', item.id)
+    playback.stop(); activeStream = undefined; selected = item; save('frequency.selected', item.id)
     if ('mediaSession' in navigator) { navigator.mediaSession.metadata = null; navigator.mediaSession.playbackState = 'none' }
     window.open(url, '_blank', 'noopener')
     update()
@@ -299,6 +335,13 @@ function App(handle: Handle) {
       })
     }
     syncMetadata()
+    triedStreams.clear()
+    if (item.source === 'watch') {
+      const channel = allChannels.find(ch => ch.id === item.rawId)
+      const stream = channel && orderedStreams(channel, tvLibrary.data.preferred[channel.id])[0]
+      if (stream?.playback === 'hls') { await startTvStream(item, stream); return }
+    }
+    activeStream = undefined
     await playback.play({ streamUrl: item.streamUrl, streamType: item.streamType ?? 'hls' })
   }
 
@@ -386,11 +429,11 @@ function App(handle: Handle) {
       .then(data => { tvCountries = validateTvIndex(data); save('frequency.tv.index', data) })
       .catch(() => { try { tvCountries = validateTvIndex(loadSaved('frequency.tv.index', { version: 1, countries: [] })) } catch { tvCountries = [] } })
       .finally(() => {
-        if (tvCountries.length && !tvCountries.some(country => country.code === tvCountry)) tvCountry = 'GB'
+        if (tvCountry !== 'ALL' && tvCountries.length && !tvCountries.some(country => country.code === tvCountry)) tvCountry = 'GB'
         persistContext()
         update()
       })
-    loadTvCountry(tvCountry).finally(() => { initializeSelection(); update() })
+    void tvLibrary.start().then(() => { rebuildTv(); initializeSelection() })
     if ('serviceWorker' in navigator) navigator.serviceWorker.register(`${APP_BASE_PATH}sw.js`, { scope: APP_BASE_PATH, updateViaCache: 'none' }).then(serviceWorkerRegistration => {
       registration = serviceWorkerRegistration
       let startupCheckInProgress = true
@@ -584,6 +627,7 @@ function App(handle: Handle) {
           <h3>{item.title}</h3>
           <p>{item.streamUrl ? playLabel : item.source === 'watch' ? `${item.category} ↗` : 'Official player ↗'}</p>
           {item.source === 'watch' && item.labels.length ? <span class="channel-tags">{item.labels.map(label => <small key={label} class={'channel-tag' + (label === 'Geo-blocked' ? ' geo' : '')}>{label}</small>)}</span> : null}
+          {streamSelector(item)}
           {healthWarning(item) ? <small class="health-note">{healthWarning(item)}</small> : null}
         </div>
         <button class="favourite" aria-label={(favourites.includes(item.id) ? 'Remove favourite ' : 'Favourite ') + item.title} aria-pressed={favourites.includes(item.id)} mix={on('click', () => toggleFavourite(item.id))}>{favourites.includes(item.id) ? '♥' : '♡'}</button>
@@ -605,13 +649,15 @@ function App(handle: Handle) {
     return <label class="country-picker" title={`TV channels from ${current.name}`}>
       <span aria-hidden="true">{flagEmoji(current.code)} {displayCode(current.code)}</span>
       <select aria-label="TV country" value={tvCountry} mix={on('change', event => setTvCountry(event.currentTarget.value))}>
-        {tvCountries.map(country => <option key={country.code} value={country.code}>{flagEmoji(country.code)} {country.name} · {country.channels}</option>)}
+        <option value="ALL" selected={tvCountry === 'ALL'}>All countries</option>
+        {tvCountries.map(country => <option key={country.code} value={country.code} selected={country.code === tvCountry}>{flagEmoji(country.code)} {country.name} · {country.channels}</option>)}
       </select>
     </label>
   }
 
   function vpnNote() {
     if (scope === 'listen') return null
+    if (tvCountry === 'ALL') return <p class="vpn-note">Some channels require a VPN set to their broadcast country.</p>
     const where = countryInSentence(tvCountryInfo())
     return <p class="vpn-note" role="note">Many of these channels only stream inside {where}. Use a VPN set to {where}.</p>
   }
@@ -622,6 +668,7 @@ function App(handle: Handle) {
     const broadcasters = [...new Set(media.filter(item => item.broadcaster).map(item => item.broadcaster!))].sort()
     const showBroadcasters = scope === 'listen'
     return <div class="facet-row">
+      {scope !== 'listen' ? <label class="feed-filter">Feed<select aria-label="Filter TV feed" value={feedFilter} mix={on('change', event => { feedFilter = event.currentTarget.value; rebuildTv() })}><option value="all">All enabled feeds</option>{tvLibrary.data.feeds.filter(f => f.enabled).map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label> : null}
       {showBroadcasters
         ? <div class="collection-filters" role="group" aria-label="Filter by broadcaster">
             {['All', ...broadcasters].map(name => <button key={name} aria-pressed={broadcaster === name} mix={on('click', () => { broadcaster = name; update() })}>{name === 'All' ? 'All broadcasters' : name}</button>)}
@@ -678,6 +725,7 @@ function App(handle: Handle) {
 
         <div class="page-content">
           <div class="view-toolbar">
+            {scope !== 'listen' ? <button class="add-channels primary" mix={on('click', tvManager.open)}>＋ Add channels</button> : null}
             <div class="view-toggle" role="group" aria-label="Main view">
               <button aria-pressed={view === 'Channels'} mix={on('click', () => setView('Channels'))}>▦ Channels</button>
               <button aria-pressed={view === 'Guide'} aria-disabled={!guideAvailable} disabled={!guideAvailable} mix={on('click', () => setView('Guide'))}>☷ Guide</button>
@@ -709,6 +757,7 @@ function App(handle: Handle) {
                 <p>{selected.title}{current ? ` · ${time(current.start)}–${time(current.end)}` : ''}{next ? ` · Next ${time(next.start)} ${next.title}` : ''}</p>
               </div>
               <div class="stage-actions">
+                {streamSelector(selected)}
                 {destination(selected, selected.streamUrl ?? selected.url, 'Open stream')}
                 <button aria-label="Close player" mix={on('click', closePlayer)}>{icon('close')}</button>
               </div>
@@ -735,7 +784,7 @@ function App(handle: Handle) {
               </div>
               {facetRow()}
               <div class="card-grid">{listingsFirst.map(card)}</div>
-              {!listingsFirst.length && !onNow.length ? <p class="empty-message">No channels match this filter.</p> : null}
+              {!listingsFirst.length && !onNow.length ? <p class="empty-message">No channels match this filter. {scope !== 'listen' ? <button mix={on('click', tvManager.open)}>Add channels</button> : null}</p> : null}
             </section>
 
             {onDemand.length ? <section class="on-demand-section">
@@ -743,7 +792,7 @@ function App(handle: Handle) {
               <div class="card-grid">{onDemand.map(card)}</div>
             </section> : null}
 
-            {tvUnavailable && scope !== 'listen' ? <p class="empty-message">TV channels for {tvCountryInfo().name} are unavailable. Check tv/{tvCountry}.json.</p> : null}
+            {tvUnavailable && scope !== 'listen' ? <p class="empty-message">No enabled TV channels for {tvCountry === 'ALL' ? 'these feeds' : tvCountryInfo().name}. <button mix={on('click', tvManager.open)}>Add channels</button></p> : null}
           </div> : <section class="guide">
             <div class="guide-controls">
               <label>Date <input aria-label="Guide date" type="date" value={guideDate} mix={on('change', event => selectGuideDate(event.currentTarget.value))}/></label>
@@ -805,6 +854,7 @@ function App(handle: Handle) {
         </div>
       </section>
 
+      {tvManager.render()}
       {paletteOpen ? <div class="palette-backdrop" mix={on('click', event => { if (event.target === event.currentTarget) closePalette() })}>
         <div class="palette" role="dialog" aria-modal="true" aria-label="Search">
           <label class="palette-search"><span>⌕</span><input type="search" placeholder="Search channels and stations" aria-label="Search channels and stations" value={query} mix={[ref(node => { paletteInput = node as HTMLInputElement }), on('input', event => { query = event.currentTarget.value; update() })]}/><kbd>Esc</kbd></label>

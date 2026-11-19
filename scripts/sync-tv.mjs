@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir, readdir, rm } from 'node:fs/promises'
 import path from 'node:path'
+import { DEFAULT_TV_URL, parseM3u } from '../app/public/tv-feeds.ts'
 import { COUNTRY_FILES, isCountryFile, parseList, applyConfig, epgIdFor } from './freetv-parse.mjs'
 
 const REPO = 'Free-TV/IPTV'
@@ -56,6 +57,14 @@ async function readConfig() {
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('scripts/tv-config.json must be an object keyed by country code.')
   return config
 }
+
+// Keep a same-origin default snapshot alongside optional Free-TV catalogues.
+const defaultResponse = await fetch(DEFAULT_TV_URL, { signal: AbortSignal.timeout(30000) })
+if (!defaultResponse.ok) throw Error(`Default playlist HTTP ${defaultResponse.status}`)
+const defaultPlaylist = (await defaultResponse.text()).replaceAll('\r\n', '\n')
+parseM3u(defaultPlaylist)
+if (!CHECK) { await mkdir(OUTPUT, { recursive: true }); await writeFile(path.join(OUTPUT, 'default.m3u'), defaultPlaylist) }
+else if (await readFile(path.join(OUTPUT, 'default.m3u'), 'utf8').catch(() => '') !== defaultPlaylist) { console.error('public/tv/default.m3u differs from the live default feed.'); process.exitCode = 1 }
 
 // Pin the run to one commit so every list comes from the same revision.
 const [{ sha: commit }] = await get(`${API}/commits?per_page=1`)

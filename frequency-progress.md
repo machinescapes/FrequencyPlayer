@@ -2,6 +2,8 @@
 
 ## Current Verified State
 
+- 2026-11-18: FRQ-05 implemented on `feat/frq-05-tv-feed-management` (issue #13): default IPTV-org UK, Add channels, multiple feed/entry controls, browser verification, grouped stream selection/fallback, custom XMLTV and broader UK EPG, IndexedDB/transfer/offline. Check/build pass with 70 tests. Development and static Chrome desktop/mobile suites pass with 36 screenshots; see `docs/tv-feed-browser-evidence.md`. Optional Free-TV live snapshot check reports upstream drift; default M3U matches upstream. Awaiting PR review/merge; no production deployment claimed.
+
 - 2026-11-14: Local checkout includes merged PR #12 (5850d36) and subsequent catalogue refresh; older iptv-org notes below are historical. `./init.sh` passes: typecheck, lint, 50/50 tests. No browser or deployment verification this session. All tracked features remain passing; local main was behind origin/main by 2 commits at startup.
 
 - 2026-10-24: `main` includes frq-01, frq-02 (PR #10) and frq-03 (direct push, `c88158f`), all live on frequency.wtf. Earlier today: `main` at `81de95b` (deploys to frequency.wtf root). `pnpm run check` passes: typecheck, lint and 48/48 tests.
@@ -41,3 +43,10 @@
 
 - TV now comes from Free-TV/IPTV, one country at a time (`public/tv/<CC>.json`, 86 countries, 714 KB total). iptv-org removed. File order and logos are preserved; http/YouTube rows open in a new tab; geo-blocked rows are kept and labelled. A top-bar country picker shows the UK as "UK", and a VPN note is on every Watch page. `tv-sync.yml` runs weekly.
 - Verified: `pnpm run check` 50/50, build, full sync, Chrome desktop and phone (screenshots `docs/screenshots/frq-04-*.png`). BBC inline playback is unverified from outside the UK.
+
+### Session 2026-11-18: FRQ-05 feed management
+
+- User approved the detailed plan and browser screenshot requirement. Issue #13; plan `docs/plans/frq-05-tv-feed-management.md` approved, feature in_progress.
+- Added pure feed/group/guide logic, separate IndexedDB guide records, import/export/refresh controls, native browser XMLTV parsing, muted isolated verification and fallback player integration. Optional Free-TV UK defaults off; legacy favourites preserved/matched where unambiguous.
+- Verified actual HLS fixture playback, definitive/inconclusive exclusions, cancellation, manual EPG/group mapping, feed switches/bulk/refresh/new/error, XML/GZ upload, remembered preference, transfer/reload/offline and mobile playback. Initial select-value and browser harness issues were fixed and suites repeated successfully.
+- Existing optional Free-TV snapshots drift from live upstream; no unrelated country JSON changes. Actual upstream stream uptime and real iOS/gamepad hardware remain outside fixture evidence.

@@ -763,3 +763,77 @@ main{margin-left:0}
     .card-info .channel-tag { font-size: 7px; padding: 0 3px; }
   }
 }
+
+/* TV feed management: the same collection controls on desktop and touch. */
+@layer components {
+  .view-toolbar { gap: 1rem; flex-wrap: wrap; }
+  .add-channels { order: 2; margin-inline-start: auto; }
+  .feed-filter, .stream-selector { display: flex; align-items: center; gap: .5rem; font-size: .75rem; min-width: 0; }
+  .feed-filter select, .stream-selector select { max-width: 100%; min-width: 0; padding: .35rem; border-radius: .5rem; background: var(--surface, #202522); color: inherit; border: 1px solid var(--border, #404840); }
+  .stream-selector { margin-top: .5rem; flex-wrap: wrap; }
+  .stream-selector select { width: 100%; }
+  .facet-row { flex-wrap: wrap; gap: .6rem; }
+  dialog.tv-manager { width: min(1120px, calc(100vw - 32px)); max-width: none; padding: 0; max-height: calc(100dvh - 40px); overflow: auto; background: #161c18; color: #edf0e9; border: 1px solid #3c473e; border-radius: 20px; }
+  .tv-manager-head { display: flex; justify-content: space-between; align-items: start; padding: 24px 28px; border-bottom: 1px solid #354036; }
+  .tv-manager-head h2 { margin: .35rem 0; font-size: 1.8rem; }
+  .tv-manager-head p { margin: 0; color: #aab8ac; }
+  .tv-manager-head > button { font-size: 1.5rem; }
+  .eyebrow { font-size: .65rem; letter-spacing: .16em; color: #c5e762; }
+  .tv-manager-body { display: grid; grid-template-columns: 260px minmax(0, 1fr); }
+  .tv-feed-sidebar { padding: 20px; background: #111713; border-right: 1px solid #354036; }
+  .tv-feed-sidebar h3 { margin: 0 0 14px; }
+  .tv-feed-row { display: flex; gap: .6rem; align-items: center; padding: 8px; border: 1px solid transparent; border-radius: 10px; margin-bottom: 6px; }
+  .tv-feed-row.active { background: #263125; border-color: #53664b; }
+  .tv-feed-row input, .tv-entry input { width: 18px; height: 18px; accent-color: #c5e762; flex: none; }
+  .tv-feed-row button { text-align: start; background: transparent; border: 0; flex: 1; min-width: 0; padding: 0; }
+  .tv-feed-row strong, .tv-feed-row small { display: block; overflow-wrap: anywhere; }
+  .tv-feed-row small { color: #aab8ac; margin-top: 4px; }
+  .tv-import { border-top: 1px solid #354036; margin-top: 18px; padding-top: 14px; }
+  .tv-import summary, .tv-guide-settings summary { cursor: pointer; padding-block: 6px; font-weight: 600; }
+  .tv-import label, .tv-guide-settings label, .tv-entry-settings label { display: grid; gap: 6px; font-size: .8rem; margin-top: 12px; }
+  .tv-manager input:not([type=checkbox]), .tv-manager select { width: 100%; min-width: 0; box-sizing: border-box; background: #111713; color: #edf0e9; border: 1px solid #455247; border-radius: 8px; padding: 9px; }
+  .tv-manager input[type=file] { font-size: .7rem; }
+  .tv-import form > button { margin-top: 12px; width: 100%; }
+  .tv-import p, .tv-guide-settings p { font-size: .78rem; color: #aab8ac; line-height: 1.5; }
+  .tv-channel-panel { padding: 24px; min-width: 0; }
+  .tv-panel-heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
+  .tv-panel-heading h3 { margin: 0 0 6px; font-size: 1.3rem; }
+  .tv-panel-heading p { margin: 0; font-size: .85rem; color: #aab8ac; }
+  .tv-muted { color: #aab8ac; display: block; margin-top: .5rem; font-size: .7rem; }
+  .tv-search { display: grid; gap: 6px; margin: 20px 0 12px; font-size: .8rem; }
+  .tv-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .tv-bulk span { margin-inline-end: auto; font-size: .75rem; color: #aab8ac; }
+  .tv-bulk button, .tv-entry button { padding: 7px 10px; font-size: .73rem; }
+  .tv-entry-list { border-top: 1px solid #354036; }
+  .tv-entry { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #2c372e; }
+  .tv-entry label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .tv-entry strong { display: block; font-size: .86rem; overflow-wrap: anywhere; }
+  .tv-entry small { display: block; color: #aab8ac; font-size: .68rem; margin-top: 4px; }
+  .tv-check { font-size: .67rem; color: #aab8ac; max-width: 110px; }
+  .tv-check.working { color: #c5e762; } .tv-check.failed { color: #ffb3a8; }
+  .tv-feedback { background: #263125; border-radius: 8px; padding: 12px; font-size: .8rem; overflow-wrap: anywhere; }
+  .tv-error { color: #ffb3a8; background: #3d2724; border-radius: 8px; padding: 12px; font-size: .8rem; }
+  .tv-guide-settings, .tv-entry-settings { margin-top: 20px; padding: 16px; border: 1px solid #455247; border-radius: 12px; }
+  .tv-entry-settings h4 { margin: 0; } .tv-entry-settings p { overflow-wrap: anywhere; font-size: .8rem; }
+  .tv-entry-settings button { margin-top: 12px; }
+  @media (max-width: 700px) {
+    dialog.tv-manager { width: calc(100vw - 16px); max-height: calc(100dvh - 16px); border-radius: 14px; }
+    .tv-manager-body { grid-template-columns: minmax(0, 1fr); }
+    .tv-feed-sidebar { border-right: 0; border-bottom: 1px solid #354036; }
+    .tv-manager-head, .tv-channel-panel, .tv-feed-sidebar { padding: 16px; }
+    .tv-entry { flex-wrap: wrap; } .tv-entry label { flex-basis: calc(100% - 90px); }
+    .tv-check { margin-left: 30px; max-width: none; flex: 1; }
+    .tv-entry button { margin-left: auto; }
+    .add-channels { margin-inline-start: 0; }
+  }
+}
+@layer components {
+  @media (max-width: 540px) {
+    .stage-bar { flex-wrap: wrap; }
+    .stage-info { flex: 1 1 100%; }
+    .stage-actions { flex: 1 1 100%; min-width: 0; gap: 8px; }
+    .stage-actions .stream-selector { flex: 1; min-width: 0; margin: 0; display: grid; gap: 4px; }
+    .stage-actions .stream-selector select { width: 100%; max-width: 100%; }
+    .stage-actions a, .stage-actions button { flex: none; }
+  }
+}

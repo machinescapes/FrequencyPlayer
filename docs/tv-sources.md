@@ -1,6 +1,9 @@
 # TV sources
 
-Frequency's Watch channels come from [Free-TV/IPTV](https://github.com/Free-TV/IPTV),
+Frequency's default Watch feed is now IPTV-org UK. Use **Add channels** to manage
+feeds, entry switches, browser verification and XMLTV; see [TV feeds](tv-feeds.md).
+
+The optional Free-TV country channels come from [Free-TV/IPTV](https://github.com/Free-TV/IPTV),
 a hand-curated list of free-to-air channels around the world. It replaced the
 much larger, unvetted iptv-org index in October 2026.
 

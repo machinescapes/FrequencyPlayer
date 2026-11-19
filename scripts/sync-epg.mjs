@@ -2,7 +2,15 @@ import { XMLParser, XMLValidator } from 'fast-xml-parser'
 import { createHash } from 'node:crypto'
 import { readFile, mkdir, writeFile } from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
+import { xmltvFromData, validateXmltvText } from '../app/public/xmltv.ts'
 import { validateSchedule } from '../app/public/epg.ts'
+
+export function parseTvGuide(xml, now = Date.now()) {
+  validateXmltvText(xml)
+  if (XMLValidator.validate(xml) !== true) throw Error('Malformed XMLTV.')
+  const data = new XMLParser({ ignoreAttributes: false, parseTagValue: false, trimValues: true, isArray: tag => ['channel', 'programme', 'display-name', 'title', 'desc'].includes(tag) }).parse(xml).tv
+  return xmltvFromData(data, 'uk-builtin', 'Freeview UK', now)
+}
 
 export const FEED_URL = 'https://raw.githubusercontent.com/dp247/Freeview-EPG/master/epg.xml'
 export function xmltvTime(value) {
@@ -57,12 +65,17 @@ export function extractSchedule(xml, items, now = Date.now(), tvItems = []) {
     coverageStart: Math.min(...programmes.map(p => p.start)), coverageEnd: Math.max(...programmes.map(p => p.end)), programmes })
 }
 export async function syncSchedule({ output = 'public/epg/freeview.json', fallbackUrl = process.env.EPG_FALLBACK_URL } = {}) {
-  let result
+  let result, tvGuideUpdated = false
   try {
     const response = await fetch(FEED_URL, { signal: AbortSignal.timeout(60000) })
     if (!response.ok) throw Error(`Feed HTTP ${response.status}`)
     const xml = await response.text()
     if (xml.length > 80000000) throw Error('Feed exceeds size limit')
+    const tvGuide = parseTvGuide(xml)
+    await mkdir('public/epg', { recursive: true })
+    await writeFile('public/epg/tv.json', JSON.stringify(tvGuide))
+    tvGuideUpdated = true
+    console.log(`Extracted broad TV guide: ${tvGuide.channels.length} channels, ${tvGuide.programmes.length} programmes`)
     const { items } = JSON.parse(await readFile('public/catalogue.json', 'utf8'))
     // The TV snapshot is optional: a radio-only checkout still builds.
     // Only UK TV channels share the Freeview guide.
@@ -72,6 +85,18 @@ export async function syncSchedule({ output = 'public/epg/freeview.json', fallba
     console.log(`Extracted ${result.programmes.length} programmes (${tvCount} TV channels)`)
   } catch (error) {
     console.warn('EPG refresh failed:', error.message)
+    // A fresh CI checkout can retain the last deployed broad guide too.
+    if (fallbackUrl && !tvGuideUpdated) {
+      try {
+        const previous = await fetch(fallbackUrl.replace(/freeview\.json$/, 'tv.json'), { signal: AbortSignal.timeout(20000) })
+        if (previous.ok) {
+          const { validateGuide } = await import('../app/public/tv-feeds.ts')
+          const guide = validateGuide(await previous.json())
+          await mkdir('public/epg', { recursive: true })
+          await writeFile('public/epg/tv.json', JSON.stringify(guide))
+        }
+      } catch { /* Keep the existing local guide if upstream and deployment are unavailable. */ }
+    }
     try { result = validateSchedule(JSON.parse(await readFile(output, 'utf8'))) } catch { /* Try last deployment. */ }
     if (!result && fallbackUrl) {
       try {
