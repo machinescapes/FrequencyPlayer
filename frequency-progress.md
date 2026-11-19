@@ -50,3 +50,7 @@
 - Added pure feed/group/guide logic, separate IndexedDB guide records, import/export/refresh controls, native browser XMLTV parsing, muted isolated verification and fallback player integration. Optional Free-TV UK defaults off; legacy favourites preserved/matched where unambiguous.
 - Verified actual HLS fixture playback, definitive/inconclusive exclusions, cancellation, manual EPG/group mapping, feed switches/bulk/refresh/new/error, XML/GZ upload, remembered preference, transfer/reload/offline and mobile playback. Initial select-value and browser harness issues were fixed and suites repeated successfully.
 - Existing optional Free-TV snapshots drift from live upstream; no unrelated country JSON changes. Actual upstream stream uptime and real iOS/gamepad hardware remain outside fixture evidence.
+
+- PR #14 opened for issue #13: https://github.com/machinescapes/FrequencyPlayer/pull/14. Seven embedded screenshots plus complete 36-image report; Quality CI pending. Implementation commit 45f324d, handoff commit 75d3203.
+
+- Quality CI passed on branch and PR runs 44466068797 / 44466079881; PR #14 is mergeable. All 36 screenshots committed; 7 embedded PR images verified. Feature awaits review/merge.

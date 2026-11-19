@@ -18,8 +18,8 @@
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: frq-05-tv-feed-management remains in_progress, approved and verified locally, awaiting PR/CI/review/merge.
-- Why it is next: Complete review and merge of this user-requested feature; no additional implementation feature is started.
+- Highest-priority unfinished feature: frq-05-tv-feed-management remains in_progress, approved and verified locally, PR #14 open, mergeable and Quality CI green; awaiting review/merge.
+- Why it is next: Review and merge PR #14 (local verification and Quality CI are green); no additional implementation feature is started.
 - What counts as passing: Quality CI green, reviewed PR with embedded browser screenshots, merge; update feature to passing after merge.
 - What must not change during that step: User-owned AGENTS.md prefix, Listen catalogue, unrelated optional country snapshots; retain all recorded evidence.
 
@@ -65,3 +65,6 @@
 - Mobile expanded-player layout fix verified in development suite: all stage controls inside the 390px viewport; no page errors. `pnpm run build` PASS again (70/70). Refreshing production captures for this visual correction.
 - Final static suite PASS after mobile action-row correction; every expanded-player action is within the 390px viewport, no page errors. 36 final screenshots ready for PR; docs/tv-feed-browser-evidence.md records all coverage and known catalogue drift.
 - Commit 45f324d: FRQ-05 implementation, approved plan, tests, docs and 36 browser screenshots. User-owned AGENTS.md prefix was not committed.
+- Commit 75d3203: committed implementation hash and complete browser handoff before pushing/opening the PR.
+- PR #14 OPEN: https://github.com/machinescapes/FrequencyPlayer/pull/14, issue #13; 7 captioned screenshots embedded and complete 36-image coverage report linked. Branch pushed; Quality CI pending.
+- Quality CI PASS on both branch push and PR runs: 44466068797 (20s), 44466079881 (18s). PR #14 mergeable. Verified 7 embedded screenshot URLs in PR body; first image returns HTTP200 image/png.

@@ -154,14 +154,17 @@
         "check": "pnpm run check and pnpm run build: typecheck, lint, 70/70 tests pass (2026-11-18). ./init.sh baseline 50/50 before implementation.",
         "sync": "node scripts/sync-epg.mjs: 287 channels / 48,965 programmes in broad guide, existing extract 9,122 programmes. Default M3U compared directly to live source: matches (308 entries / 297 groups). pnpm sync:tv --check fails on upstream drift in optional Free-TV country snapshots; unrelated JSON unchanged.",
         "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md.",
-        "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked."
+        "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked.",
+        "ci": "Quality checks passed for branch push and PR #14: runs 44466068797 and 44466079881 (2026-11-18 local)."
       },
       "next_steps": [
-        "Review implementation plan at docs/plans/frq-05-tv-feed-management.md and browser evidence at docs/tv-feed-browser-evidence.md.",
-        "Open linked-issue PR with embedded screenshots, confirm Quality CI, review and merge. Keep in_progress until merge per developer-workflow."
+        "Review PR #14 and browser evidence at docs/tv-feed-browser-evidence.md.",
+        "Quality CI passed; merge after review and update status to passing per developer-workflow."
       ],
       "github_issue": 13,
-      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13"
+      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13",
+      "github_pr": 14,
+      "github_pr_url": "https://github.com/machinescapes/FrequencyPlayer/pull/14"
     }
   ]
 }

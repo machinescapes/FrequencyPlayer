@@ -27,6 +27,8 @@ these are not application exceptions. The suite also observes no unsolicited
 external tabs during verification or fallback. A tab opens only on an explicit
 external-channel click.
 
+Quality CI also passed on both the [branch push](https://github.com/machinescapes/FrequencyPlayer/actions/runs/44466068797) and [PR run](https://github.com/machinescapes/FrequencyPlayer/actions/runs/44466079881). [PR #14](https://github.com/machinescapes/FrequencyPlayer/pull/14) embeds seven representative screenshots and links this full report.
+
 ## Screenshot coverage
 
 Each scenario has development and production evidence. The table links the
