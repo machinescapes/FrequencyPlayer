@@ -64,3 +64,4 @@
 - Final `./init.sh` PASS: install, typecheck, lint, 70/70 tests. Screenshot review found mobile expanded-player actions could be clipped despite no page-width overflow; adjusting that row and adding explicit control-bound checks before refreshing final captures.
 - Mobile expanded-player layout fix verified in development suite: all stage controls inside the 390px viewport; no page errors. `pnpm run build` PASS again (70/70). Refreshing production captures for this visual correction.
 - Final static suite PASS after mobile action-row correction; every expanded-player action is within the 390px viewport, no page errors. 36 final screenshots ready for PR; docs/tv-feed-browser-evidence.md records all coverage and known catalogue drift.
+- Commit 45f324d: FRQ-05 implementation, approved plan, tests, docs and 36 browser screenshots. User-owned AGENTS.md prefix was not committed.
