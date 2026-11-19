@@ -54,3 +54,10 @@
 - PR #14 opened for issue #13: https://github.com/machinescapes/FrequencyPlayer/pull/14. Seven embedded screenshots plus complete 36-image report; Quality CI pending. Implementation commit 45f324d, handoff commit 75d3203.
 
 - Quality CI passed on branch and PR runs 44466068797 / 44466079881; PR #14 is mergeable. All 36 screenshots committed; 7 embedded PR images verified. Feature awaits review/merge.
+
+### PR #14 review fixes
+
+- Both available threads are Codex findings (no Claude review thread present): migrated favourites resurrect after removal, and TV guides stay at startup snapshots. Both confirmed valid.
+- Consume only unambiguous legacy favourite mappings and persist explicit removals, including delayed metadata; retain unmatched/ambiguous dormant legacy IDs.
+- Refresh built-in/remote custom TV guides on six-hour/foreground/online paths, deduplicate concurrent built-in requests, retain cached failures/uploaded files, and refresh media metadata.
+- Check/build 73/73; focused real-Chrome dev/static regressions pass with 12 added screenshots. Existing original 36 screenshots retained. Push/reply/resolve and CI confirmation next.

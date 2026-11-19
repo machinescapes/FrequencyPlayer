@@ -151,15 +151,15 @@
         "docs"
       ],
       "verification": {
-        "check": "pnpm run check and pnpm run build: typecheck, lint, 70/70 tests pass (2026-11-18). ./init.sh baseline 50/50 before implementation.",
+        "check": "pnpm run build (includes typecheck, lint, tests): 73/73 tests pass after PR review fixes. Baseline ./init.sh 70/70.",
         "sync": "node scripts/sync-epg.mjs: 287 channels / 48,965 programmes in broad guide, existing extract 9,122 programmes. Default M3U compared directly to live source: matches (308 entries / 297 groups). pnpm sync:tv --check fails on upstream drift in optional Free-TV country snapshots; unrelated JSON unchanged.",
-        "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md.",
+        "browser": "Real Chrome via scripts/browser-tv-feeds.mjs: development localhost:44100 and built static localhost:44101; desktop 1440x1000 and mobile 390x844. Imports, optional feeds/filters, bulk/individual choices, actual HLS verification/fallback, manual guide/group mapping, refresh/new/error retention, XMLTV URL/gzip upload, cancellation, preferred stream after reload, settings transfer, external tabs, Listen/All/search and offline reload all pass; no application page errors. 36 screenshots docs/screenshots/frq-05-{dev,static}-*.png; captions/coverage docs/tv-feed-browser-evidence.md. PR review regressions: scripts/browser-tv-review.mjs passes in development and static Chrome; removal persists across feed/country/reload, timer/visible/online built-in/custom guide refresh, request deduplication, cache-on-failure and uploaded guide preservation. Twelve additional screenshots docs/screenshots/frq-05-review-{dev,static}-*.png.",
         "limits": "Not every live upstream channel verified; real iOS Safari, physical controller/TV not checked.",
-        "ci": "Quality checks passed for branch push and PR #14: runs 44466068797 and 44466079881 (2026-11-18 local)."
+        "ci": "Previous PR head Quality green; review-fix commit CI pending push."
       },
       "next_steps": [
-        "Review PR #14 and browser evidence at docs/tv-feed-browser-evidence.md.",
-        "Quality CI passed; merge after review and update status to passing per developer-workflow."
+        "Review fixes for threads 4625042529 and 4625042538, verify CI, reply with evidence and resolve after pushing.",
+        "Review/merge PR #14; keep in_progress until merge."
       ],
       "github_issue": 13,
       "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13",

@@ -116,6 +116,25 @@ export function groupChannels(library: Library, feedFilter = 'all', country = 'a
   }
   return [...groups.values()]
 }
+/** Consume only unambiguously mapped legacy IDs; unmatched favourites stay dormant. */
+export function migrateTvFavourites(favourites: string[], library: Library, channels: Channel[], removals: string[] = []) {
+  const targets = new Map<string, Set<string>>(), available = new Set(channels.map(channel => channel.id))
+  const addTarget = (legacy: string, target: string) => {
+    const ids = targets.get(legacy) ?? new Set<string>()
+    ids.add(`watch:${target}`); targets.set(legacy, ids)
+  }
+  for (const channel of channels) for (const legacy of channel.legacyIds) addTarget(legacy, channel.id)
+  for (const feed of library.feeds) for (const entry of feed.entries) {
+    const target = channelKey(entry)
+    if (entry.legacyId && available.has(target)) addTarget(`watch:${entry.legacyId}`, target)
+  }
+  const removed = new Set(removals)
+  return [...new Set(favourites.flatMap(id => {
+    const matches = targets.get(id)
+    const target = matches?.size === 1 ? [...matches][0] : id
+    return removed.has(target) ? [] : [target]
+  }))]
+}
 export function streamKey(stream: Pick<Stream, 'feedId' | 'id'>) { return `${stream.feedId}:${stream.id}` }
 export function orderedStreams(channel: Channel, preferred?: string) {
   return [...channel.streams].sort((a, b) => Number(streamKey(b) === preferred || b.id === preferred) - Number(streamKey(a) === preferred || a.id === preferred) || Number(b.playback === 'hls') - Number(a.playback === 'hls') || Number(b.check?.status === 'working') - Number(a.check?.status === 'working'))

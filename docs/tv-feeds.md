@@ -63,7 +63,7 @@ mappings take priority, followed by a feed's custom guide and the built-in guide
 Channel settings offer a guide-channel selector. Entries report **Matched**,
 **No listings** or **Unmatched**. Grouped alternate streams share a Guide row.
 
-Refresh failures preserve cached listings. Remote playlists and guides must allow
+URL-based TV guides refresh every six hours while the app is visible, when it returns to the foreground, and when connectivity returns. Uploaded guides remain unchanged until replaced. Refresh failures preserve cached listings. Remote playlists and guides must allow
 browser access; upload a file if their CORS policy prevents access. XMLTV dates
 respect their stated offsets; the Guide displays times in the device timezone.
 

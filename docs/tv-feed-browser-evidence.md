@@ -62,3 +62,33 @@ probed, and fixture results do not establish global uptime. Geographic and CORS
 restrictions depend on the user's network. Real iOS Safari, hardware gamepads
 and TV devices were not tested in this session. Instructions to repeat the suite
 are in [TV feeds and channels](tv-feeds.md).
+
+
+## PR review regressions
+
+The two available review threads were posted by Codex, not Claude; both were
+valid and were fixed. The expanded check/build passes **73/73** tests.
+Focused real-Chrome checks pass against development and built static output,
+with no page errors and twelve additional screenshots (six per serving mode).
+
+- **Migrated favourites:** consume unambiguous legacy mappings, preserve dormant
+  unmatched/ambiguous IDs, and remember explicit removals even if metadata arrives
+  later. Browser checks remove a migrated favourite, change country, reload and
+  toggle its legacy feed; the favourite stays removed.
+  [Removal remains removed](screenshots/frq-05-review-static-01-removal-persists.png).
+- **Long-running TV guides:** refresh the built-in guide and remote custom guides
+  on reconnect, visible-tab events and the six-hour timer; overlapping events
+  share in-flight requests. Guide refresh also updates media metadata.
+  [Reconnect refresh](screenshots/frq-05-review-static-02-online-refresh.png),
+  [visible-tab refresh](screenshots/frq-05-review-static-03-visible-refresh.png),
+  [six-hour refresh](screenshots/frq-05-review-static-05-six-hour-refresh.png).
+- Guide failures keep valid cached data; uploaded guides are not fetched as remote
+  sources. [Retained listings after failure](screenshots/frq-05-review-static-04-failure-retains-guide.png),
+  [uploaded guide retained](screenshots/frq-05-review-static-06-upload-not-refetched.png).
+
+Repeat with `PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs node
+scripts/browser-tv-review.mjs`. For static output add
+`BROWSER_BASE_URL=http://localhost:44101 BROWSER_EVIDENCE_PREFIX=frq-05-review-static`.
+The harness uses Playwright's browser clock to exercise the actual six-hour
+interval without a six-hour wait. The production screenshot links above also have
+corresponding `frq-05-review-dev-` captures.

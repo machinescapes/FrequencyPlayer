@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { IDBFactory } from 'fake-indexeddb'
-import { parseM3u, reconcileEntries, initialLibrary, groupChannels, orderedStreams, applyCheck, entryEnabled, validateLibrary, exportLibrary, openTvDatabase, writeLibrary, readLibrary, guideMatch, channelProgrammes } from '../app/public/tv-feeds.ts'
+import { parseM3u, reconcileEntries, initialLibrary, groupChannels, orderedStreams, applyCheck, entryEnabled, validateLibrary, exportLibrary, openTvDatabase, writeLibrary, readLibrary, guideMatch, channelProgrammes, migrateTvFavourites } from '../app/public/tv-feeds.ts'
 import { xmltvTime, readXmltvFile } from '../app/public/xmltv.ts'
 import { probeChannel, verifyChannels } from '../app/public/tv-verify.ts'
 
@@ -145,4 +145,36 @@ test('muted autoplay rejection leaves verification inconclusive rather than disa
   const video = new Video(); video.play = () => Promise.reject(new DOMException('Not allowed', 'NotAllowedError'))
   const result = await probeChannel(entry(), new AbortController().signal, { createVideo: () => video, fetcher: manifest })
   assert.equal(result.status, 'inconclusive'); assert.equal(video.released, true)
+})
+
+
+test('migrated TV favourites consume legacy ids so removals survive rebuilds and reloads', () => {
+  const data = fixture(), original = 'watch:GB:bbc-one-london'
+  data.feeds[0].entries[0].legacyId = 'GB:bbc-one-london'
+  const channels = groupChannels(data), grouped = `watch:${channels[0].id}`
+  const migrated = migrateTvFavourites(['listen:bbc6', original, 'watch:GB:unmatched'], data, channels)
+  assert.deepEqual(migrated, ['listen:bbc6', grouped, 'watch:GB:unmatched'])
+  const removed = JSON.parse(JSON.stringify(migrated.filter(id => id !== grouped)))
+  assert.deepEqual(migrateTvFavourites(removed, data, groupChannels(data)), ['listen:bbc6', 'watch:GB:unmatched'])
+})
+test('disabled-source legacy favourites migrate only when an unambiguous enabled target exists', () => {
+  const data = fixture(), source = data.feeds[1], legacy = 'watch:GB:old'
+  source.entries = [{ ...entry(), legacyId: 'GB:old' }]
+  assert.equal(source.enabled, false)
+  const grouped = `watch:${groupChannels(data)[0].id}`
+  assert.deepEqual(migrateTvFavourites([legacy, grouped], data, groupChannels(data)), [grouped])
+  data.feeds[0].enabled = false
+  assert.deepEqual(migrateTvFavourites([legacy], data, groupChannels(data)), [legacy])
+  data.feeds[0].enabled = true; source.enabled = true; source.entries[0].group = 'different'
+  data.feeds[0].entries[0].legacyId = 'GB:old'
+  assert.deepEqual(migrateTvFavourites([legacy], data, groupChannels(data)), [legacy])
+})
+
+test('explicit removals win when legacy mappings become available after the user removes a grouped favourite', () => {
+  const data = fixture(), legacy = 'watch:GB:old', target = `watch:${groupChannels(data)[0].id}`
+  const removed = [target]
+  assert.deepEqual(migrateTvFavourites([legacy], data, groupChannels(data), removed), [legacy])
+  data.feeds[1].entries = [{ ...entry(), legacyId: 'GB:old' }]
+  assert.deepEqual(migrateTvFavourites([legacy], data, groupChannels(data), removed), [])
+  assert.deepEqual(migrateTvFavourites([target], data, groupChannels(data), []), [target])
 })

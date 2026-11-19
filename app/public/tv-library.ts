@@ -9,6 +9,7 @@ export class TvLibrary {
   private db?: IDBDatabase
   private writes = Promise.resolve()
   private savePending = false
+  private builtinRefresh?: Promise<void>
   private operations = new Map<string, number>()
   constructor(private base: string, private signal: AbortSignal, private onChange: () => void) {}
   changed() {
@@ -37,9 +38,18 @@ export class TvLibrary {
     }
     await Promise.allSettled(this.data.feeds.filter(feed => feed.kind === 'freetv' && !feed.loaded).map(feed => this.refresh(feed)))
     this.ready = true; this.changed()
-    await Promise.allSettled([this.refreshBuiltin(), ...this.data.feeds.filter(feed => feed.guideUrl).map(feed => this.refreshGuide(feed))])
+    await this.refreshGuides()
   }
-  async refreshBuiltin() {
+  async refreshGuides() {
+    if (!this.ready || this.signal.aborted) return
+    await Promise.allSettled([this.refreshBuiltin(), ...this.data.feeds.filter(feed => feed.guideUrl && !feed.guide?.uploaded).map(feed => this.refreshGuide(feed))])
+  }
+  refreshBuiltin() {
+    if (this.signal.aborted) return Promise.resolve()
+    this.builtinRefresh ??= this.fetchBuiltin().finally(() => { this.builtinRefresh = undefined })
+    return this.builtinRefresh
+  }
+  private async fetchBuiltin() {
     try { this.data.builtin = validateGuide(await (await this.get(`${this.base}epg/tv.json`)).json()); this.changed() }
     catch { /* Existing cached guide remains usable; no guide in a fresh checkout is normal. */ }
   }

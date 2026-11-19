@@ -9,7 +9,7 @@ import {
 import { createScheduleClient, nowAndNext, dateInput, localDay, normalizeFavourites, type Schedule, type Programme } from './epg.ts'
 import { TvLibrary } from './tv-library.ts'
 import { createTvManager } from './tv-manager.tsx'
-import { groupChannels, channelProgrammes, orderedStreams, channelKey, streamKey, type Channel, type Stream } from './tv-feeds.ts'
+import { groupChannels, channelProgrammes, orderedStreams, migrateTvFavourites, streamKey, type Channel, type Stream } from './tv-feeds.ts'
 import { setupNavigation } from './navigation.js'
 import { createPlayback, type PlaybackState } from './playback.ts'
 
@@ -82,6 +82,8 @@ function App(handle: Handle) {
   let activeStream: Stream | undefined
   const triedStreams = new Set<string>()
   let favourites = migrateFavourites(loadSaved, save)
+  let tvFavouriteRemovals = loadSaved('frequency.tv.favourite.removals', []) as string[]
+  if (!Array.isArray(tvFavouriteRemovals)) tvFavouriteRemovals = []
   let scope: Scope = initial.scope ?? (loadSaved('frequency.scope', 'all') as Scope)
   let view: View = initial.view ?? (loadSaved('frequency.view', 'Channels') as View)
   let query = '', category = 'All', broadcaster = 'All'
@@ -150,16 +152,8 @@ function App(handle: Handle) {
       const stream = orderedStreams(channel, tvLibrary.data.preferred[channel.id])[0]
       return { id: channel.id, title: channel.title, url: stream.url, streamUrl: stream.playback === 'hls' ? stream.url : undefined, playback: stream.playback, logoUrl: stream.logoUrl, category: stream.category, countryCode: stream.countryCode, epgId: channel.guide?.channelId, labels: [stream.feedName, ...(stream.playback === 'external' ? ['External link'] : [])], order }
     })
-    // Preserve dormant legacy favourites while migrating unambiguous grouped identities.
-    for (const channel of allChannels) if (channel.legacyIds.some(id => favourites.includes(id))) {
-      if (!favourites.includes(`watch:${channel.id}`)) favourites.push(`watch:${channel.id}`)
-    }
-    for (const feed of tvLibrary.data.feeds) for (const entry of feed.entries) {
-      if (entry.legacyId && favourites.includes(`watch:${entry.legacyId}`)) {
-        const match = allChannels.find(ch => ch.id === channelKey(entry))
-        if (match && !favourites.includes(`watch:${match.id}`)) favourites.push(`watch:${match.id}`)
-      }
-    }
+    // Successfully migrated IDs are consumed so a later removal remains removed.
+    favourites = migrateTvFavourites(favourites, tvLibrary.data, allChannels, tvFavouriteRemovals)
     save('frequency.favourites.v2', favourites)
     if (selected?.source === 'watch' && activeStream) {
       const group = allChannels.find(ch => ch.id === selected!.rawId)
@@ -169,6 +163,7 @@ function App(handle: Handle) {
       }
     }
     tvUnavailable = tvLibrary.ready && !tvItems.length
+    syncMetadata()
     update()
   }
 
@@ -290,6 +285,10 @@ function App(handle: Handle) {
   function notify(text: string) { notice = text; update() }
 
   function toggleFavourite(id: string) {
+    if (id.startsWith('watch:')) {
+      tvFavouriteRemovals = favourites.includes(id) ? [...new Set([...tvFavouriteRemovals, id])] : tvFavouriteRemovals.filter(value => value !== id)
+      save('frequency.tv.favourite.removals', tvFavouriteRemovals)
+    }
     favourites = favourites.includes(id) ? favourites.filter(value => value !== id) : [...favourites, id]
     save('frequency.favourites.v2', favourites)
     update()
@@ -387,9 +386,10 @@ function App(handle: Handle) {
     })
     void epg.start()
     const tick = window.setInterval(() => { clock = Date.now(); syncMetadata(); update(); if (!document.hidden) void epg.refreshNts() }, 60000)
-    const refresh = window.setInterval(() => { if (!document.hidden) void epg.refresh() }, 6 * 60 * 60 * 1000)
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) { clock = Date.now(); void epg.refresh() } }, { signal: handle.signal })
-    window.addEventListener('online', () => void epg.refresh(), { signal: handle.signal })
+    const refreshSchedules = () => Promise.all([epg.refresh(), tvLibrary.refreshGuides()])
+    const refresh = window.setInterval(() => { if (!document.hidden) void refreshSchedules() }, 6 * 60 * 60 * 1000)
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { clock = Date.now(); void refreshSchedules() } }, { signal: handle.signal })
+    window.addEventListener('online', () => void refreshSchedules(), { signal: handle.signal })
     handle.signal.addEventListener('abort', () => { window.clearInterval(tick); window.clearInterval(refresh) }, { once: true })
     setupNavigation(handle.signal, () => {})
     document.addEventListener('keydown', event => {
