@@ -1,6 +1,6 @@
 {
   "project": "frequency",
-  "last_updated": "2026-11-18",
+  "last_updated": "2026-11-27",
   "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
   "rules": {
     "single_active_feature": false,
@@ -166,6 +166,30 @@
       "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13",
       "github_pr": 14,
       "github_pr_url": "https://github.com/machinescapes/FrequencyPlayer/pull/14"
+    },
+    {
+      "id": "frq-08-dependency-upgrade",
+      "title": "FRQ-08 Upgrade dependencies to Remix 3.3 and Node 26, assess new framework features",
+      "status": "in_progress",
+      "type": "chore",
+      "plan": "docs/plans/frq-08-dependency-upgrade.md",
+      "plan_status": "approved",
+      "summary": "Upgrade remix 3.0.0 to 3.3.0 and the rest of the toolchain to current versions, move CI and engines to Node 26 (Active LTS), and document Remix 3.1-3.3 features that are refactoring candidates.",
+      "summary_of_intent": "User: 'i want to upgrade all dependencies including remix (3.2)  to the latest depencies. i want to check the upgrade guide to fix any issues and also do an assessment of framework features that are there now that weren't before that could be candidates for refactoring. i also want to look at the node version that is deployed as that will probably need patching.'",
+      "scope": [
+        "package.json / pnpm-lock.yaml - dependency, packageManager and engines bumps",
+        ".github/workflows/*.yml - node-version 26",
+        ".node-version - new",
+        "README.md, AGENTS.md, docs/sources.md - version text",
+        "docs/framework-3-x-assessment.md - new assessment"
+      ],
+      "verification": {
+        "check": "not_run",
+        "browser": "not_run"
+      },
+      "next_steps": [
+        "Read the implementation plan at docs/plans/frq-08-dependency-upgrade.md before starting work."
+      ]
     }
   ]
 }

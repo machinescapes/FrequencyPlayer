@@ -2,36 +2,35 @@
 
 ## Verified Now
 
-- What is currently working: PR #14 review fixes in cdfe497, current head 524c032; both Codex findings replied and resolved, no new review comments; Quality green and PR mergeable.
-- What verification actually ran: ./init.sh passes typecheck/lint/73 tests; fetched all review threads, review comments and issue comments through GitHub APIs; both threads remain resolved; head Quality checks pass.
+- What is currently working:
+- What verification actually ran:
 
 ## Changed This Session
 
-- Code or behavior added: None. This was a fresh audit of the existing PR comments; prior fixes remain applied.
-- Infrastructure or harness changes: None; existing browser evidence and tests retained.
+- Code or behavior added:
+- Infrastructure or harness changes:
 
 ## Broken Or Unverified
 
-- Known defect: No new finding. The automated Codex summary still describes its original e7af642 review snapshot; authoritative GitHub thread state is resolved for both findings.
-- Unverified path: No Claude-authored review output exists in current PR reviews, inline comments or issue comments. Real stream/VPN and device limitations remain as previously documented.
-- Risk for the next session: Preserve user-owned AGENTS.md prefix. Do not reopen resolved discussions or duplicate existing replies. Feature remains in_progress until merge.
+- Known defect:
+- Unverified path:
+- Risk for the next session:
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: frq-05-tv-feed-management, approved/in_progress; PR #14 awaiting review/merge.
-- Why it is next: All currently published review findings are already addressed and resolved.
-- What counts as passing: Review/merge PR #14, then set feature passing. Review-comment action requested this session is complete.
-- What must not change during that step: User-owned AGENTS.md prefix; existing verified fixes and screenshot evidence; no merge without user direction.
+- Highest-priority unfinished feature:
+- Why it is next:
+- What counts as passing:
+- What must not change during that step:
 
 ## Commands
 
-- Startup: ./init.sh; pnpm run dev.
-- Verification: ./init.sh; gh pr checks 14 --repo machinescapes/FrequencyPlayer; GitHub reviewThreads query.
-- Focused debug command: node --test test/tv-feeds.test.js; scripts/browser-tv-review.mjs with external Playwright.
+- Startup:
+- Verification:
+- Focused debug command:
 
 ## Session Log
 
-- Rechecked GitHub identity mintsource and repository/feature branch; read previous verified state, risks and approved FRQ-05 record. Preserved uncommitted user-owned AGENTS.md change.
-- `./init.sh` PASS: install, typecheck, lint, 73/73 tests.
-- Audited all PR #14 review threads, reviews, inline comments and conversation comments: no new findings or Claude review output. Comments 4625042529 and 4625042538 remain resolved with evidence-linked replies 4625194988 and 4625195215.
-- Current head 524c032 is mergeable; Quality runs 44473789622 and 44473795189 both passed. No source changes or duplicate replies needed.
+- 2026-11-27 startup: gh user mintsource OK; worktree /Users/dan/workspaces/frequency-frq-08 on feat/frq-08-dependency-upgrade from origin/main 258d482 (PR #14 already merged). Main checkout's uncommitted user AGENTS.md prefix left untouched.
+- ./init.sh PASS on baseline: install, typecheck, lint, 73/73 tests (Node v24.21.0, pnpm 12.9.1).
+- frq-08-dependency-upgrade added in_progress/approved (frq-06/07 ids taken by unpushed feat/frq-07-compact-browser worktree). Plan docs/plans/frq-08-dependency-upgrade.md.
