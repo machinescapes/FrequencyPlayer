@@ -2,7 +2,7 @@
     "name": "frequency",
     "private": true,
     "type": "module",
-    "packageManager": "pnpm@12.9.1",
+    "packageManager": "pnpm@12.23.0",
     "scripts": {
         "dev": "NODE_ENV=development node --watch --import remix/node-tsx server.ts",
         "test": "node --test test/*.test.js",
