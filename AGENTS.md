@@ -21,8 +21,8 @@ If baseline verification is already failing, fix that first. Don't stack new fea
 ## Project
 
 **Frequency** is a dark, touch/keyboard/gamepad-friendly PWA for UK live radio ("Listen") and IPTV channels ("Watch").
-- **Stack:** Remix 3 component/SPA APIs (`remix@3.0.0`, with JSX via `jsxImportSource: remix/component`). It does **not** use React, Vite, a UI framework or external fonts, so don't add them. `hls.js` is lazy-loaded only when the browser lacks native HLS.
-- **Hosting:** production is a fully static site on GitHub Pages (custom domain `frequency.wtf`, served at the root). There is no runtime backend. Node 24.3+ is needed only for dev, tests and the build.
+- **Stack:** Remix 3 component/SPA APIs (`remix@3.3.0`, with JSX via `jsxImportSource: remix/component`). It does **not** use React, Vite, a UI framework or external fonts, so don't add them. `hls.js` is lazy-loaded only when the browser lacks native HLS.
+- **Hosting:** production is a fully static site on GitHub Pages (custom domain `frequency.wtf`, served at the root). There is no runtime backend. Node 26+ (pinned in `.node-version`, read by every workflow) is needed only for dev, tests and the build.
 - **Repo:** `machinescapes/FrequencyPlayer`. Use **`pnpm` only**: the version is pinned in `package.json` (`packageManager`) and CI installs with `pnpm install --frozen-lockfile`. Never run `npm install` or commit a `package-lock.json`.
 
 Remix 3 is not Remix 1/2. Don't assume `loader`/`action` exports, `@remix-run/*` packages or `<Outlet />`. Check against https://api.remix.run/api/remix/overview/ and this project's code.

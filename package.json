@@ -14,7 +14,7 @@
         "sync:tv": "node scripts/sync-tv.mjs"
     },
     "engines": {
-        "node": ">=24.3.0"
+        "node": ">=26.0.0"
     },
     "dependencies": {
         "hls.js": "^1.7.4",

@@ -106,7 +106,7 @@ Unit tests cover import compatibility and URL validation, native/HLS selection, 
 
 ## Remix 3 references
 
-The implementation follows the installed `remix@3.0.0` component and asset APIs, which match the installed runtime:
+The implementation follows the installed `remix@3.3.0` component and asset APIs, which match the installed runtime:
 
 - `node_modules/remix/INDEX.md`
 - `node_modules/remix/guides/05-interactivity.md`
