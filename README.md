@@ -1,10 +1,10 @@
 # Frequency
 
-A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. Uses `remix@3.0.0` and lazily loaded `hls.js` for browsers without native HLS. No React, Vite, UI framework or external fonts.
+A dark, touch-friendly radio listening room built with **Remix 3 SPA APIs**. Uses `remix@3.3.0` and lazily loaded `hls.js` for browsers without native HLS. No React, Vite, UI framework or external fonts.
 
 ## Run
 
-Node **24.3+** is needed only to install dependencies and build the static site. The deployed app runs entirely in the browser from GitHub Pages; it has no application server or runtime backend.
+Node **26+** (pinned in `.node-version`) is needed only to install dependencies and build the static site. The deployed app runs entirely in the browser from GitHub Pages; it has no application server or runtime backend.
 
 ```sh
 pnpm install

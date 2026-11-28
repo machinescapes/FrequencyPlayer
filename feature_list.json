@@ -1,6 +1,6 @@
 {
   "project": "frequency",
-  "last_updated": "2026-11-18",
+  "last_updated": "2026-11-27",
   "backlog_note": "2026-10-24: harness adopted from unscatteredweb; repo standardised on pnpm. Two TV-catalogue features planned and approved by the user. Do frq-02 (config) first: frq-01's ordering reads the `pin` field it adds.",
   "rules": {
     "single_active_feature": false,
@@ -166,6 +166,58 @@
       "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/13",
       "github_pr": 14,
       "github_pr_url": "https://github.com/machinescapes/FrequencyPlayer/pull/14"
+    },
+    {
+      "id": "frq-08-dependency-upgrade",
+      "title": "FRQ-08 Upgrade dependencies to Remix 3.3 and Node 26, assess new framework features",
+      "status": "passing",
+      "type": "chore",
+      "plan": "docs/plans/frq-08-dependency-upgrade.md",
+      "plan_status": "approved",
+      "summary": "Upgrade remix 3.0.0 to 3.3.0 and the rest of the toolchain to current versions, move CI and engines to Node 26 (Active LTS), and document Remix 3.1-3.3 features that are refactoring candidates.",
+      "summary_of_intent": "User: 'i want to upgrade all dependencies including remix (3.2)  to the latest depencies. i want to check the upgrade guide to fix any issues and also do an assessment of framework features that are there now that weren't before that could be candidates for refactoring. i also want to look at the node version that is deployed as that will probably need patching.'",
+      "scope": [
+        "package.json / pnpm-lock.yaml - dependency, packageManager and engines bumps",
+        ".github/workflows/*.yml - node-version 26",
+        ".node-version - new",
+        "README.md, AGENTS.md, docs/sources.md - version text",
+        "docs/framework-3-x-assessment.md - new assessment",
+        "package.json typescript narrowed to ~6.0.3 (typescript-eslint 8.x peers <6.1.0)"
+      ],
+      "verification": {
+        "check": "pnpm run check PASS 73/73 on Node 24.21.0 and Node 26.13.1; pnpm install --frozen-lockfile OK on pnpm 12.23.0; pnpm run build PASS; scripts/sync-epg.mjs PASS on Node 26 (2026-11-27)",
+        "browser": "Chrome via Playwright 1.66 golden paths (/tmp/frq08-browser/golden.mjs): dev 12/12 on Node 24 and on Node 26 (BBC Radio 1 plays; BBC One video advanced 5.3s/136 frames; all/guide programme dialog; 255 aria attrs 'true'/'false'; blocked stream shows Retry; mobile no overflow). Static build: all functional checks pass; console-clean checks fail only on upstream imgur logo 403s (pre-existing, identical on 3.0.0). scripts/browser-tv-feeds.mjs PASS dev+static, scripts/browser-tv-review.mjs PASS dev, pageErrors []. Screenshots docs/screenshots/frq-08-{dev,static}-*.png.",
+        "regression": "Remix 3.0.0 static build of identical source compared: app.js 160,208 -> 120,841 bytes; update-loop finding and /tv dev 500 reproduce identically on 3.0.0. SPA-router guard still armed (probe bundle importing spaResponse contains the guarded string)."
+      },
+      "next_steps": [
+        "Push branch and confirm the Quality workflow passes on Node 26 via .node-version.",
+        "Follow-ups from docs/framework-3-x-assessment.md are tracked as frq-09."
+      ],
+      "github_issue": 15,
+      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/15"
+    },
+    {
+      "id": "frq-09-post-upgrade-fixes",
+      "title": "FRQ-09 Fix logo update storm and dev-server issues found during the Remix 3.3 upgrade",
+      "status": "not_started",
+      "type": "fix",
+      "plan": null,
+      "plan_status": "pending",
+      "summary": "Coalesce logo-failure handle.update() calls (pre-existing 'infinite loop detected' when ~150 logos fail at once), fix dev /tv 500 (relative Response.redirect), remove duplicate /epg/freeview.json route and dead app/routes.ts, import ScriptEntry type, and harden the static-build SPA guard with an esbuild metafile check.",
+      "summary_of_intent": "From frq-08 assessment (docs/framework-3-x-assessment.md, 'Worth considering' items 1-4).",
+      "scope": [
+        "app/public/entry.tsx - logo error handling",
+        "server.ts - /tv redirect, duplicate route, ScriptEntry",
+        "app/routes.ts, app/assets.ts - dead code",
+        "scripts/build.mjs - guard"
+      ],
+      "verification": {
+        "check": "not_run",
+        "browser": "not_run"
+      },
+      "next_steps": [
+        "Create an approved plan at docs/plans/frq-09-post-upgrade-fixes.md before starting work - implementation is blocked until plan_status is 'approved'."
+      ]
     }
   ]
 }

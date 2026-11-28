@@ -2,6 +2,8 @@
 
 ## Current Verified State
 
+- 2026-11-27: FRQ-08 on `feat/frq-08-dependency-upgrade`: remix 3.3.0, pnpm 12.23.0, current eslint/typescript-eslint/@types/node/hls.js/fast-xml-parser/fake-indexeddb; typescript held at ~6.0.3 (typescript-eslint peer ceiling). Node 26 via `.node-version` in all workflows, engines >=26.0.0. No source changes needed. Check 73/73 on Node 24 and 26; app.js -24.6%. Browser golden paths pass on dev and static; pre-existing logo update storm and dev /tv 500 documented in `docs/framework-3-x-assessment.md` and queued as frq-09. Not pushed.
+
 - 2026-11-18: FRQ-05 implemented on `feat/frq-05-tv-feed-management` (issue #13): default IPTV-org UK, Add channels, multiple feed/entry controls, browser verification, grouped stream selection/fallback, custom XMLTV and broader UK EPG, IndexedDB/transfer/offline. Check/build pass with 70 tests. Development and static Chrome desktop/mobile suites pass with 36 screenshots; see `docs/tv-feed-browser-evidence.md`. Optional Free-TV live snapshot check reports upstream drift; default M3U matches upstream. Awaiting PR review/merge; no production deployment claimed.
 
 - 2026-11-14: Local checkout includes merged PR #12 (5850d36) and subsequent catalogue refresh; older iptv-org notes below are historical. `./init.sh` passes: typecheck, lint, 50/50 tests. No browser or deployment verification this session. All tracked features remain passing; local main was behind origin/main by 2 commits at startup.
@@ -65,3 +67,9 @@
 - Review-fix commit cdfe497 pushed. Quality CI passed (44473499414 / 44473506279). Both review threads replied with evidence and resolved: 4625042529 / 4625042538. PR #14 remains open for review/merge.
 
 - PR #14 recheck: no new comments or Claude-authored review output; both previous Codex threads remain resolved with evidence-linked replies. ./init.sh passes 73/73 and head 524c032 Quality is green. No code changes needed.
+
+### Session 2026-11-27: frq-08 dependency upgrade
+
+- Upgraded in four green commits: tooling, pnpm, Remix 3.3.0, Node 26. No Remix upgrade guide exists for 3.x; package changelogs used.
+- Verified Node 26 with an official v26.13.1 tarball on PATH only (nvm unchanged). Port 44100 is shared with another local app on [::1]; dev checks ran on PORT=44102.
+- Assessment: `updateUrl`/`prefetch` would re-add the frame runtime (+18-20 KB gz) for no behaviour gain; recommended follow-ups are app-side fixes (frq-09).
