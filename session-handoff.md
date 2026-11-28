@@ -3,7 +3,7 @@
 ## Verified Now
 
 - What is currently working: feat/frq-08-dependency-upgrade (worktree /Users/dan/workspaces/frequency-frq-08) runs remix 3.3.0, pnpm 12.23.0, current tooling, Node 26 via .node-version. Dev and static builds play radio and TV, guide and programme dialog work. app.js is 24.6% smaller than on 3.0.0.
-- What verification actually ran: pnpm run check 73/73 on Node 24.21.0 and 26.13.1; frozen install; build; sync-epg on Node 26; Playwright/Chrome golden paths dev 12/12 (Node 24 and 26), static functional pass; scripts/browser-tv-feeds.mjs (dev+static) and browser-tv-review.mjs (dev) PASS; final ./init.sh (see log).
+- What verification actually ran: PR #16 Quality green on Node 26.13.1 (setup-node logged 'Resolved .node-version as 26'); pnpm run check 73/73 on Node 24.21.0 and 26.13.1; frozen install; build; sync-epg on Node 26; Playwright/Chrome golden paths dev 12/12 (Node 24 and 26), static functional pass; scripts/browser-tv-feeds.mjs (dev+static) and browser-tv-review.mjs (dev) PASS; final ./init.sh (see log).
 
 ## Changed This Session
 
@@ -13,14 +13,14 @@
 ## Broken Or Unverified
 
 - Known defect: Pre-existing (identical on 3.0.0): handle.update() loop error when ~150 imgur logos fail at once; dev /tv returns 500 (relative Response.redirect). Both queued in frq-09.
-- Unverified path: GitHub Actions on Node 26 (branch not pushed); Pages deploy on Node 26; real iOS/Safari.
+- Unverified path: Pages deploy on Node 26 (runs on merge to main); real iOS/Safari.
 - Risk for the next session: Port 44100 is also bound on [::1] by another local app (src/server.ts) - use PORT=44102 or stop it. Main checkout still has the user's uncommitted AGENTS.md prefix on feat/frq-05-tv-feed-management; do not commit or discard it. Parallel unpushed worktree feat/frq-07-compact-browser owns frq-06/frq-07 ids.
 
 ## Next Best Step
 
-- Highest-priority unfinished feature: frq-08 push + PR (user to approve), then frq-09-post-upgrade-fixes (needs plan).
-- Why it is next: CI on Node 26 is the remaining proof; the logo update storm can drop renders in production when imgur throttles.
-- What counts as passing: Quality workflow green on the PR; for frq-09, zero loop errors in loop-repro on a static build plus /tv 302 in dev.
+- Highest-priority unfinished feature: frq-08 awaiting PR #16 review/merge, then frq-09-post-upgrade-fixes (needs plan).
+- Why it is next: CI on Node 26 now passes; the logo update storm can drop renders in production when imgur throttles.
+- What counts as passing: merge PR #16 then set frq-08 passing; for frq-09, zero loop errors in loop-repro on a static build plus /tv 302 in dev.
 - What must not change during that step: remix pinned 3.3.0 exact; typescript ~6.0.3 until typescript-eslint supports TS 7; no updateUrl/prefetch adoption (re-adds frame runtime).
 
 ## Commands
@@ -47,3 +47,4 @@
 - Node 24.21.0 with engines >=26: pnpm prints "Unsupported engine" WARN, install and typecheck still succeed (engine-strict unset).
 - Final ./init.sh PASS from clean node_modules (Node 24.21.0: engine WARN only), 73/73.
 - Issue #15 created for frq-08; feature_list records github_issue 15.
+- PR #16 opened for feat/frq-08-dependency-upgrade (Closes #15). Quality check PASS 29s and 21s; CI resolved .node-version to 26 and ran node v26.13.1. No merge requested.
