@@ -46,3 +46,4 @@
 - Node 26 verification used official v26.13.1 tarball (SHASUMS256 OK) in /tmp, PATH-only (nvm untouched): clean pnpm install --frozen-lockfile, pnpm run check PASS 73/73 (no Experimental/Deprecation warnings), build PASS, sync-epg PASS (287 ch / 48,639 progs), dev server on Node 26 (remix/node-tsx loader) golden 12/12 PASS.
 - Node 24.21.0 with engines >=26: pnpm prints "Unsupported engine" WARN, install and typecheck still succeed (engine-strict unset).
 - Final ./init.sh PASS from clean node_modules (Node 24.21.0: engine WARN only), 73/73.
+- Issue #15 created for frq-08; feature_list records github_issue 15.

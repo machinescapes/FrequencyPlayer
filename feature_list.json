@@ -192,7 +192,9 @@
       "next_steps": [
         "Push branch and confirm the Quality workflow passes on Node 26 via .node-version.",
         "Follow-ups from docs/framework-3-x-assessment.md are tracked as frq-09."
-      ]
+      ],
+      "github_issue": 15,
+      "github_issue_url": "https://github.com/machinescapes/FrequencyPlayer/issues/15"
     },
     {
       "id": "frq-09-post-upgrade-fixes",
